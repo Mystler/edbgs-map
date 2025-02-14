@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Noto Sans";
+  font-style: normal;
+  src: url("/3d/NotoSans-VariableFont_wdth,wght.ttf");
+}
+
+@font-face {
+  font-family: "Noto Sans";
+  font-style: italic;
+  src: url("/3d/NotoSans-Italic-VariableFont_wdth,wght.ttf");
+}
+
+/* Tailwind setup */
+@theme {
+  --font-*: initial;
+  --font-sans: "Noto Sans", sans-serif;
+}
+
+:root {
+  --ed-orange: #f07b05;
+  --ed-orange-light: #ffaa54;
+  scrollbar-color: var(--color-zinc-500) var(--color-zinc-900);
+}
+
+@layer base {
+  body {
+    @apply m-0 bg-zinc-900 text-zinc-50;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply mt-4 mb-2;
+  }
+  h1 {
+    @apply text-4xl text-(--ed-orange);
+  }
+  h2 {
+    @apply text-3xl;
+  }
+  h3 {
+    @apply text-2xl;
+  }
+  h4 {
+    @apply text-xl;
+  }
+
+  p {
+    @apply mb-2;
+  }
+
+  a,
+  a:visited {
+    color: var(--ed-orange);
+  }
+  a:active,
+  a:hover,
+  a:focus {
+    color: var(--ed-orange-light);
+  }
+
+  input[type="button"],
+  input[type="text"],
+  input[type="number"],
+  select {
+    @apply m-1 rounded-lg border-2 border-(--ed-orange) bg-zinc-800 px-4 py-2;
+    @apply hover:border-(--ed-orange-light) hover:bg-zinc-700;
+  }
+
+  input[type="color"] {
+    @apply size-10 cursor-pointer;
+  }
+
+  input[type="button"],
+  button {
+    @apply cursor-pointer;
+  }
+}
+
+.link-btn {
+  @apply text-xs text-(--ed-orange) underline hover:text-(--ed-orange-light);
+}
