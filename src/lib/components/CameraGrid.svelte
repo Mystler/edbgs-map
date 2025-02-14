@@ -14,19 +14,18 @@
   interface Props {
     showGrid?: boolean;
     cameraSetup?: CameraData;
-    lookAt?: [number, number, number];
   }
   let {
     showGrid = true,
-    cameraSetup = { lookAtSystem: "", distance: 100 },
-    lookAt = [0, 0, 0],
+    cameraSetup = { lookAtSystem: "", lookAt: [0, 0, 0], distance: 100 },
   }: Props = $props();
-  let target = $state(lookAt);
+  let target = $state(cameraSetup.lookAt);
   let position: [number, number, number] = $derived([
     target[0] + cameraSetup.distance * 0.577,
     target[1] + cameraSetup.distance * 0.577,
     target[2] + cameraSetup.distance * 0.577,
   ]);
+  $inspect(position);
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
@@ -57,7 +56,14 @@
   }
 </script>
 
-<T.PerspectiveCamera makeDefault {position}>
+<T.PerspectiveCamera
+  makeDefault
+  {position}
+  fov={60}
+  oncreate={(ref) => {
+    ref.lookAt(target[0], target[1], target[2]);
+  }}
+>
   <OrbitControls
     {target}
     onchange={(e) => {
