@@ -12,6 +12,7 @@
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
   import { setContext } from "svelte";
   import type { ClickMode, HUDInfo } from "$lib/types/HUDInfo";
+  import { randomColor } from "$lib/Helpers";
 
   interface Props {
     data: MapData;
@@ -38,10 +39,15 @@
       localStorage.setItem("clickMode", hudInfo.clickMode);
     });
   }
+
+  let addFaction = $state("");
+  let addSystem = $state("");
+  let addSphere = $state("");
 </script>
 
 <svelte:window
   onkeydown={(e) => {
+    if (e.target instanceof HTMLInputElement) return;
     if (e.key === "g") showGrid = !showGrid;
     else if (e.key === "f") perfMon = !perfMon;
     else if (e.key === "m") menuOpen = !menuOpen;
@@ -89,10 +95,15 @@
     }}>☰</button
   >
   {#if menuOpen}
-    <div transition:slide class="fixed top-0 w-xs bg-(--ed-orange)/20 p-2 pt-6">
-      <span class="absolute top-2 right-2">Share</span>
+    <div
+      transition:slide
+      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-6 sm:w-xs"
+    >
+      <div class="absolute top-2 right-2">
+        <span>Share</span>
+      </div>
       <h2>Controls</h2>
-      <div class="flex flex-wrap justify-between gap-2 py-2">
+      <div class="flex flex-wrap items-center justify-between gap-2 py-2">
         <div>
           <label>
             Show Grid
@@ -116,6 +127,25 @@
           <input type="color" bind:value={f.color} />
         </div>
       {/each}
+      <div class="flex items-center">
+        <input type="text" class="grow p-1" bind:value={addFaction} />
+        <input
+          type="button"
+          class="px-2 py-1"
+          value="Add"
+          onclick={() => {
+            if (addFaction) {
+              data.Factions.push({
+                name: addFaction,
+                displayName: addFaction,
+                color: randomColor(),
+                visible: true,
+              });
+              addFaction = "";
+            }
+          }}
+        />
+      </div>
       <hr />
       <h4>Individual Systems</h4>
       {#each data.Systems as s, i (s.name)}
@@ -125,6 +155,25 @@
           <input type="color" bind:value={s.color} />
         </div>
       {/each}
+      <div class="flex items-center">
+        <input type="text" class="grow p-1" bind:value={addSystem} />
+        <input
+          type="button"
+          class="px-2 py-1"
+          value="Add"
+          onclick={() => {
+            if (addSystem) {
+              data.Systems.push({
+                name: addSystem,
+                displayName: addSystem,
+                color: randomColor(),
+                visible: true,
+              });
+              addSystem = "";
+            }
+          }}
+        />
+      </div>
       <hr />
       <h4>Powerplay Spheres</h4>
       {#each data.Spheres as s, i (s.name)}
@@ -138,6 +187,25 @@
           </select>
         </div>
       {/each}
+      <div class="flex items-center">
+        <input type="text" class="grow p-1" bind:value={addSphere} />
+        <input
+          type="button"
+          class="px-2 py-1"
+          value="Add"
+          onclick={() => {
+            if (addSphere) {
+              data.Spheres.push({
+                name: addSphere,
+                color: randomColor(),
+                visible: true,
+                type: "Fortified",
+              });
+              addSphere = "";
+            }
+          }}
+        />
+      </div>
     </div>
   {/if}
 {/if}

@@ -33,7 +33,7 @@
   h2,
   h3,
   h4 {
-    @apply mt-4 mb-2;
+    @apply mt-4 mb-2 font-semibold;
   }
   h1 {
     @apply text-4xl text-(--ed-orange);
