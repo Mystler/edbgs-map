@@ -23,9 +23,9 @@
   }: Props = $props();
   let target = $state(lookAt);
   let position: [number, number, number] = $derived([
-    target[0],
-    target[1],
-    target[2] + cameraSetup.distance,
+    target[0] + cameraSetup.distance * 0.577,
+    target[1] + cameraSetup.distance * 0.577,
+    target[2] + cameraSetup.distance * 0.577,
   ]);
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
