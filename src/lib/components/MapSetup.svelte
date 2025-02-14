@@ -15,12 +15,13 @@
     data.Spheres = data.Spheres.filter((x) => x.name.trim() !== "");
     for (const x of data.Factions) if (!x.displayName) x.displayName = x.name;
     for (const x of data.Systems) if (!x.displayName) x.displayName = x.name;
+    data.sortAll();
     onConfirmRender();
   }
 </script>
 
 <div class="mt-2 text-center">
-  <h1>EliteBGS &ndash; Custom Factions Map Setup</h1>
+  <h1>Elite Dangerous &ndash; Custom Factions Map Setup</h1>
   <p>
     Here you can create a custom map to visualize. Configuration will be stored locally for you.
   </p>

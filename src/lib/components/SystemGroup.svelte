@@ -40,7 +40,7 @@
     <Text
       text={system.displayName}
       font={DefaultMapFont}
-      fontSize={5}
+      fontSize={3}
       anchorX="center"
       anchorY="bottom"
       color={system.color}

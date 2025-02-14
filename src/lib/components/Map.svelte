@@ -19,7 +19,7 @@
   }
   let { data = $bindable() }: Props = $props();
 
-  let showGrid = $state(true);
+  let showGrid = $state(false);
   let perfMon = $state(false);
   let menuOpen = $state(false);
 

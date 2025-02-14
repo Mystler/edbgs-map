@@ -57,7 +57,7 @@
       <Text
         text={faction.displayName}
         font={DefaultMapFont}
-        fontSize={10}
+        fontSize={5}
         anchorX="center"
         anchorY="bottom"
         color={faction.color}
