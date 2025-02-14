@@ -56,7 +56,7 @@
         {#if perfMon}
           <PerfMonitor anchorX="right" />
         {/if}
-        <CameraGrid {showGrid} />
+        <CameraGrid {showGrid} cameraSetup={data.Camera} />
 
         <Measurement />
 

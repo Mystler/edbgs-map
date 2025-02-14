@@ -190,9 +190,9 @@
     <input
       type="text"
       placeholder="System to look at (optional)"
-      value={data.Camera.lookAtSystem}
+      bind:value={data.Camera.lookAtSystem}
     />
-    <input type="number" step="1" value={data.Camera.distance} />
+    <input type="number" step="1" bind:value={data.Camera.distance} />
   </p>
   <p><input type="button" value="Render Map" onclick={confirm} /></p>
 </div>

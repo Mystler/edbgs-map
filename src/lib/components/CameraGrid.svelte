@@ -2,25 +2,66 @@
   import { T } from "@threlte/core";
   import { Grid, OrbitControls, Text } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
+  import type { CameraData } from "$lib/types/MapData.svelte";
+  import { type SpanshSystem } from "$lib/SpanshAPI";
+  import { base } from "$app/paths";
+
+  /**
+   * Idea with the properties: We can set either leave the lookAtSystem empty and use custom lookAt coordinates
+   * or have the lookAtSystem cause loading coordinates which will override it.
+   */
 
   interface Props {
     showGrid?: boolean;
-    position?: [number, number, number];
+    cameraSetup?: CameraData;
+    lookAt?: [number, number, number];
   }
-  let { showGrid = $bindable(true), position = [5, 5, 5] }: Props = $props();
+  let {
+    showGrid = true,
+    cameraSetup = { lookAtSystem: "", distance: 100 },
+    lookAt = [0, 0, 0],
+  }: Props = $props();
+  let target = $state(lookAt);
+  let position: [number, number, number] = $derived([
+    target[0],
+    target[1],
+    target[2] + cameraSetup.distance,
+  ]);
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
+
+  /**
+   * The grid follows the camera on the y axis. Its origin and label then shift in increments of 10 ly with our camera movements.
+   */
+  function updateGrid(x: number, y: number, z: number) {
+    gridRef = [Math.round(x / 10) * 10, y, Math.round(z / 10) * 10];
+  }
+  $effect(() => {
+    updateGrid(target[0], target[1], target[2]);
+  });
+
+  async function fetchData(): Promise<SpanshSystem | null> {
+    let response = await fetch(`${base}/api/system/${cameraSetup.lookAtSystem}`);
+    if (!response.ok) {
+      alert(`Could not find look at system: ${cameraSetup.lookAtSystem}`);
+      return null;
+    }
+    return response.json();
+  }
+
+  if (cameraSetup.lookAtSystem) {
+    fetchData().then((data) => {
+      if (data) target = [data.x, data.y, -data.z];
+    });
+  }
 </script>
 
 <T.PerspectiveCamera makeDefault {position}>
   <OrbitControls
+    {target}
     onchange={(e) => {
-      gridRef = [
-        Math.round(e.target.target.x / 10) * 10,
-        e.target.target.y,
-        Math.round(e.target.target.z / 10) * 10,
-      ];
+      updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
     }}
   />
 </T.PerspectiveCamera>
