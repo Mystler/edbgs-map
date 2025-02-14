@@ -25,7 +25,6 @@
     target[1] + cameraSetup.distance * 0.577,
     target[2] + cameraSetup.distance * 0.577,
   ]);
-  $inspect(position);
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
