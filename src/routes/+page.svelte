@@ -2,6 +2,7 @@
   import Map from "$lib/components/Map.svelte";
   import { MapData } from "$lib/types/MapData.svelte";
   import MapSetup from "$lib/components/MapSetup.svelte";
+  //import { browser } from "$app/environment";
 
   let mapData = $state(new MapData());
   let setupComplete = $state(false);
@@ -9,13 +10,20 @@
   function onConfirmRender() {
     setupComplete = true;
   }
+
+  /*if (browser) {
+    // Sync custom map settings with local storage
+    $effect(() => {
+
+    });
+  }*/
 </script>
 
 <svelte:head>
-  <title>EliteBGS - Custom Factions Map</title>
+  <title>Custom Factions Map</title>
   <meta
     name="description"
-    content="A 3D-map of minor factions in Elite - locally configured on your browser."
+    content="A 3D-map of minor factions in Elite Dangerous - locally configured on your browser."
   />
 </svelte:head>
 
