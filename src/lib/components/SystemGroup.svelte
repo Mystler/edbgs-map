@@ -39,7 +39,7 @@
 
 {#if systemData}
   <SystemRenderGroup systems={[systemData]} color={system.color} visible={system.visible} />
-  <Billboard position={[systemData.x, systemData.y + 2, -systemData.z]}>
+  <Billboard position={[systemData.x, systemData.y + 2, -systemData.z]} visible={system.visible}>
     <Text
       text={system.displayName}
       font={DefaultMapFont}

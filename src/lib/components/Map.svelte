@@ -71,7 +71,7 @@
 
   <!-- HUD -->
   {#if HUDInfo.LoadingMessages.length > 0}
-    <div class="pointer-events-none absolute right-2 bottom-10 w-sm backdrop-blur-sm">
+    <div class="pointer-events-none absolute right-2 bottom-10 w-sm rounded-xl backdrop-blur-sm">
       {#each HUDInfo.LoadingMessages as m}
         <div class="flex items-center gap-2 p-2">
           <span
