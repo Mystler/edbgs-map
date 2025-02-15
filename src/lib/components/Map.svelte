@@ -10,7 +10,7 @@
   import { PerfMonitor } from "@threlte/extras";
   import { slide } from "svelte/transition";
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
-  import { HUDInfo, LoadingMessage } from "$lib/types/HUDInfo.svelte";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     data: MapData;
@@ -126,7 +126,7 @@
         <div class="flex items-center gap-2">
           <label for={`mfsc-${i}`} class="grow">{f.displayName}</label>
           <input id={`mfsc-${i}`} type="checkbox" bind:checked={f.visible} />
-          <input type="color" bind:value={f.color} />
+          <input class="flex-none" type="color" bind:value={f.color} />
         </div>
       {/each}
       <div class="flex items-center">
@@ -149,7 +149,7 @@
         <div class="flex gap-2">
           <label for={`mssc-${i}`} class="grow">{s.displayName}</label>
           <input id={`mssc-${i}`} type="checkbox" bind:checked={s.visible} />
-          <input type="color" bind:value={s.color} />
+          <input class="flex-none" type="color" bind:value={s.color} />
         </div>
       {/each}
       <div class="flex items-center">
@@ -172,7 +172,7 @@
         <div class="flex items-center gap-2">
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
           <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} />
-          <input type="color" bind:value={s.color} />
+          <input class="flex-none" type="color" bind:value={s.color} />
           <select bind:value={s.type} class="p-1">
             <option>Fortified</option>
             <option>Stronghold</option>

@@ -179,14 +179,9 @@
   </p>
 
   <h3>Camera Setup</h3>
-  <!---<p id="cam-reset-area" style="display: none">
-    Stored camera setup has been found and will be re-used.<br /><a class="small" id="cam-reset"
-      >Reset Camera</a
-    >
-  </p>-->
   <p>
-    If you want to override the camera to look at a specific system, please enter name and distance
-    here:<br />
+    If you want to initialize the camera to look at a specific system, please enter name and
+    distance here:<br />
     <input
       type="text"
       placeholder="System to look at (optional)"

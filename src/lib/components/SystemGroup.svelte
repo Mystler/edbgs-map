@@ -6,7 +6,7 @@
   import type { SpanshSystem } from "../SpanshAPI";
   import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
-  import { HUDInfo, LoadingMessage } from "$lib/types/HUDInfo.svelte";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     system: SystemData;
