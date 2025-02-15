@@ -10,9 +10,7 @@
   import { PerfMonitor } from "@threlte/extras";
   import { slide } from "svelte/transition";
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
-  import { setContext } from "svelte";
-  import type { ClickMode, HUDInfo } from "$lib/types/HUDInfo";
-  import { randomColor } from "$lib/Helpers";
+  import { HUDInfo, LoadingMessage } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     data: MapData;
@@ -23,20 +21,12 @@
   let perfMon = $state(false);
   let menuOpen = $state(false);
 
-  let hudInfo: HUDInfo = $state({ currentSystem: "", clickMode: "inara" });
-  setContext("hudInfo", hudInfo);
-
   if (browser) {
     const lsGridVal = localStorage.getItem("showGrid");
     if (lsGridVal) showGrid = lsGridVal === "true";
-    const lsClickVal = localStorage.getItem("clickMode");
-    if (lsClickVal) hudInfo.clickMode = lsClickVal as ClickMode;
 
     $effect(() => {
       localStorage.setItem("showGrid", JSON.stringify(showGrid));
-    });
-    $effect(() => {
-      localStorage.setItem("clickMode", hudInfo.clickMode);
     });
   }
 
@@ -50,7 +40,7 @@
     if (e.target instanceof HTMLInputElement) return;
     if (e.key === "g") showGrid = !showGrid;
     else if (e.key === "f") perfMon = !perfMon;
-    else if (e.key === "m") menuOpen = !menuOpen;
+    else if (e.key === "c") menuOpen = !menuOpen;
   }}
 />
 
@@ -80,9 +70,21 @@
   </div>
 
   <!-- HUD -->
-  <div class="pointer-events-none fixed bottom-10 w-full text-center text-3xl">
-    {#if hudInfo.currentSystem}
-      <div>{hudInfo.currentSystem}</div>
+  {#if HUDInfo.LoadingMessages.length > 0}
+    <div class="pointer-events-none absolute right-2 bottom-10 w-sm backdrop-blur-sm">
+      {#each HUDInfo.LoadingMessages as m}
+        <div class="flex items-center gap-2 p-2">
+          <span
+            class="size-4 animate-spin rounded-full border-4 border-(--ed-orange) border-t-transparent"
+          ></span>
+          <span class="grow">{m.Message}</span>
+        </div>
+      {/each}
+    </div>
+  {/if}
+  <div class="pointer-events-none absolute bottom-10 w-full text-center text-3xl">
+    {#if HUDInfo.CurrentSystem}
+      <div>{HUDInfo.CurrentSystem}</div>
     {/if}
     {@render CurrentMeasurement.HUDSnippet()}
   </div>
@@ -112,7 +114,7 @@
         </div>
         <div>
           <span>On System Click</span>
-          <select class="p-1" bind:value={hudInfo.clickMode}>
+          <select class="p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>
             <option value="measure">Measure Distance</option>
           </select>
@@ -135,12 +137,7 @@
           value="Add"
           onclick={() => {
             if (addFaction) {
-              data.Factions.push({
-                name: addFaction,
-                displayName: addFaction,
-                color: randomColor(),
-                visible: true,
-              });
+              data.addFaction({ name: addFaction });
               addFaction = "";
             }
           }}
@@ -163,12 +160,7 @@
           value="Add"
           onclick={() => {
             if (addSystem) {
-              data.Systems.push({
-                name: addSystem,
-                displayName: addSystem,
-                color: randomColor(),
-                visible: true,
-              });
+              data.addSystem({ name: addSystem });
               addSystem = "";
             }
           }}
@@ -195,12 +187,7 @@
           value="Add"
           onclick={() => {
             if (addSphere) {
-              data.Spheres.push({
-                name: addSphere,
-                color: randomColor(),
-                visible: true,
-                type: "Fortified",
-              });
+              data.addSphere({ name: addSphere });
               addSphere = "";
             }
           }}

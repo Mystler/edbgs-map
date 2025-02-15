@@ -6,6 +6,7 @@
   import type { SpanshSystem } from "../SpanshAPI";
   import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
+  import { HUDInfo, LoadingMessage } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     system: SystemData;
@@ -17,7 +18,9 @@
   }
 
   async function fetchData(): Promise<SpanshSystem | null> {
+    const m = HUDInfo.showMessage(system.name, "System");
     let response = await fetch(`${base}/api/system/${system.name}`);
+    HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Could not find system: ${system.name}`);
       return null;

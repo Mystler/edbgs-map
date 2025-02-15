@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { randomColor } from "../Helpers";
   import { type MapData } from "../types/MapData.svelte";
 
   interface Props {
@@ -69,7 +68,7 @@
       type="button"
       value="+"
       onclick={() => {
-        data.Factions.push({ name: "", displayName: "", color: randomColor(), visible: true });
+        data.addFaction();
       }}
     /><br />
     <button
@@ -119,7 +118,7 @@
       type="button"
       value="+"
       onclick={() => {
-        data.Systems.push({ name: "", displayName: "", color: randomColor(), visible: true });
+        data.addSystem();
       }}
     /><br />
     <button
@@ -167,7 +166,7 @@
       type="button"
       value="+"
       onclick={() => {
-        data.Spheres.push({ name: "", type: "Fortified", color: randomColor(), visible: true });
+        data.addSphere();
       }}
     /><br />
     <button

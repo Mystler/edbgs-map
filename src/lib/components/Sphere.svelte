@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { T } from "@threlte/core";
   import { DoubleSide } from "three";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     sphere: SphereData;
@@ -12,7 +13,9 @@
   let { sphere }: Props = $props();
 
   async function fetchData(): Promise<SpanshSystem | null> {
+    const m = HUDInfo.showMessage(sphere.name, "Sphere");
     let response = await fetch(`${base}/api/system/${sphere.name}`);
+    HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Could not find sphere system: ${sphere.name}`);
       return null;

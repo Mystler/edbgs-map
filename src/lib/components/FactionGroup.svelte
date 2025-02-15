@@ -6,6 +6,7 @@
   import type { SpanshSystem } from "../SpanshAPI";
   import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
     faction: FactionData;
@@ -13,7 +14,9 @@
   let { faction }: Props = $props();
 
   async function fetchData(): Promise<SpanshSystem[]> {
+    const m = HUDInfo.showMessage(faction.name, "Faction");
     let response = await fetch(`${base}/api/faction/${faction.name}`);
+    HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Could not find any systems for faction: ${faction.name}`);
       return [];
