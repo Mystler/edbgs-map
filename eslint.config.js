@@ -19,6 +19,8 @@ export default ts.config(
       globals: {
         ...globals.browser,
         ...globals.node,
+        __VERSION__: "readonly",
+        __COMMIT__: "readonly",
       },
     },
   },
