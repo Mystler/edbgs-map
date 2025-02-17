@@ -1,5 +1,6 @@
 <script lang="ts">
   import { type MapData } from "../types/MapData.svelte";
+  import AutocompleteInput from "./AutocompleteInput.svelte";
 
   interface Props {
     data: MapData;
@@ -31,14 +32,20 @@
       <table class="mx-auto">
         <thead>
           <tr>
-            <th>Faction Name<br /><span class="text-[10px]">(Case Sensitive!)</span></th>
+            <th>Faction Name</th>
             <th>Display Name</th><th>Color</th><th></th>
           </tr>
         </thead>
         <tbody>
           {#each data.Factions as faction, index}
             <tr>
-              <td><input type="text" class="w-32 sm:w-52 md:w-72" bind:value={faction.name} /></td>
+              <td
+                ><AutocompleteInput
+                  dataType="faction"
+                  class="w-32 sm:w-52 md:w-72"
+                  bind:value={faction.name}
+                /></td
+              >
               <td
                 ><input
                   type="text"
@@ -88,7 +95,13 @@
         <tbody>
           {#each data.Systems as system, index}
             <tr>
-              <td><input type="text" class="w-32 sm:w-52 md:w-72" bind:value={system.name} /></td>
+              <td
+                ><AutocompleteInput
+                  dataType="system"
+                  class="w-32 sm:w-52 md:w-72"
+                  bind:value={system.name}
+                /></td
+              >
               <td
                 ><input
                   type="text"
@@ -138,7 +151,13 @@
         <tbody>
           {#each data.Spheres as sphere, index}
             <tr>
-              <td><input type="text" class="w-32 sm:w-52 md:w-72" bind:value={sphere.name} /></td>
+              <td
+                ><AutocompleteInput
+                  dataType="system"
+                  class="w-32 sm:w-52 md:w-72"
+                  bind:value={sphere.name}
+                /></td
+              >
               <td><input type="color" bind:value={sphere.color} /></td>
               <td>
                 <select bind:value={sphere.type}>
@@ -183,8 +202,8 @@
     By default, the camera will re-use the position from your last visit.<br />
     If you want to initialize the camera to look at a specific system instead, please enter name and
     distance here:<br />
-    <input
-      type="text"
+    <AutocompleteInput
+      dataType="system"
       placeholder="System to look at (optional)"
       bind:value={data.Camera.lookAtSystem}
     />

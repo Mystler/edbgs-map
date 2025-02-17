@@ -12,6 +12,7 @@
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { base } from "$app/paths";
+  import AutocompleteInput from "./AutocompleteInput.svelte";
 
   interface Props {
     data: MapData;
@@ -132,7 +133,7 @@
         </div>
       {/each}
       <div class="flex items-center">
-        <input type="text" class="grow p-1" bind:value={addFaction} />
+        <AutocompleteInput dataType="faction" class="grow p-1" bind:value={addFaction} />
         <input
           type="button"
           class="px-2 py-1"
@@ -155,7 +156,7 @@
         </div>
       {/each}
       <div class="flex items-center">
-        <input type="text" class="grow p-1" bind:value={addSystem} />
+        <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSystem} />
         <input
           type="button"
           class="px-2 py-1"
@@ -182,7 +183,7 @@
         </div>
       {/each}
       <div class="flex items-center">
-        <input type="text" class="grow p-1" bind:value={addSphere} />
+        <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSphere} />
         <input
           type="button"
           class="px-2 py-1"

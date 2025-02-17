@@ -98,3 +98,26 @@ export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]>
   if (systems.length > 0) return systems;
   throw new Error(`No system data found for faction ${name}.`);
 }
+
+interface SpanshAutocompleteResponse {
+  values: string[];
+}
+type AutoCompleteType = "autocomplete_controlling_minor_faction" | "system_names";
+
+export async function autoComplete(name: string, type: AutoCompleteType): Promise<string[]> {
+  let response: Response;
+  try {
+    response = await fetch(
+      `https://spansh.co.uk/api/systems/field_values/${type}?q=${encodeURIComponent(name)}`,
+    );
+  } catch {
+    throw new Error(
+      `Could not fetch data. Spansh.co.uk might be down, so you will have to try again later.`,
+    );
+  }
+  if (response.ok) {
+    const data: SpanshAutocompleteResponse = await response.json();
+    return data.values;
+  }
+  return [];
+}
