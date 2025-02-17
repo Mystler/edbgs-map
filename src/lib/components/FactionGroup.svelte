@@ -18,7 +18,7 @@
     let response = await fetch(`${base}/api/faction/${faction.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Could not find any systems for faction: ${faction.name}`);
+      alert(`Could not find any systems controlled by faction: ${faction.name}`);
       return [];
     }
     return response.json();
