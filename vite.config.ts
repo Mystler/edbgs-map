@@ -5,11 +5,13 @@ import { execSync } from "child_process";
 
 const version = execSync("git rev-list --count HEAD").toString().trim();
 const commit = execSync("git rev-parse --short HEAD").toString().trim();
+const commitDate = execSync("git log -1 --format=%cI").toString().trim();
 
 export default defineConfig({
   plugins: [sveltekit(), tailwindcss()],
   define: {
     __VERSION__: JSON.stringify(version),
     __COMMIT__: JSON.stringify(commit),
+    __COMMITDATE__: JSON.stringify(commitDate),
   },
 });

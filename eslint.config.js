@@ -21,6 +21,7 @@ export default ts.config(
         ...globals.node,
         __VERSION__: "readonly",
         __COMMIT__: "readonly",
+        __COMMITDATE__: "readonly",
       },
     },
   },

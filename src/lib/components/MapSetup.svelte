@@ -190,5 +190,7 @@
     <input type="number" step="1" bind:value={data.Camera.distance} />
   </p>
   <p><input type="button" value="Render Map" onclick={confirm} /></p>
-  <div class="mt-2 text-xs text-zinc-400">{`v${__VERSION__} (${__COMMIT__})`}</div>
+  <div class="mt-2 text-xs text-zinc-400">
+    {`v${__VERSION__} (${__COMMIT__})`}<br />{new Date(__COMMITDATE__).toLocaleDateString()}
+  </div>
 </div>

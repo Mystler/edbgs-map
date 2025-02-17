@@ -195,7 +195,9 @@
           }}
         />
       </div>
-      <div class="mt-2 text-right text-xs text-zinc-400">{`v${__VERSION__} (${__COMMIT__})`}</div>
+      <div class="mt-2 text-right text-xs text-zinc-400">
+        {`v${__VERSION__} (${__COMMIT__})`}<br />{new Date(__COMMITDATE__).toLocaleDateString()}
+      </div>
     </div>
   {/if}
 {/if}

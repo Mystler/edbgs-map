@@ -11,6 +11,7 @@ declare global {
 
   const __VERSION__: string;
   const __COMMIT__: string;
+  const __COMMITDATE__: string;
 }
 
 export {};
