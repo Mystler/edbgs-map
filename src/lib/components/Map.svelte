@@ -13,6 +13,7 @@
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { base } from "$app/paths";
   import AutocompleteInput from "./AutocompleteInput.svelte";
+  import { page } from "$app/state";
 
   interface Props {
     data: MapData;
@@ -103,10 +104,12 @@
       transition:slide
       class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-6 sm:w-xs"
     >
-      <div class="absolute top-2 right-2 flex flex-col items-end">
-        <span><strike>Share</strike></span>
-        <a data-sveltekit-reload href={`${base}/`} title="Back">Back</a>
-      </div>
+      {#if page.route.id === "/"}
+        <div class="absolute top-2 right-2 flex flex-col items-end">
+          <span><strike>Share</strike></span>
+          <a data-sveltekit-reload href={`${base}/`} title="Back">Back</a>
+        </div>
+      {/if}
       <h2>Controls</h2>
       <div class="flex flex-wrap items-center justify-between gap-2 py-2">
         <div>
