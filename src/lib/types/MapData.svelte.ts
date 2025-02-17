@@ -17,10 +17,17 @@ export interface SphereData {
   visible: boolean;
 }
 
+/**
+ * Intended priority of usage:
+ * 1. If lookAtSystem is not empty, use it and distance.
+ * 2. Use lookAt, if set; use 0,0,0 otherwise.
+ * 3. Use position if set; apply distance along unit vector 1,1,1 to lookAt otherwise.
+ */
 export interface CameraData {
   lookAtSystem: string;
-  lookAt: [number, number, number];
   distance: number;
+  position?: [x: number, y: number, z: number];
+  lookAt?: [x: number, y: number, z: number];
 }
 
 export class MapData {
@@ -28,7 +35,7 @@ export class MapData {
   Systems: SystemData[] = $state([]);
   Spheres: SphereData[] = $state([]);
 
-  Camera: CameraData = $state({ lookAtSystem: "", lookAt: [0, 0, 0], distance: 100 });
+  Camera: CameraData = $state({ lookAtSystem: "", distance: 100 });
 
   // Setup Helpers
   addFaction({ name = "", displayName = "", color = randomColor(), visible = true } = {}) {
@@ -62,7 +69,6 @@ export class MapData {
       Factions: this.Factions,
       Systems: this.Systems,
       Spheres: this.Spheres,
-      Camera: this.Camera,
     };
   }
 
@@ -87,9 +93,6 @@ export class MapData {
       for (const sphere of obj.Spheres) {
         data.addSphere(sphere);
       }
-    }
-    if ("Camera" in obj) {
-      Object.assign(data.Camera, obj.Camera);
     }
 
     return data;

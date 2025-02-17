@@ -5,26 +5,24 @@
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
   import { base } from "$app/paths";
-
-  /**
-   * Idea with the properties: We can set either leave the lookAtSystem empty and use custom lookAt coordinates
-   * or have the lookAtSystem cause loading coordinates which will override it.
-   */
+  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
 
   interface Props {
     showGrid?: boolean;
     cameraSetup?: CameraData;
   }
-  let {
-    showGrid = true,
-    cameraSetup = { lookAtSystem: "", lookAt: [0, 0, 0], distance: 100 },
-  }: Props = $props();
-  let target = $state(cameraSetup.lookAt);
-  let position: [number, number, number] = $derived([
-    target[0] + cameraSetup.distance * 0.577,
-    target[1] + cameraSetup.distance * 0.577,
-    target[2] + cameraSetup.distance * 0.577,
-  ]);
+  let { showGrid = true, cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
+
+  // Note comment on CameraData for intended priority in data usage.
+  let target: [x: number, y: number, z: number] = $state(cameraSetup.lookAt ?? [0, 0, 0]);
+  let position: [x: number, y: number, z: number] = $derived.by(() => {
+    if (!cameraSetup.lookAtSystem && cameraSetup.position) return cameraSetup.position;
+    return [
+      target[0] + cameraSetup.distance * 0.577,
+      target[1] + cameraSetup.distance * 0.577,
+      target[2] + cameraSetup.distance * 0.577,
+    ];
+  });
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
@@ -37,6 +35,7 @@
   }
   $effect(() => {
     updateGrid(target[0], target[1], target[2]);
+    CurrentCamera.LookAt = target;
   });
 
   async function fetchData(): Promise<SpanshSystem | null> {
@@ -61,12 +60,15 @@
   fov={60}
   oncreate={(ref) => {
     ref.lookAt(target[0], target[1], target[2]);
+    CurrentCamera.Position = ref.position.toArray();
   }}
 >
   <OrbitControls
     {target}
     onchange={(e) => {
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
+      CurrentCamera.LookAt = e.target.target.toArray();
+      CurrentCamera.Position = e.target.object.position.toArray();
     }}
   />
 </T.PerspectiveCamera>

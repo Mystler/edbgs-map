@@ -180,7 +180,8 @@
 
   <h3>Camera Setup</h3>
   <p>
-    If you want to initialize the camera to look at a specific system, please enter name and
+    By default, the camera will re-use the position from your last visit.<br />
+    If you want to initialize the camera to look at a specific system instead, please enter name and
     distance here:<br />
     <input
       type="text"
