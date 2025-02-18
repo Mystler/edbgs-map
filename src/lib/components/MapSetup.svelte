@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { slide } from "$lib/types/Animations.svelte";
   import { type MapData } from "../types/MapData.svelte";
   import AutocompleteInput from "./AutocompleteInput.svelte";
 
@@ -28,7 +29,7 @@
 
   <h3>Minor Factions</h3>
   {#if data.Factions.length > 0}
-    <div class="overflow-auto">
+    <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
         <thead>
           <tr>
@@ -39,30 +40,38 @@
         <tbody>
           {#each data.Factions as faction, index}
             <tr>
-              <td
-                ><AutocompleteInput
-                  dataType="faction"
-                  class="w-32 sm:w-52 md:w-72"
-                  bind:value={faction.name}
-                /></td
-              >
-              <td
-                ><input
-                  type="text"
-                  class="w-32 sm:w-52 md:w-72"
-                  bind:value={faction.displayName}
-                  placeholder="optional"
-                /></td
-              >
-              <td><input type="color" bind:value={faction.color} /></td>
               <td>
-                <input
-                  type="button"
-                  value="X"
-                  onclick={() => {
-                    data.Factions.splice(index, 1);
-                  }}
-                />
+                <div transition:slide>
+                  <AutocompleteInput
+                    dataType="faction"
+                    class="w-32 sm:w-52 md:w-72"
+                    bind:value={faction.name}
+                  />
+                </div>
+              </td>
+              <td>
+                <div transition:slide>
+                  <input
+                    type="text"
+                    class="w-32 sm:w-52 md:w-72"
+                    bind:value={faction.displayName}
+                    placeholder="optional"
+                  />
+                </div>
+              </td>
+              <td>
+                <div transition:slide><input type="color" bind:value={faction.color} /></div>
+              </td>
+              <td>
+                <div transition:slide>
+                  <input
+                    type="button"
+                    value="X"
+                    onclick={() => {
+                      data.Factions.splice(index, 1);
+                    }}
+                  />
+                </div>
               </td>
             </tr>
           {/each}
@@ -89,36 +98,42 @@
 
   <h3>Individual Systems</h3>
   {#if data.Systems.length > 0}
-    <div class="overflow-auto">
+    <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
         <thead><tr><th>System Name</th><th>Display Name</th><th>Color</th><th></th></tr></thead>
         <tbody>
           {#each data.Systems as system, index}
             <tr>
-              <td
-                ><AutocompleteInput
-                  dataType="system"
-                  class="w-32 sm:w-52 md:w-72"
-                  bind:value={system.name}
-                /></td
-              >
-              <td
-                ><input
-                  type="text"
-                  class="w-32 sm:w-52 md:w-72"
-                  bind:value={system.displayName}
-                  placeholder="optional"
-                /></td
-              >
-              <td><input type="color" bind:value={system.color} /></td>
               <td>
-                <input
-                  type="button"
-                  value="X"
-                  onclick={() => {
-                    data.Systems.splice(index, 1);
-                  }}
-                />
+                <div transition:slide>
+                  <AutocompleteInput
+                    dataType="system"
+                    class="w-32 sm:w-52 md:w-72"
+                    bind:value={system.name}
+                  />
+                </div>
+              </td>
+              <td>
+                <div transition:slide>
+                  <input
+                    type="text"
+                    class="w-32 sm:w-52 md:w-72"
+                    bind:value={system.displayName}
+                    placeholder="optional"
+                  />
+                </div>
+              </td>
+              <td><div transition:slide><input type="color" bind:value={system.color} /></div></td>
+              <td>
+                <div transition:slide>
+                  <input
+                    type="button"
+                    value="X"
+                    onclick={() => {
+                      data.Systems.splice(index, 1);
+                    }}
+                  />
+                </div>
               </td>
             </tr>
           {/each}
@@ -145,34 +160,40 @@
 
   <h3>Powerplay Spheres</h3>
   {#if data.Spheres.length > 0}
-    <div class="overflow-auto">
+    <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
         <thead><tr><th>Sphere</th><th>Color</th><th>Type</th><th></th></tr></thead>
         <tbody>
           {#each data.Spheres as sphere, index}
             <tr>
-              <td
-                ><AutocompleteInput
-                  dataType="system"
-                  class="w-32 sm:w-52 md:w-72"
-                  bind:value={sphere.name}
-                /></td
-              >
-              <td><input type="color" bind:value={sphere.color} /></td>
               <td>
-                <select bind:value={sphere.type}>
-                  <option>Fortified</option>
-                  <option>Stronghold</option>
-                </select>
+                <div transition:slide>
+                  <AutocompleteInput
+                    dataType="system"
+                    class="w-32 sm:w-52 md:w-72"
+                    bind:value={sphere.name}
+                  />
+                </div>
+              </td>
+              <td><div transition:slide><input type="color" bind:value={sphere.color} /></div></td>
+              <td>
+                <div transition:slide>
+                  <select bind:value={sphere.type}>
+                    <option>Fortified</option>
+                    <option>Stronghold</option>
+                  </select>
+                </div>
               </td>
               <td>
-                <input
-                  type="button"
-                  value="X"
-                  onclick={() => {
-                    data.Spheres.splice(index, 1);
-                  }}
-                />
+                <div transition:slide>
+                  <input
+                    type="button"
+                    value="X"
+                    onclick={() => {
+                      data.Spheres.splice(index, 1);
+                    }}
+                  />
+                </div>
               </td>
             </tr>
           {/each}

@@ -8,7 +8,7 @@
   import CameraGrid from "./CameraGrid.svelte";
   import MapContent from "./MapContent.svelte";
   import { PerfMonitor } from "@threlte/extras";
-  import { slide } from "svelte/transition";
+  import { slide } from "$lib/types/Animations.svelte";
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { base } from "$app/paths";
@@ -129,7 +129,7 @@
       <hr />
       <h4>Minor Factions</h4>
       {#each data.Factions as f, i (f.name)}
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" transition:slide>
           <label for={`mfsc-${i}`} class="grow">{f.displayName}</label>
           <input id={`mfsc-${i}`} type="checkbox" bind:checked={f.visible} />
           <input class="flex-none" type="color" bind:value={f.color} />
@@ -152,7 +152,7 @@
       <hr />
       <h4>Individual Systems</h4>
       {#each data.Systems as s, i (s.name)}
-        <div class="flex gap-2">
+        <div class="flex gap-2" transition:slide>
           <label for={`mssc-${i}`} class="grow">{s.displayName}</label>
           <input id={`mssc-${i}`} type="checkbox" bind:checked={s.visible} />
           <input class="flex-none" type="color" bind:value={s.color} />
@@ -175,7 +175,7 @@
       <hr />
       <h4>Powerplay Spheres</h4>
       {#each data.Spheres as s, i (s.name)}
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
           <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} />
           <input class="flex-none" type="color" bind:value={s.color} />

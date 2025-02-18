@@ -13,7 +13,10 @@
   useInteractivity();
   const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
 
-  const systemScale = new Spring(1);
+  const systemScale = new Spring(1, {
+    stiffness: 0.25,
+    damping: 0.25,
+  });
 </script>
 
 <Billboard position={[system.x, system.y, -system.z]}>
