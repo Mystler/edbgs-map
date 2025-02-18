@@ -4,6 +4,8 @@
   import MapSetup from "$lib/components/MapSetup.svelte";
   import { browser } from "$app/environment";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { page } from "$app/state";
+  import { readCustomURL } from "$lib/CustomURL";
 
   let mapData = $state(new MapData());
   let setupComplete = $state(false);
@@ -12,8 +14,8 @@
     setupComplete = true;
   }
 
-  if (browser) {
-    // Sync custom map settings with local storage
+  if (browser && page.url.searchParams.size === 0) {
+    // Sync custom map settings with local storage, if we're not using a customized link
     (() => {
       const saved = localStorage.getItem("customMapSetup");
       if (saved) {
@@ -33,6 +35,12 @@
     $effect(() => {
       if (setupComplete) localStorage.setItem("customMapCamera", JSON.stringify(CurrentCamera));
     });
+  } else if (browser && page.url.searchParams.size > 0) {
+    (() => {
+      mapData = readCustomURL(page.url.searchParams);
+      mapData.sortAll();
+      setupComplete = true;
+    })();
   }
 </script>
 
@@ -46,6 +54,6 @@
 
 {#if setupComplete}
   <Map bind:data={mapData} />
-{:else}
+{:else if page.url.searchParams.size === 0}
   <MapSetup bind:data={mapData} {onConfirmRender} />
 {/if}

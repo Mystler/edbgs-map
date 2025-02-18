@@ -53,12 +53,16 @@
   }
 
   a,
-  a:visited {
+  a:visited,
+  .link {
     color: var(--ed-orange);
   }
   a:active,
   a:hover,
-  a:focus {
+  a:focus,
+  .link:hover,
+  .link:focus,
+  .link:active {
     color: var(--ed-orange-light);
   }
 

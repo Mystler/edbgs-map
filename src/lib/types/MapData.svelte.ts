@@ -9,7 +9,7 @@ export interface FactionData {
 
 export type SystemData = FactionData;
 
-type SphereType = "Fortified" | "Stronghold";
+export type SphereType = "Fortified" | "Stronghold";
 export interface SphereData {
   name: string;
   color: string;

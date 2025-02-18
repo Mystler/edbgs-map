@@ -14,6 +14,7 @@
   import { base } from "$app/paths";
   import AutocompleteInput from "./AutocompleteInput.svelte";
   import { page } from "$app/state";
+  import { createCustomURL } from "$lib/CustomURL";
 
   interface Props {
     data: MapData;
@@ -106,7 +107,14 @@
     >
       {#if page.route.id === "/"}
         <div class="absolute top-2 right-2 flex flex-col items-end">
-          <span><strike>Share</strike></span>
+          <button
+            class="link"
+            onclick={() => {
+              const link = createCustomURL(data);
+              navigator.clipboard.writeText(link);
+              alert("A shareable link has been copied to your clipboard!");
+            }}>Share</button
+          >
           <a data-sveltekit-reload href={`${base}/`} title="Back">Back</a>
         </div>
       {/if}
