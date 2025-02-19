@@ -3,7 +3,7 @@ import { page } from "$app/state";
 import { CurrentCamera } from "./types/CurrentCamera.svelte";
 import { MapData, type SphereType } from "./types/MapData.svelte";
 
-export function createCustomURL(data: MapData): string {
+export function createCustomURL(data: MapData) {
   const params = new URLSearchParams();
   for (const x of data.Factions) {
     params.append("fn", x.name);
@@ -30,7 +30,7 @@ export function createCustomURL(data: MapData): string {
     params.append("cty", CurrentCamera.LookAt[1].toFixed());
     params.append("ctz", CurrentCamera.LookAt[2].toFixed());
   }
-  return `${page.url.origin}${base}/?${params.toString()}`;
+  return params;
 }
 
 export function readCustomURL(params: URLSearchParams): MapData {
@@ -77,4 +77,21 @@ export function readCustomURL(params: URLSearchParams): MapData {
   }
 
   return data;
+}
+
+export async function createShortlink(data: MapData) {
+  const short = await fetch(base + "/s", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(createCustomURL(data).toString()),
+  }).then((res) => res.json());
+  if (!short) {
+    alert("Error on creating shareable shortlink!");
+    return;
+  }
+  const link = `${page.url.origin}${base}/s/${short}`;
+  navigator.clipboard.writeText(link);
+  alert("A shareable link has been copied to your clipboard!");
 }
