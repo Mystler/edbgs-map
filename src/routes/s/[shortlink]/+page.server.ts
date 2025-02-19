@@ -5,10 +5,10 @@ export async function load({ params }) {
   let long: string | undefined;
 
   await new Promise<void>((resolve) => {
-    db.get(
+    db.get<{ short: string; long: string }>(
       "SELECT * FROM shortlinks WHERE short = ?",
       params.shortlink,
-      (err, row: { short: string; long: string }) => {
+      (err, row) => {
         if (!err && row) {
           long = row.long;
         }
