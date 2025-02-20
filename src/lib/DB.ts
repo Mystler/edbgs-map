@@ -1,6 +1,7 @@
 import sqlite3 from "sqlite3";
+import { DBFilePath } from "./Constants";
 
-export const db = new sqlite3.Database("db.sqlite3");
+export const db = new sqlite3.Database(DBFilePath);
 
 // Setup the database
 await new Promise<void>((resolve, reject) => {
@@ -12,3 +13,16 @@ await new Promise<void>((resolve, reject) => {
     }
   });
 });
+
+/** Wrapper for the db.get function that allows async awaiting for the results. */
+export async function dbGet<T>(sql: string, ...params: unknown[]): Promise<T | undefined> {
+  return await new Promise<T | undefined>((resolve, reject) => {
+    db.get<T | undefined>(sql, params, (err, row) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(row);
+      }
+    });
+  });
+}

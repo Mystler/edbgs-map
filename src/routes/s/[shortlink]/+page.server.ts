@@ -1,25 +1,15 @@
-import { db } from "$lib/DB.js";
+import { dbGet } from "$lib/DB.js";
 import { error } from "@sveltejs/kit";
 
 export async function load({ params }) {
-  let long: string | undefined;
+  const q = await dbGet<{ short: string; long: string }>(
+    "SELECT * FROM shortlinks WHERE short = ?",
+    params.shortlink,
+  );
 
-  await new Promise<void>((resolve) => {
-    db.get<{ short: string; long: string }>(
-      "SELECT * FROM shortlinks WHERE short = ?",
-      params.shortlink,
-      (err, row) => {
-        if (!err && row) {
-          long = row.long;
-        }
-        resolve();
-      },
-    );
-  });
-
-  if (!long) error(404, "Could not find data for this shortlink!");
+  if (!q || !q.long) error(404, "Could not find data for this shortlink!");
 
   return {
-    long,
+    long: q.long,
   };
 }
