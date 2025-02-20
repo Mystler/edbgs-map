@@ -70,7 +70,7 @@
   <T.Mesh>
     <MeshLineGeometry {points} />
     <MeshLineMaterial
-      width={0.5}
+      width={0.25}
       color="#ffffff"
       transparent
       depthTest={false}

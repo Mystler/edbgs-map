@@ -21,18 +21,8 @@
   }
   let { data = $bindable() }: Props = $props();
 
-  let showGrid = $state(false);
   let perfMon = $state(false);
   let menuOpen = $state(false);
-
-  if (browser) {
-    const lsGridVal = localStorage.getItem("showGrid");
-    if (lsGridVal) showGrid = lsGridVal === "true";
-
-    $effect(() => {
-      localStorage.setItem("showGrid", JSON.stringify(showGrid));
-    });
-  }
 
   let addFaction = $state("");
   let addSystem = $state("");
@@ -42,7 +32,7 @@
 <svelte:window
   onkeydown={(e) => {
     if (e.target instanceof HTMLInputElement) return;
-    if (e.key === "g") showGrid = !showGrid;
+    if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
     else if (e.key === "f") perfMon = !perfMon;
     else if (e.key === "c") menuOpen = !menuOpen;
   }}
@@ -56,7 +46,7 @@
         {#if perfMon}
           <PerfMonitor anchorX="right" />
         {/if}
-        <CameraGrid {showGrid} cameraSetup={data.Camera} />
+        <CameraGrid cameraSetup={data.Camera} />
 
         <Measurement />
 
@@ -75,7 +65,7 @@
 
   <!-- HUD -->
   {#if HUDInfo.LoadingMessages.length > 0}
-    <div class="pointer-events-none absolute right-2 bottom-10 w-sm rounded-xl backdrop-blur-sm">
+    <div class="pointer-events-none absolute right-2 bottom-10 w-sm rounded-xl backdrop-blur-xs">
       {#each HUDInfo.LoadingMessages as m}
         <div class="flex items-center gap-2 p-2">
           <span
@@ -103,7 +93,7 @@
   {#if menuOpen}
     <div
       transition:slide
-      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-6 sm:w-xs"
+      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-6 backdrop-blur-xs sm:w-xs"
     >
       {#if page.route.id === "/"}
         <div class="absolute top-2 right-2 flex flex-col items-end">
@@ -116,7 +106,7 @@
         <div>
           <label>
             Show Grid
-            <input type="checkbox" bind:checked={showGrid} class="ml-1" />
+            <input type="checkbox" bind:checked={HUDInfo.ShowGrid} class="ml-1" />
           </label>
         </div>
         <div>

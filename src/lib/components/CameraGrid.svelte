@@ -6,12 +6,12 @@
   import { type SpanshSystem } from "$lib/SpanshAPI";
   import { base } from "$app/paths";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
 
   interface Props {
-    showGrid?: boolean;
     cameraSetup?: CameraData;
   }
-  let { showGrid = true, cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
+  let { cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
 
   // Note comment on CameraData for intended priority in data usage.
   let target: [x: number, y: number, z: number] = $state(cameraSetup.lookAt ?? [0, 0, 0]);
@@ -73,7 +73,7 @@
   />
 </T.PerspectiveCamera>
 
-<T.Group position={gridRef} visible={showGrid}>
+<T.Group position={gridRef} visible={HUDInfo.ShowGrid}>
   <Grid
     sectionThickness={1}
     infiniteGrid

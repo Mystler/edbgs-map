@@ -14,7 +14,7 @@
   const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
 
   const systemScale = new Spring(1, {
-    stiffness: 0.25,
+    stiffness: 0.15,
     damping: 0.25,
   });
 </script>

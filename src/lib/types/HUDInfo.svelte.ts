@@ -11,15 +11,22 @@ export class LoadingMessage {
 }
 
 export const HUDInfo = new (class {
+  ShowGrid: boolean = $state(false);
   CurrentSystem: string = $state("");
   ClickMode: ClickMode = $state("inara");
   LoadingMessages: LoadingMessage[] = $state([]);
 
   constructor() {
     if (browser) {
+      const lsGridVal = localStorage.getItem("showGrid");
+      if (lsGridVal) this.ShowGrid = lsGridVal === "true";
       const lsClickVal = localStorage.getItem("clickMode");
       if (lsClickVal) this.ClickMode = lsClickVal as ClickMode;
+
       $effect.root(() => {
+        $effect(() => {
+          localStorage.setItem("showGrid", JSON.stringify(this.ShowGrid));
+        });
         $effect(() => {
           localStorage.setItem("clickMode", this.ClickMode);
         });
