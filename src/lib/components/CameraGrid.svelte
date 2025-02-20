@@ -58,6 +58,7 @@
   makeDefault
   {position}
   fov={60}
+  far={5000}
   oncreate={(ref) => {
     ref.lookAt(target[0], target[1], target[2]);
     CurrentCamera.Position = ref.position.toArray();
