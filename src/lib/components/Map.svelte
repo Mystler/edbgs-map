@@ -38,8 +38,10 @@
     if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
     else if (e.key === "f") perfMon = !perfMon;
     else if (e.key === "c") menuOpen = !menuOpen;
-    else if (e.key === "h")
-      controlsDialog.isOpen() ? controlsDialog.close() : controlsDialog.show();
+    else if (e.key === "h") {
+      if (controlsDialog.isOpen()) controlsDialog.close();
+      else controlsDialog.show();
+    }
   }}
 />
 
