@@ -29,16 +29,14 @@ export function createCustomURL(data: MapData) {
     params.append("spt", x.type);
     if (!x.visible) params.append("spv", x.visible.toString());
   }
-  if (CurrentCamera.Position) {
-    params.append("cpx", CurrentCamera.Position[0].toFixed());
-    params.append("cpy", CurrentCamera.Position[1].toFixed());
-    params.append("cpz", CurrentCamera.Position[2].toFixed());
-  }
-  if (CurrentCamera.LookAt) {
-    params.append("ctx", CurrentCamera.LookAt[0].toFixed());
-    params.append("cty", CurrentCamera.LookAt[1].toFixed());
-    params.append("ctz", CurrentCamera.LookAt[2].toFixed());
-  }
+
+  params.append("cpx", CurrentCamera.Position[0].toFixed());
+  params.append("cpy", CurrentCamera.Position[1].toFixed());
+  params.append("cpz", CurrentCamera.Position[2].toFixed());
+  params.append("ctx", CurrentCamera.LookAt[0].toFixed());
+  params.append("cty", CurrentCamera.LookAt[1].toFixed());
+  params.append("ctz", CurrentCamera.LookAt[2].toFixed());
+
   return params;
 }
 
