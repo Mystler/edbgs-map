@@ -1,14 +1,15 @@
 <script lang="ts">
   import { T } from "@threlte/core";
-  import { Grid, OrbitControls, Text } from "@threlte/extras";
+  import { Grid, Instance, InstancedMesh, OrbitControls, Text } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
   import { base } from "$app/paths";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { type Matrix4, MOUSE, Vector3 } from "three";
+  import { DoubleSide, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+  import ArrowShape from "./ArrowShape.svelte";
 
   interface Props {
     cameraSetup?: CameraData;
@@ -25,6 +26,8 @@
       target[2] + cameraSetup.distance * 0.577,
     ];
   });
+  let cameraAngle = $state(0);
+  let isPanning = $state(false);
 
   let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
@@ -102,6 +105,7 @@
       // Explicitly set pan state again to allow adding RMB when LMB is already pressed for rotation
       controls.state = _STATE.PAN;
       controls._handleMouseDownPan(e);
+      isPanning = true;
     } else {
       // Otherwise pans vertically.
       panPlane = "vertical";
@@ -109,6 +113,7 @@
         // Reset back to rotation state if only left mouse button is pressed.
         controls.state = _STATE.ROTATE;
         controls._handleMouseDownRotate(e);
+        isPanning = false;
       }
     }
   }
@@ -132,11 +137,13 @@
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
       CurrentCamera.LookAt = e.target.target.toArray();
       CurrentCamera.Position = e.target.object.position.toArray();
+      cameraAngle = e.target.getAzimuthalAngle();
     }}
     bind:ref={controls}
     mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
     screenSpacePanning={HUDInfo.PanMode === "screen" ? true : false}
     oncreate={(ref) => {
+      cameraAngle = ref.getAzimuthalAngle();
       // HACK: Monkey patching OrbitControls to allow for panning up when not in screen space.
       const controls = ref as PatchedOrbitControls;
       const v = new Vector3();
@@ -150,6 +157,12 @@
         v.multiplyScalar(distance);
         controls._panOffset.add(v);
       };
+    }}
+    onstart={() => {
+      if (controls.state === _STATE.PAN) isPanning = true;
+    }}
+    onend={() => {
+      isPanning = false;
     }}
   />
 </T.PerspectiveCamera>
@@ -174,4 +187,35 @@
     anchorY="top"
     color="#00aaaa"
   />
+</T.Group>
+
+<T.Group
+  position={CurrentCamera.LookAt}
+  visible={HUDInfo.ShowGrid}
+  scale={CurrentCamera.Distance / 40}
+>
+  <T.Mesh rotation={[-Math.PI / 2, 0, 0]}>
+    <T.RingGeometry args={[1, 1.2, 32]} />
+    <T.MeshBasicMaterial color="#00aaaa" side={DoubleSide} />
+  </T.Mesh>
+
+  <InstancedMesh>
+    <ArrowShape />
+    <T.MeshBasicMaterial color="#00aaaa" side={DoubleSide} />
+
+    {#if HUDInfo.PanMode === "grid" && isPanning && panPlane === "vertical"}
+      <T.Group rotation={[0, cameraAngle, 0]}>
+        <Instance position={[0, 0.5, 0]} />
+        <Instance position={[0, -0.5, 0]} rotation={[Math.PI, 0, 0]} />
+      </T.Group>
+    {/if}
+    {#if HUDInfo.PanMode === "grid" && isPanning && panPlane === "horizontal"}
+      <T.Group>
+        <Instance position={[0, 0, 1.5]} rotation={[-Math.PI / 2, 0, Math.PI]} />
+        <Instance position={[0, 0, -1.5]} rotation={[-Math.PI / 2, 0, 0]} />
+        <Instance position={[1.5, 0, 0]} rotation={[-Math.PI / 2, 0, -Math.PI / 2]} />
+        <Instance position={[-1.5, 0, 0]} rotation={[-Math.PI / 2, 0, Math.PI / 2]} />
+      </T.Group>
+    {/if}
+  </InstancedMesh>
 </T.Group>
