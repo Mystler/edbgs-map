@@ -21,7 +21,7 @@
   }
 </script>
 
-<div class="mt-2 text-center">
+<div class="my-4 text-center">
   <h1>Elite Dangerous &ndash; Custom Factions Map Setup</h1>
   <p>
     Here you can create a custom map to visualize. Configuration will be stored locally for you.

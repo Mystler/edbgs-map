@@ -15,6 +15,7 @@
   import AutocompleteInput from "./AutocompleteInput.svelte";
   import { page } from "$app/state";
   import { createShortlink } from "$lib/CustomURL";
+  import Dialog from "./Dialog.svelte";
 
   interface Props {
     data: MapData;
@@ -27,6 +28,8 @@
   let addFaction = $state("");
   let addSystem = $state("");
   let addSphere = $state("");
+
+  let controlsDialog = $state() as Dialog;
 </script>
 
 <svelte:window
@@ -35,6 +38,8 @@
     if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
     else if (e.key === "f") perfMon = !perfMon;
     else if (e.key === "c") menuOpen = !menuOpen;
+    else if (e.key === "h")
+      controlsDialog.isOpen() ? controlsDialog.close() : controlsDialog.show();
   }}
 />
 
@@ -102,6 +107,7 @@
         </div>
       {/if}
       <h2>Controls</h2>
+      <button class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
       <div class="flex flex-wrap items-center justify-between gap-2 py-2">
         <div>
           <label>
@@ -202,4 +208,34 @@
       </div>
     </div>
   {/if}
+
+  <!-- Controls Help dialog -->
+  <Dialog bind:this={controlsDialog}>
+    <h2>Controls Help</h2>
+    <h4>Panning Modes</h4>
+    <p>
+      The control settings support two panning modes: "Screen Space" and "Elite Dangerous". The
+      former is recommended when the grid is disabled while the latter more closely reproduces what
+      the game does and is more intuitive when the grid is on. You can choose freely which one you
+      would like to use. However, touch screen devices should probably always keep this set to
+      screen space.
+    </p>
+    <ul class="list-disc pl-4">
+      <li><kbd>Primary Mouse Button</kbd>: Rotate</li>
+      <li><kbd>Secondary Mouse Button</kbd>: Pan (vertical plane if in Elite Dangerous mode)</li>
+      <li>
+        <kbd>Middle Mouse Button / Left+Right Mouse Buttons</kbd>: Pan (horizontal plane if in Elite
+        Dangerous mode)
+      </li>
+      <li><kbd>Mouse Wheel</kbd>: Zoom</li>
+      <li><kbd>Single Touch</kbd>: Rotate</li>
+      <li><kbd>Double Touch</kbd>: Pan and Zoom</li>
+    </ul>
+    <h4>Other Hotkeys</h4>
+    <ul class="list-disc pl-4">
+      <li><kbd>c</kbd>: Toggle Controls Menu</li>
+      <li><kbd>h</kbd>: Toggle Help</li>
+      <li><kbd>g</kbd>: Toggle Grid</li>
+    </ul>
+  </Dialog>
 {/if}

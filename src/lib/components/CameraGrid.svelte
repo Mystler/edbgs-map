@@ -91,11 +91,7 @@
     _handleMouseDownRotate: (e: MouseEvent) => void;
   }
   let controls = $state() as PatchedOrbitControls;
-
   let panPlane = $state("vertical") as "horizontal" | "vertical";
-  let panVector = $derived(
-    new Vector3(0, panPlane === "horizontal" ? 1 : 0, panPlane === "vertical" ? 1 : 0),
-  );
 
   function onMouseChange(e: MouseEvent) {
     // Buttons Flags - 1: Left, 2: Right, 4: Middle
@@ -150,9 +146,11 @@
       controls._panUp = (distance: number, objectMatrix: Matrix4) => {
         if (controls.screenSpacePanning === true) {
           v.setFromMatrixColumn(objectMatrix, 1);
-        } else {
+        } else if (panPlane === "horizontal") {
           v.setFromMatrixColumn(objectMatrix, 0);
-          v.crossVectors(panVector, v);
+          v.crossVectors(controls.object.up, v);
+        } else if (panPlane === "vertical") {
+          v.set(controls.object.up.x, controls.object.up.y, controls.object.up.z);
         }
         v.multiplyScalar(distance);
         controls._panOffset.add(v);
