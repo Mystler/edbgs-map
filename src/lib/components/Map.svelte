@@ -100,15 +100,15 @@
   {#if menuOpen}
     <div
       transition:slide
-      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-8 backdrop-blur-xs sm:w-xs"
+      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-12 backdrop-blur-xs sm:w-xs"
     >
+      <h2>Controls</h2>
       {#if page.route.id === "/"}
         <div class="absolute top-2 right-2 flex flex-col items-end">
           <button class="link" onclick={() => createShortlink(data)}>Share</button>
           <a data-sveltekit-reload href={`${base}/`}>Back</a>
         </div>
       {/if}
-      <h2>Controls</h2>
       <button class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
       <div class="flex flex-wrap items-center justify-between gap-2 py-2">
         <div>
