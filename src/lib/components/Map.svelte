@@ -100,7 +100,7 @@
   {#if menuOpen}
     <div
       transition:slide
-      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-6 backdrop-blur-xs sm:w-xs"
+      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-8 backdrop-blur-xs sm:w-xs"
     >
       {#if page.route.id === "/"}
         <div class="absolute top-2 right-2 flex flex-col items-end">
