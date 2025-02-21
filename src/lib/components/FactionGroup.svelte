@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
 
   interface Props {
     faction: FactionData;
@@ -56,7 +57,11 @@
 {#key systems}
   {#if systems.length > 0}
     <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} />
-    <Billboard position={textPosition} visible={faction.visible}>
+    <Billboard
+      position={textPosition}
+      visible={faction.visible}
+      scale={Math.max(0.1, Math.min(1, CurrentCamera.Distance / 100))}
+    >
       <Text
         text={faction.displayName}
         font={DefaultMapFont}
@@ -65,7 +70,7 @@
         anchorY="bottom"
         color={faction.color}
         outlineColor="black"
-        outlineWidth={0.5}
+        outlineWidth={0.2}
       />
     </Billboard>
   {/if}
