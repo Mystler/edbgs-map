@@ -7,13 +7,15 @@
   import { base } from "$app/paths";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { type Matrix4, MOUSE, Vector3 } from "three";
+  import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
   interface Props {
     cameraSetup?: CameraData;
   }
   let { cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
 
-  // Note comment on CameraData for intended priority in data usage.
+  // See comment on CameraData for intended priority in data usage.
   let target: [x: number, y: number, z: number] = $state(cameraSetup.lookAt ?? [0, 0, 0]);
   let position: [x: number, y: number, z: number] = $derived.by(() => {
     if (!cameraSetup.lookAtSystem && cameraSetup.position) return cameraSetup.position;
@@ -52,7 +54,67 @@
       if (data) target = [data.x, data.y, -data.z];
     });
   }
+
+  /**
+   * Orbit Conrol Customization
+   *
+   * Goal: Allow for panning vertically and down when not in screen space panning mode.
+   * Left mouse button rotates, Middle or Left+Right pan horizontally, Right pans vertically.
+   * This is very close to what Elite Dangerous does.
+   *
+   * In screen space panning mode, we do not change any default behavior.
+   */
+  const _STATE = {
+    NONE: -1,
+    ROTATE: 0,
+    DOLLY: 1,
+    PAN: 2,
+    TOUCH_ROTATE: 3,
+    TOUCH_PAN: 4,
+    TOUCH_DOLLY_PAN: 5,
+    TOUCH_DOLLY_ROTATE: 6,
+  };
+  /**
+   * Declare more properties and methods that are actually present on OrbitControls to allow for some customization.
+   * This is a bit hacky and needs to be updated if relevant internal parts of OrbitControls change.
+   * However, I tried to keep monkey patching to a minimum with very low assessed risks or maintenance effort.
+   * See: https://github.com/mrdoob/three.js/blob/master/examples/jsm/controls/OrbitControls.js
+   */
+  interface PatchedOrbitControls extends ThreeOrbitControls {
+    _panUp: (distance: number, objectMatrix: Matrix4) => void;
+    _panOffset: Vector3;
+    state: (typeof _STATE)[keyof typeof _STATE];
+    _handleMouseDownPan: (e: MouseEvent) => void;
+    _handleMouseDownRotate: (e: MouseEvent) => void;
+  }
+  let controls = $state() as PatchedOrbitControls;
+
+  let panPlane = $state("vertical") as "horizontal" | "vertical";
+  let panVector = $derived(
+    new Vector3(0, panPlane === "horizontal" ? 1 : 0, panPlane === "vertical" ? 1 : 0),
+  );
+
+  function onMouseChange(e: MouseEvent) {
+    // Buttons Flags - 1: Left, 2: Right, 4: Middle
+    if ((e.buttons & 1 && e.buttons & 2) || e.buttons === 4) {
+      // Middle mouse button only or left and right mouse buttons together pans horizontally.
+      panPlane = "horizontal";
+      // Explicitly set pan state again to allow adding RMB when LMB is already pressed for rotation
+      controls.state = _STATE.PAN;
+      controls._handleMouseDownPan(e);
+    } else {
+      // Otherwise pans vertically.
+      panPlane = "vertical";
+      if (e.buttons === 1) {
+        // Reset back to rotation state if only left mouse button is pressed.
+        controls.state = _STATE.ROTATE;
+        controls._handleMouseDownRotate(e);
+      }
+    }
+  }
 </script>
+
+<svelte:window onmouseup={onMouseChange} onmousedown={onMouseChange} />
 
 <T.PerspectiveCamera
   makeDefault
@@ -70,6 +132,24 @@
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
       CurrentCamera.LookAt = e.target.target.toArray();
       CurrentCamera.Position = e.target.object.position.toArray();
+    }}
+    bind:ref={controls}
+    mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
+    screenSpacePanning={HUDInfo.PanMode === "screen" ? true : false}
+    oncreate={(ref) => {
+      // HACK: Monkey patching OrbitControls to allow for panning up when not in screen space.
+      const controls = ref as PatchedOrbitControls;
+      const v = new Vector3();
+      controls._panUp = (distance: number, objectMatrix: Matrix4) => {
+        if (controls.screenSpacePanning === true) {
+          v.setFromMatrixColumn(objectMatrix, 1);
+        } else {
+          v.setFromMatrixColumn(objectMatrix, 0);
+          v.crossVectors(panVector, v);
+        }
+        v.multiplyScalar(distance);
+        controls._panOffset.add(v);
+      };
     }}
   />
 </T.PerspectiveCamera>

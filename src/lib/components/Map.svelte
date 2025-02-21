@@ -110,6 +110,13 @@
           </label>
         </div>
         <div>
+          <span>Panning Mode</span>
+          <select class="p-1" bind:value={HUDInfo.PanMode}>
+            <option value="screen">Screen Space</option>
+            <option value="grid">Elite Dangerous</option>
+          </select>
+        </div>
+        <div>
           <span>On System Click</span>
           <select class="p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>

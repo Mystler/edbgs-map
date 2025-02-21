@@ -1,6 +1,7 @@
 import { browser } from "$app/environment";
 
 export type ClickMode = "inara" | "measure";
+export type PanMode = "screen" | "grid";
 
 export class LoadingMessage {
   Message: string;
@@ -14,6 +15,7 @@ export const HUDInfo = new (class {
   ShowGrid: boolean = $state(false);
   CurrentSystem: string = $state("");
   ClickMode: ClickMode = $state("inara");
+  PanMode: PanMode = $state("screen");
   LoadingMessages: LoadingMessage[] = $state([]);
 
   constructor() {
@@ -22,6 +24,8 @@ export const HUDInfo = new (class {
       if (lsGridVal) this.ShowGrid = lsGridVal === "true";
       const lsClickVal = localStorage.getItem("clickMode");
       if (lsClickVal) this.ClickMode = lsClickVal as ClickMode;
+      const lsPanMode = localStorage.getItem("panMode");
+      if (lsPanMode) this.PanMode = lsPanMode as PanMode;
 
       $effect.root(() => {
         $effect(() => {
@@ -29,6 +33,9 @@ export const HUDInfo = new (class {
         });
         $effect(() => {
           localStorage.setItem("clickMode", this.ClickMode);
+        });
+        $effect(() => {
+          localStorage.setItem("panMode", this.PanMode);
         });
       });
     }
