@@ -20,7 +20,7 @@
 </script>
 
 <dialog bind:this={dialog} class="m-auto bg-transparent outline-none backdrop:backdrop-blur-xs">
-  <button class="absolute top-2 right-2 size-6" onclick={close} aria-label="Close">🗙</button>
+  <button class="absolute top-2 right-2 size-6" onclick={close} aria-label="Close">x</button>
   <div class="max-w-3xl rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-4">
     {@render children?.()}
   </div>

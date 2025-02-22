@@ -36,7 +36,7 @@
   onkeydown={(e) => {
     if (e.target instanceof HTMLInputElement) return;
     if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
-    else if (e.key === "f") perfMon = !perfMon;
+    else if (e.key === "p") perfMon = !perfMon;
     else if (e.key === "c") menuOpen = !menuOpen;
     else if (e.key === "h") {
       if (controlsDialog.isOpen()) controlsDialog.close();
@@ -124,10 +124,17 @@
             type="range"
             min="0.5"
             max="3"
-            step="0.01"
+            step="0.1"
             bind:value={HUDInfo.PanSpeed}
           />
-          <input type="number" class="w-16 p-1" bind:value={HUDInfo.PanSpeed} />
+          <input
+            type="number"
+            class="w-14 p-1"
+            bind:value={HUDInfo.PanSpeed}
+            min="0.5"
+            max="3"
+            step="0.5"
+          />
         </div>
         <div class="flex items-center gap-2">
           <span>Panning Mode</span>
@@ -250,6 +257,7 @@
       <li><kbd>c</kbd>: Toggle Controls Menu</li>
       <li><kbd>h</kbd>: Toggle Help</li>
       <li><kbd>g</kbd>: Toggle Grid</li>
+      <li><kbd>p</kbd>: Toggle Performance Stats</li>
     </ul>
   </Dialog>
 {/if}

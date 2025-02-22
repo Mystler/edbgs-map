@@ -7,6 +7,7 @@
   import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
 
   interface Props {
     system: SystemData;
@@ -39,7 +40,11 @@
 
 {#if systemData}
   <SystemRenderGroup systems={[systemData]} color={system.color} visible={system.visible} />
-  <Billboard position={[systemData.x, systemData.y + 2, -systemData.z]} visible={system.visible}>
+  <Billboard
+    position={[systemData.x, systemData.y + 1, -systemData.z]}
+    visible={system.visible}
+    scale={Math.max(0.1, Math.min(1, CurrentCamera.Distance / 100))}
+  >
     <Text
       text={system.displayName}
       font={DefaultMapFont}
@@ -48,7 +53,7 @@
       anchorY="bottom"
       color={system.color}
       outlineColor="black"
-      outlineWidth={0.25}
+      outlineWidth={0.1}
     />
   </Billboard>
 {/if}
