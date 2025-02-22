@@ -129,6 +129,7 @@
 >
   <OrbitControls
     {target}
+    panSpeed={HUDInfo.PanSpeed}
     onchange={(e) => {
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
       CurrentCamera.LookAt = e.target.target.toArray();

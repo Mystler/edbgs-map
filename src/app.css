@@ -72,6 +72,15 @@
     @apply outline-none hover:border-(--ed-orange-light) hover:bg-zinc-700 focus:border-(--ed-orange-light) focus:bg-zinc-700;
   }
 
+  .flex {
+    input[type="button"],
+    input[type="text"],
+    input[type="number"],
+    select {
+      @apply mx-0;
+    }
+  }
+
   input[type="color"] {
     @apply size-10 cursor-pointer;
   }

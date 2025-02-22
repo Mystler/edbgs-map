@@ -12,11 +12,13 @@ export class LoadingMessage {
 }
 
 export const HUDInfo = new (class {
-  ShowGrid: boolean = $state(false);
   CurrentSystem: string = $state("");
+  LoadingMessages: LoadingMessage[] = $state([]);
+
+  ShowGrid: boolean = $state(false);
   ClickMode: ClickMode = $state("inara");
   PanMode: PanMode = $state("screen");
-  LoadingMessages: LoadingMessage[] = $state([]);
+  PanSpeed: number = $state(2);
 
   constructor() {
     if (browser) {
@@ -26,6 +28,8 @@ export const HUDInfo = new (class {
       if (lsClickVal) this.ClickMode = lsClickVal as ClickMode;
       const lsPanMode = localStorage.getItem("panMode");
       if (lsPanMode) this.PanMode = lsPanMode as PanMode;
+      const lsPanSpeed = localStorage.getItem("panSpeed");
+      if (lsPanSpeed) this.PanSpeed = parseFloat(lsPanSpeed);
 
       $effect.root(() => {
         $effect(() => {
@@ -36,6 +40,9 @@ export const HUDInfo = new (class {
         });
         $effect(() => {
           localStorage.setItem("panMode", this.PanMode);
+        });
+        $effect(() => {
+          localStorage.setItem("panSpeed", this.PanSpeed.toString());
         });
       });
     }

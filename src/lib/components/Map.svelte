@@ -110,23 +110,35 @@
         </div>
       {/if}
       <button class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
-      <div class="flex flex-wrap items-center justify-between gap-2 py-2">
+      <div class="align-center flex flex-col py-2">
         <div>
           <label>
             Show Grid
             <input type="checkbox" bind:checked={HUDInfo.ShowGrid} class="ml-1" />
           </label>
         </div>
-        <div>
+        <div class="flex items-center gap-2">
+          <span>Pan Speed</span>
+          <input
+            class="grow"
+            type="range"
+            min="0.5"
+            max="3"
+            step="0.01"
+            bind:value={HUDInfo.PanSpeed}
+          />
+          <input type="number" class="w-16 p-1" bind:value={HUDInfo.PanSpeed} />
+        </div>
+        <div class="flex items-center gap-2">
           <span>Panning Mode</span>
-          <select class="p-1" bind:value={HUDInfo.PanMode}>
+          <select class="grow p-1" bind:value={HUDInfo.PanMode}>
             <option value="screen">Screen Space</option>
             <option value="grid">Elite Dangerous</option>
           </select>
         </div>
-        <div>
+        <div class="flex items-center gap-2">
           <span>On System Click</span>
-          <select class="p-1" bind:value={HUDInfo.ClickMode}>
+          <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>
             <option value="measure">Measure Distance</option>
           </select>
@@ -135,13 +147,13 @@
       <hr />
       <h4>Minor Factions</h4>
       {#each data.Factions as f, i (f.name)}
-        <div class="flex items-center gap-2" transition:slide>
+        <div class="flex items-center gap-1" transition:slide>
           <label for={`mfsc-${i}`} class="grow">{f.displayName}</label>
           <input id={`mfsc-${i}`} type="checkbox" bind:checked={f.visible} />
           <input class="flex-none" type="color" bind:value={f.color} />
         </div>
       {/each}
-      <div class="flex items-center">
+      <div class="flex items-center gap-1">
         <AutocompleteInput dataType="faction" class="grow p-1" bind:value={addFaction} />
         <input
           type="button"
@@ -158,13 +170,13 @@
       <hr />
       <h4>Individual Systems</h4>
       {#each data.Systems as s, i (s.name)}
-        <div class="flex gap-2" transition:slide>
+        <div class="flex items-center gap-1" transition:slide>
           <label for={`mssc-${i}`} class="grow">{s.displayName}</label>
           <input id={`mssc-${i}`} type="checkbox" bind:checked={s.visible} />
           <input class="flex-none" type="color" bind:value={s.color} />
         </div>
       {/each}
-      <div class="flex items-center">
+      <div class="flex items-center gap-1">
         <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSystem} />
         <input
           type="button"
@@ -181,7 +193,7 @@
       <hr />
       <h4>Powerplay Spheres</h4>
       {#each data.Spheres as s, i (s.name)}
-        <div class="flex items-center gap-2" transition:slide>
+        <div class="flex items-center gap-1" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
           <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} />
           <input class="flex-none" type="color" bind:value={s.color} />
@@ -191,7 +203,7 @@
           </select>
         </div>
       {/each}
-      <div class="flex items-center">
+      <div class="flex items-center gap-1">
         <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSphere} />
         <input
           type="button"
