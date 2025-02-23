@@ -94,6 +94,10 @@
   input[type="checkbox"] {
     @apply accent-(--ed-orange);
   }
+
+  kbd {
+    @apply bg-zinc-700;
+  }
 }
 
 .link-btn {

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { T } from "@threlte/core";
+  import { T, useTask } from "@threlte/core";
   import { Grid, Instance, InstancedMesh, OrbitControls, Text } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
   import type { CameraData } from "$lib/types/MapData.svelte";
@@ -84,6 +84,7 @@
    * See: https://github.com/mrdoob/three.js/blob/master/examples/jsm/controls/OrbitControls.js
    */
   interface PatchedOrbitControls extends ThreeOrbitControls {
+    _pan: (deltaX: number, deltaY: number) => void;
     _panUp: (distance: number, objectMatrix: Matrix4) => void;
     _panOffset: Vector3;
     state: (typeof _STATE)[keyof typeof _STATE];
@@ -113,9 +114,83 @@
       }
     }
   }
+
+  // Keyboard Movement
+  let keyMovement = $state({ W: false, A: false, S: false, D: false, R: false, F: false });
+  function onKeyDown(e: KeyboardEvent) {
+    if (e.target instanceof HTMLInputElement) return;
+    if (e.key === "r") {
+      keyMovement.R = true;
+    } else if (e.key === "f") {
+      keyMovement.F = true;
+    } else if (e.key === "w") {
+      keyMovement.W = true;
+    } else if (e.key === "a") {
+      keyMovement.A = true;
+    } else if (e.key === "s") {
+      keyMovement.S = true;
+    } else if (e.key === "d") {
+      keyMovement.D = true;
+    }
+  }
+
+  function onKeyUp(e: KeyboardEvent) {
+    if (e.key === "r") {
+      keyMovement.R = false;
+    } else if (e.key === "f") {
+      keyMovement.F = false;
+    } else if (e.key === "w") {
+      keyMovement.W = false;
+    } else if (e.key === "a") {
+      keyMovement.A = false;
+    } else if (e.key === "s") {
+      keyMovement.S = false;
+    } else if (e.key === "d") {
+      keyMovement.D = false;
+    }
+  }
+
+  // Scaled based on pan speed
+  const keyMovementSpeedMult = $derived(500 * HUDInfo.PanSpeed);
+  // Helper vector: X for AD, Y for RF, Z for WS.
+  let keyVector = $derived(
+    new Vector3(
+      (keyMovement.A ? 1 : 0) + (keyMovement.D ? -1 : 0),
+      (keyMovement.R ? 1 : 0) + (keyMovement.F ? -1 : 0),
+      (keyMovement.W ? 1 : 0) + (keyMovement.S ? -1 : 0),
+    )
+      .normalize()
+      .multiplyScalar(keyMovementSpeedMult),
+  );
+  let isKeyPanning = $derived(Object.values(keyVector).some((v) => v !== 0));
+
+  useTask(
+    (delta) => {
+      if (isKeyPanning) {
+        const prevPlane = panPlane;
+        if (keyVector.x !== 0 || keyVector.z !== 0) {
+          panPlane = "horizontal";
+          controls._pan(keyVector.x * delta, keyVector.z * delta);
+        }
+        if (keyVector.y !== 0) {
+          panPlane = "vertical";
+          controls._pan(0, keyVector.y * delta);
+        }
+        // If we are simultanously mouse panning, that gets priority for the visual display.
+        if (controls.state === _STATE.PAN) panPlane = prevPlane;
+        controls.update();
+      }
+    },
+    { autoInvalidate: false },
+  );
 </script>
 
-<svelte:window onmouseup={onMouseChange} onmousedown={onMouseChange} />
+<svelte:window
+  onmouseup={onMouseChange}
+  onmousedown={onMouseChange}
+  onkeydown={onKeyDown}
+  onkeyup={onKeyUp}
+/>
 
 <T.PerspectiveCamera
   makeDefault
@@ -145,7 +220,9 @@
       const controls = ref as PatchedOrbitControls;
       const v = new Vector3();
       controls._panUp = (distance: number, objectMatrix: Matrix4) => {
-        if (controls.screenSpacePanning === true) {
+        if (controls.screenSpacePanning === true && panPlane === "horizontal") {
+          v.setFromMatrixColumn(objectMatrix, 2).multiplyScalar(-1);
+        } else if (controls.screenSpacePanning === true) {
           v.setFromMatrixColumn(objectMatrix, 1);
         } else if (panPlane === "horizontal") {
           v.setFromMatrixColumn(objectMatrix, 0);
@@ -202,13 +279,13 @@
     <ArrowShape />
     <T.MeshBasicMaterial color="#00aaaa" side={DoubleSide} />
 
-    {#if HUDInfo.PanMode === "grid" && isPanning && panPlane === "vertical"}
+    {#if HUDInfo.PanMode === "grid" && (isPanning || isKeyPanning) && panPlane === "vertical"}
       <T.Group rotation={[0, cameraAngle, 0]}>
         <Instance position={[0, 0.5, 0]} />
         <Instance position={[0, -0.5, 0]} rotation={[Math.PI, 0, 0]} />
       </T.Group>
     {/if}
-    {#if HUDInfo.PanMode === "grid" && isPanning && panPlane === "horizontal"}
+    {#if HUDInfo.PanMode === "grid" && (isPanning || isKeyPanning) && panPlane === "horizontal"}
       <T.Group>
         <Instance position={[0, 0, 1.5]} rotation={[-Math.PI / 2, 0, Math.PI]} />
         <Instance position={[0, 0, -1.5]} rotation={[-Math.PI / 2, 0, 0]} />

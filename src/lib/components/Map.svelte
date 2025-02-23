@@ -236,21 +236,22 @@
     <h4>Panning Modes</h4>
     <p>
       The control settings support two panning modes: "Screen Space" and "Elite Dangerous". The
-      former is recommended when the grid is disabled while the latter more closely reproduces what
-      the game does and is more intuitive when the grid is on. You can choose freely which one you
-      would like to use. However, touch screen devices should probably always keep this set to
-      screen space.
+      former defines left, right, up, down, forward, and backward based on the current view vector.
+      It is recommended when the grid is disabled. The latter more closely reproduces what the game
+      does and is more intuitive when the grid is on, as it follows the planes of the galactic
+      coordinate system. You can choose freely which one you would like to use. However, touch
+      screen devices should probably always keep this set to screen space.
     </p>
     <ul class="list-disc pl-4">
       <li><kbd>Primary Mouse Button</kbd>: Rotate</li>
-      <li><kbd>Secondary Mouse Button</kbd>: Pan (vertical plane if in Elite Dangerous mode)</li>
+      <li><kbd>Secondary Mouse Button</kbd>: Pan (vertical)</li>
       <li>
-        <kbd>Middle Mouse Button / Left+Right Mouse Buttons</kbd>: Pan (horizontal plane if in Elite
-        Dangerous mode)
+        <kbd>Middle Mouse Button / Left+Right Mouse Buttons</kbd>: Pan (horizontal)
       </li>
       <li><kbd>Mouse Wheel</kbd>: Zoom</li>
+      <li><kbd>W / A / S / D / R / F</kbd>: Pan</li>
       <li><kbd>Single Touch</kbd>: Rotate</li>
-      <li><kbd>Double Touch</kbd>: Pan and Zoom</li>
+      <li><kbd>Double Touch</kbd>: Zoom and Pan (vertical)</li>
     </ul>
     <h4>Other Hotkeys</h4>
     <ul class="list-disc pl-4">
