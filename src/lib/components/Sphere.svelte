@@ -39,7 +39,7 @@
       color={sphere.color}
       opacity={0.4}
       transparent={true}
-      depthTest={false}
+      depthWrite={false}
       side={DoubleSide}
     />
   </T.Mesh>

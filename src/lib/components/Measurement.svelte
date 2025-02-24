@@ -73,7 +73,7 @@
       width={0.25}
       color="#ffffff"
       transparent
-      depthTest={false}
+      depthWrite={false}
       dashArray={0.05}
       dashRatio={0.2}
       {dashOffset}

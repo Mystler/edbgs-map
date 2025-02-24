@@ -53,7 +53,7 @@
       <T.Group>
         <T.Mesh>
           <MeshLineGeometry points={[pointSystem, pointConnector]} />
-          <MeshLineMaterial width={0.1} color="#ffffff" {opacity} transparent depthTest={false} />
+          <MeshLineMaterial width={0.1} color="#ffffff" {opacity} transparent depthWrite={false} />
         </T.Mesh>
         <T.Mesh position={pointConnector.toArray()} rotation={[-Math.PI / 2, 0, 0]}>
           <T.CircleGeometry args={[0.33]} />
@@ -61,7 +61,7 @@
             color="#ffffff"
             {opacity}
             transparent
-            depthTest={false}
+            depthWrite={false}
             side={DoubleSide}
           />
         </T.Mesh>

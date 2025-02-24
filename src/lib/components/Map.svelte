@@ -55,8 +55,6 @@
         {/if}
         <CameraGrid cameraSetup={data.Camera} />
 
-        <Measurement />
-
         {#each data.Factions as f, i (f.name)}
           <FactionGroup faction={data.Factions[i]} />
         {/each}
@@ -66,6 +64,8 @@
         {#each data.Spheres as s, i (s.name)}
           <Sphere sphere={data.Spheres[i]} />
         {/each}
+
+        <Measurement />
       </MapContent>
     </Canvas>
   </div>
