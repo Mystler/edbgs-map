@@ -23,10 +23,12 @@
     let response = await fetch(`${base}/api/system/${system.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Could not find system: ${system.name}`);
+      alert(`Error while fetching data from Spansh.co.uk for system: ${system.name}`);
       return null;
     }
-    return response.json();
+    const res = (await response.json()) as SpanshSystem | null;
+    if (!res) alert(`Could not find system: ${system.name}`);
+    return res;
   }
 
   let systemData: SpanshSystem | undefined = $state();

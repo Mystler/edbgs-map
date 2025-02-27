@@ -12,7 +12,7 @@ interface SpanshSearchResponse {
   }[];
 }
 
-export async function fetchSystem(name: string): Promise<SpanshSystem> {
+export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
   // Easy API call. Search should have an existing system match in the results, with type being "system" and record having the system data.
   let response: Response;
   try {
@@ -39,7 +39,7 @@ export async function fetchSystem(name: string): Promise<SpanshSystem> {
       };
     }
   }
-  throw new Error(`No system data found for ${name}.`);
+  return null;
 }
 
 interface SpanshSaveResponse {
@@ -52,7 +52,7 @@ interface SpanshRecallResponse {
   results: SpanshSystem[];
 }
 
-export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]> {
+async function fetchSystems(filters: unknown): Promise<SpanshSystem[]> {
   // This one is more tricky. First we need to send our query specs to the save endpoint, then we can fetch the results page by page for the ID we were given.
   let systems: SpanshSystem[] = [];
   try {
@@ -64,7 +64,7 @@ export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]>
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        filters: { controlling_minor_faction: { value: [name] } },
+        filters,
         sort: [],
         size: 1000,
         page: 0,
@@ -93,10 +93,13 @@ export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]>
       page++;
     }
   } catch {
-    throw new Error(`Error while fetching faction data from Spansh.co.uk.`);
+    throw new Error(`Error while fetching data from Spansh.co.uk.`);
   }
-  if (systems.length > 0) return systems;
-  throw new Error(`No system data found for faction ${name}.`);
+  return systems;
+}
+
+export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]> {
+  return await fetchSystems({ controlling_minor_faction: { value: [name] } });
 }
 
 interface SpanshAutocompleteResponse {

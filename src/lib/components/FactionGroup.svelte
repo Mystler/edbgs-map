@@ -19,10 +19,13 @@
     let response = await fetch(`${base}/api/faction/${faction.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Could not find any systems controlled by faction: ${faction.name}`);
+      alert(`Error while fetching data from Spansh.co.uk for faction: ${faction.name}`);
       return [];
     }
-    return response.json();
+    const systems = (await response.json()) as SpanshSystem[];
+    if (systems.length === 0)
+      alert(`Could not find any systems controlled by faction: ${faction.name}`);
+    return systems;
   }
 
   let textPosition: [x: number, y: number, z: number] = $state([0, 0, 0]);

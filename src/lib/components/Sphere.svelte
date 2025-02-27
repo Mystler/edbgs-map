@@ -17,10 +17,12 @@
     let response = await fetch(`${base}/api/system/${sphere.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Could not find sphere system: ${sphere.name}`);
+      alert(`Error while fetching data from Spansh.co.uk for sphere: ${sphere.name}`);
       return null;
     }
-    return response.json();
+    const res = (await response.json()) as SpanshSystem | null;
+    if (!res) alert(`Could not find sphere system: ${sphere.name}`);
+    return res;
   }
 
   let systemData: SpanshSystem | undefined = $state();

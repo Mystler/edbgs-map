@@ -46,10 +46,14 @@
   async function fetchData(): Promise<SpanshSystem | null> {
     let response = await fetch(`${base}/api/system/${cameraSetup.lookAtSystem}`);
     if (!response.ok) {
-      alert(`Could not find look at system: ${cameraSetup.lookAtSystem}`);
+      alert(
+        `Error while fetching data from Spansh.co.uk for camera system: ${cameraSetup.lookAtSystem}`,
+      );
       return null;
     }
-    return response.json();
+    const res = (await response.json()) as SpanshSystem | null;
+    if (!res) alert(`Could not find look at system: ${cameraSetup.lookAtSystem}`);
+    return res;
   }
 
   if (cameraSetup.lookAtSystem) {
