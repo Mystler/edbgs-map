@@ -160,8 +160,20 @@
       {#each data.Factions as f, i (f.name)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mfsc-${i}`} class="grow">{f.displayName}</label>
-          <input id={`mfsc-${i}`} type="checkbox" bind:checked={f.visible} />
-          <input class="flex-none" type="color" bind:value={f.color} />
+          <div class="flex flex-col items-center">
+            <input id={`mfsc-${i}`} type="checkbox" bind:checked={f.visible} title="Visibility" />
+            <label for={`mfsc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
+          </div>
+          <div class="flex flex-col items-center">
+            <input
+              id={`mfscl-${i}`}
+              type="checkbox"
+              bind:checked={f.labelVisible}
+              title="Show Label"
+            />
+            <label for={`mfscl-${i}`} class="text-[8px]" title="Show Label">Lbl</label>
+          </div>
+          <input class="flex-none" type="color" bind:value={f.color} title="Color" />
         </div>
       {/each}
       <div class="flex items-center gap-1">
@@ -183,8 +195,20 @@
       {#each data.Systems as s, i (s.name)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mssc-${i}`} class="grow">{s.displayName}</label>
-          <input id={`mssc-${i}`} type="checkbox" bind:checked={s.visible} />
-          <input class="flex-none" type="color" bind:value={s.color} />
+          <div class="flex flex-col items-center">
+            <input id={`mssc-${i}`} type="checkbox" bind:checked={s.visible} title="Visibility" />
+            <label for={`mssc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
+          </div>
+          <div class="flex flex-col items-center">
+            <input
+              id={`msscl-${i}`}
+              type="checkbox"
+              bind:checked={s.labelVisible}
+              title="Show Label"
+            />
+            <label for={`msscl-${i}`} class="text-[8px]" title="Show Label">Lbl</label>
+          </div>
+          <input class="flex-none" type="color" bind:value={s.color} title="Color" />
         </div>
       {/each}
       <div class="flex items-center gap-1">
@@ -206,8 +230,11 @@
       {#each data.Spheres as s, i (s.name)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
-          <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} />
-          <input class="flex-none" type="color" bind:value={s.color} />
+          <div class="flex flex-col items-center">
+            <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} title="Visibility" />
+            <label for={`mspsc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
+          </div>
+          <input class="flex-none" type="color" bind:value={s.color} title="Color" />
           <select bind:value={s.type} class="p-1">
             <option>Colonization</option>
             <option>Fortified</option>

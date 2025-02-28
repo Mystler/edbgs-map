@@ -61,6 +61,7 @@
     scale={Math.max(0.1, Math.min(1, CurrentCamera.Distance / 100))}
   >
     <Text
+      visible={system.labelVisible}
       text={system.displayName}
       font={DefaultMapFont}
       fontSize={3}

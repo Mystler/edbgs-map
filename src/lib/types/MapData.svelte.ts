@@ -5,6 +5,7 @@ export interface FactionData {
   displayName: string;
   color: string;
   visible: boolean;
+  labelVisible: boolean;
 }
 
 export interface SystemData extends FactionData {
@@ -52,19 +53,21 @@ export class MapData {
     displayName = "",
     color = randomColor(),
     visible = true,
+    labelVisible = true,
   }: Partial<FactionData> = {}) {
     if (!displayName) displayName = name;
-    this.Factions.push({ name, displayName, color, visible });
+    this.Factions.push({ name, displayName, color, visible, labelVisible });
   }
   addSystem({
     name = "",
     displayName = "",
     color = randomColor(),
     visible = true,
+    labelVisible = true,
     position = undefined,
   }: Partial<SystemData> = {}) {
     if (!displayName) displayName = name;
-    this.Systems.push({ name, displayName, color, visible, position });
+    this.Systems.push({ name, displayName, color, visible, labelVisible, position });
   }
   addSphere({
     name = "",

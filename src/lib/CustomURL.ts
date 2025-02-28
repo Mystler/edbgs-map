@@ -16,12 +16,14 @@ export function createCustomURL(data: MapData) {
     if (x.name !== x.displayName) params.append("fd", x.displayName);
     params.append("fc", x.color);
     if (!x.visible) params.append("fv", x.visible.toString());
+    if (!x.labelVisible) params.append("fl", x.labelVisible.toString());
   }
   for (const x of data.Systems) {
     params.append("sn", x.name);
     if (x.name !== x.displayName) params.append("sd", x.displayName);
     params.append("sc", x.color);
     if (!x.visible) params.append("sv", x.visible.toString());
+    if (!x.labelVisible) params.append("sl", x.labelVisible.toString());
     if (x.position) {
       params.append("sx", x.position[0].toString());
       params.append("sy", x.position[1].toString());
@@ -88,6 +90,8 @@ export function readCustomURL(params: URLSearchParams): MapData {
       cf.color = value;
     } else if (key === "fv" && cf) {
       cf.visible = value === "true";
+    } else if (key === "fl" && cf) {
+      cf.labelVisible = value === "true";
     } else if (key === "sn") {
       // New system starts, add the previous one if it exists
       if (cs) {
@@ -101,6 +105,8 @@ export function readCustomURL(params: URLSearchParams): MapData {
       cs.color = value;
     } else if (key === "sv" && cs) {
       cs.visible = value === "true";
+    } else if (key === "sl" && cs) {
+      cs.labelVisible = value === "true";
     } else if (key === "sx" && cs) {
       if (cs.position) cs.position[0] = parseFloat(value);
       else cs.position = [parseFloat(value), 0, 0];
