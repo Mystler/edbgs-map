@@ -6,11 +6,15 @@
   import { T } from "@threlte/core";
   import { DoubleSide } from "three";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { scale3d } from "$lib/types/Animations.svelte";
+  import { transitions, global } from "@threlte/extras";
 
   interface Props {
     sphere: SphereData;
   }
   let { sphere }: Props = $props();
+
+  transitions();
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(sphere.name, "Sphere");
@@ -45,7 +49,11 @@
 </script>
 
 {#if systemData}
-  <T.Mesh position={[systemData.x, systemData.y, -systemData.z]} visible={sphere.visible}>
+  <T.Mesh
+    position={[systemData.x, systemData.y, -systemData.z]}
+    visible={sphere.visible}
+    transition={global(scale3d)}
+  >
     {#if sphere.type === "ExpansionCube"}
       <T.BoxGeometry
         args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]}
