@@ -158,11 +158,11 @@
     >
   </p>
 
-  <h3>Powerplay Spheres</h3>
+  <h3>Ranges</h3>
   {#if data.Spheres.length > 0}
     <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
-        <thead><tr><th>Sphere</th><th>Color</th><th>Type</th><th></th></tr></thead>
+        <thead><tr><th>Center System</th><th>Color</th><th>Type</th><th></th></tr></thead>
         <tbody>
           {#each data.Spheres as sphere, index (index)}
             <tr>
@@ -179,8 +179,10 @@
               <td>
                 <div transition:slide>
                   <select bind:value={sphere.type}>
+                    <option>Colonization</option>
                     <option>Fortified</option>
                     <option>Stronghold</option>
+                    <option value="ExpansionCube">Expansion Cube</option>
                   </select>
                 </div>
               </td>

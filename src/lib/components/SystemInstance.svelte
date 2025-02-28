@@ -4,6 +4,8 @@
   import { Spring } from "svelte/motion";
   import { CurrentMeasurement } from "./Measurement.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { getContext } from "svelte";
+  import type { MapData } from "$lib/types/MapData.svelte";
 
   interface Props {
     system: SpanshSystem;
@@ -17,6 +19,8 @@
     stiffness: 0.15,
     damping: 0.25,
   });
+
+  const mapData: MapData = getContext("mapData");
 </script>
 
 <Billboard position={[system.x, system.y, -system.z]}>
@@ -40,6 +44,17 @@
         );
       } else if (HUDInfo.ClickMode === "measure") {
         CurrentMeasurement.addSystem(system.name, system.x, system.y, system.z);
+      } else if (HUDInfo.ClickMode === "range") {
+        const i = mapData.Spheres.findIndex((sphere) => sphere.name === system.name);
+        if (i >= 0) {
+          mapData.Spheres.splice(i, 1);
+        } else {
+          mapData.addSphere({
+            name: system.name,
+            color: "#ffffff",
+            position: [system.x, system.y, system.z],
+          });
+        }
       }
     }}
   />

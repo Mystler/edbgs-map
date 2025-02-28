@@ -16,11 +16,14 @@
   import { page } from "$app/state";
   import { createShortlink } from "$lib/CustomURL";
   import Dialog from "./Dialog.svelte";
+  import { setContext } from "svelte";
 
   interface Props {
     data: MapData;
   }
   let { data = $bindable() }: Props = $props();
+
+  setContext("mapData", data);
 
   let perfMon = $state(false);
   let menuOpen = $state(false);
@@ -100,7 +103,7 @@
   {#if menuOpen}
     <div
       transition:slide
-      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-12 backdrop-blur-xs sm:w-xs"
+      class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-12 backdrop-blur-xs sm:w-sm"
     >
       <h2>Controls</h2>
       {#if page.route.id === "/"}
@@ -148,6 +151,7 @@
           <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>
             <option value="measure">Measure Distance</option>
+            <option value="range">Toggle Range</option>
           </select>
         </div>
       </div>
@@ -198,15 +202,17 @@
         />
       </div>
       <hr />
-      <h4>Powerplay Spheres</h4>
+      <h4>Ranges</h4>
       {#each data.Spheres as s, i (s.name)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
           <input id={`mspsc-${i}`} type="checkbox" bind:checked={s.visible} />
           <input class="flex-none" type="color" bind:value={s.color} />
           <select bind:value={s.type} class="p-1">
+            <option>Colonization</option>
             <option>Fortified</option>
             <option>Stronghold</option>
+            <option value="ExpansionCube">Expansion Cube</option>
           </select>
         </div>
       {/each}

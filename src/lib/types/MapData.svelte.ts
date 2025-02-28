@@ -9,13 +9,20 @@ export interface FactionData {
 
 export type SystemData = FactionData;
 
-export type SphereType = "Fortified" | "Stronghold";
+export type SphereType = "Fortified" | "Stronghold" | "Colonization" | "ExpansionCube";
 export interface SphereData {
   name: string;
   color: string;
   type: SphereType;
   visible: boolean;
+  position?: [x: number, y: number, z: number];
 }
+export const SphereRanges: { [k in SphereType]: number } = {
+  Fortified: 20,
+  Stronghold: 30,
+  Colonization: 15,
+  ExpansionCube: 40,
+};
 
 /**
  * Intended priority of usage:
@@ -38,21 +45,32 @@ export class MapData {
   Camera: CameraData = $state({ lookAtSystem: "", distance: 100 });
 
   // Setup Helpers
-  addFaction({ name = "", displayName = "", color = randomColor(), visible = true } = {}) {
+  addFaction({
+    name = "",
+    displayName = "",
+    color = randomColor(),
+    visible = true,
+  }: Partial<FactionData> = {}) {
     if (!displayName) displayName = name;
     this.Factions.push({ name, displayName, color, visible });
   }
-  addSystem({ name = "", displayName = "", color = randomColor(), visible = true } = {}) {
+  addSystem({
+    name = "",
+    displayName = "",
+    color = randomColor(),
+    visible = true,
+  }: Partial<SystemData> = {}) {
     if (!displayName) displayName = name;
     this.Systems.push({ name, displayName, color, visible });
   }
   addSphere({
     name = "",
-    type = "Fortified" as SphereType,
+    type = "Colonization" as SphereType,
     color = randomColor(),
     visible = true,
-  } = {}) {
-    this.Spheres.push({ name, type, color, visible });
+    position = undefined,
+  }: Partial<SphereData> = {}) {
+    this.Spheres.push({ name, type, color, visible, position });
   }
 
   sortAll() {

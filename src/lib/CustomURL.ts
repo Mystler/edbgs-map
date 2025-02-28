@@ -28,6 +28,11 @@ export function createCustomURL(data: MapData) {
     params.append("spc", x.color);
     params.append("spt", x.type);
     if (!x.visible) params.append("spv", x.visible.toString());
+    if (x.position) {
+      params.append("spx", x.position[0].toString());
+      params.append("spy", x.position[1].toString());
+      params.append("spz", x.position[2].toString());
+    }
   }
 
   params.append("cpx", CurrentCamera.Position[0].toFixed());
@@ -104,6 +109,15 @@ export function readCustomURL(params: URLSearchParams): MapData {
       csp.color = value;
     } else if (key === "spv" && csp) {
       csp.visible = value === "true";
+    } else if (key === "spx" && csp) {
+      if (csp.position) csp.position[0] = parseFloat(value);
+      else csp.position = [parseFloat(value), 0, 0];
+    } else if (key === "spy" && csp) {
+      if (csp.position) csp.position[1] = parseFloat(value);
+      else csp.position = [0, parseFloat(value), 0];
+    } else if (key === "spz" && csp) {
+      if (csp.position) csp.position[2] = parseFloat(value);
+      else csp.position = [0, 0, parseFloat(value)];
     }
   });
   // Add remaining open objects if they exist

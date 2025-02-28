@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SphereData } from "../types/MapData.svelte";
+  import { SphereRanges, type SphereData } from "../types/MapData.svelte";
   import type { SpanshSystem } from "../SpanshAPI";
   import { base } from "$app/paths";
   import { onMount } from "svelte";
@@ -25,21 +25,37 @@
     return res;
   }
 
-  let systemData: SpanshSystem | undefined = $state();
+  let systemData: Omit<SpanshSystem, "id64"> | undefined = $state();
 
   onMount(() => {
-    fetchData().then((data) => {
-      if (data) systemData = data;
-    });
+    // If a position was supplied, then don't fetch system from Spansh and create it manually
+    if (sphere.name && sphere.position) {
+      systemData = {
+        name: sphere.name,
+        x: sphere.position[0],
+        y: sphere.position[1],
+        z: sphere.position[2],
+      };
+    } else {
+      fetchData().then((data) => {
+        if (data) systemData = data;
+      });
+    }
   });
 </script>
 
 {#if systemData}
   <T.Mesh position={[systemData.x, systemData.y, -systemData.z]} visible={sphere.visible}>
-    <T.SphereGeometry args={[sphere.type === "Stronghold" ? 30 : 20]} />
+    {#if sphere.type === "ExpansionCube"}
+      <T.BoxGeometry
+        args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]}
+      />
+    {:else}
+      <T.SphereGeometry args={[SphereRanges[sphere.type]]} />
+    {/if}
     <T.MeshBasicMaterial
       color={sphere.color}
-      opacity={0.4}
+      opacity={0.3}
       transparent={true}
       depthWrite={false}
       side={DoubleSide}
