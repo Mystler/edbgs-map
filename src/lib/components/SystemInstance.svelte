@@ -42,6 +42,11 @@
           `https://inara.cz/elite/starsystem/?search=${encodeURIComponent(system.name)}`,
           "_blank",
         );
+      } else if (HUDInfo.ClickMode === "edsm") {
+        window.open(
+          `https://www.edsm.net/en/system/id//name?systemName=${encodeURIComponent(system.name)}`,
+          "_blank",
+        );
       } else if (HUDInfo.ClickMode === "measure") {
         CurrentMeasurement.addSystem(system.name, system.x, system.y, system.z);
       } else if (HUDInfo.ClickMode === "range") {

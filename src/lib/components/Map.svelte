@@ -155,6 +155,7 @@
           <span>On System Click</span>
           <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>
+            <option value="edsm">Open EDSM</option>
             <option value="measure">Measure Distance</option>
             <option value="range">Toggle Range</option>
           </select>
