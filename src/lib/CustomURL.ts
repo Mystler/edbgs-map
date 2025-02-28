@@ -22,6 +22,11 @@ export function createCustomURL(data: MapData) {
     if (x.name !== x.displayName) params.append("sd", x.displayName);
     params.append("sc", x.color);
     if (!x.visible) params.append("sv", x.visible.toString());
+    if (x.position) {
+      params.append("sx", x.position[0].toString());
+      params.append("sy", x.position[1].toString());
+      params.append("sz", x.position[2].toString());
+    }
   }
   for (const x of data.Spheres) {
     params.append("spn", x.name);
@@ -96,6 +101,15 @@ export function readCustomURL(params: URLSearchParams): MapData {
       cs.color = value;
     } else if (key === "sv" && cs) {
       cs.visible = value === "true";
+    } else if (key === "sx" && cs) {
+      if (cs.position) cs.position[0] = parseFloat(value);
+      else cs.position = [parseFloat(value), 0, 0];
+    } else if (key === "sy" && cs) {
+      if (cs.position) cs.position[1] = parseFloat(value);
+      else cs.position = [0, parseFloat(value), 0];
+    } else if (key === "sz" && cs) {
+      if (cs.position) cs.position[2] = parseFloat(value);
+      else cs.position = [0, 0, parseFloat(value)];
     } else if (key === "spn") {
       // New sphere starts, add the previous one if it exists
       if (csp) {

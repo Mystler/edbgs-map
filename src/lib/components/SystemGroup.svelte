@@ -12,7 +12,7 @@
   interface Props {
     system: SystemData;
   }
-  let { system }: Props = $props();
+  let { system = $bindable() }: Props = $props();
 
   if (!system.displayName) {
     system.displayName = system.name;
@@ -34,9 +34,22 @@
   let systemData: SpanshSystem | undefined = $state();
 
   onMount(() => {
-    fetchData().then((data) => {
-      if (data) systemData = data;
-    });
+    // If a position was supplied, then don't fetch system from Spansh and create it manually
+    if (system.name && system.position) {
+      systemData = {
+        name: system.name,
+        x: system.position[0],
+        y: system.position[1],
+        z: system.position[2],
+      };
+    } else {
+      fetchData().then((data) => {
+        if (data) {
+          systemData = data;
+          system.position = [data.x, data.y, data.z];
+        }
+      });
+    }
   });
 </script>
 

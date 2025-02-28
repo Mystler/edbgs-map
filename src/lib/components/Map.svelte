@@ -62,10 +62,10 @@
           <FactionGroup faction={data.Factions[i]} />
         {/each}
         {#each data.Systems as s, i (s.name)}
-          <SystemGroup system={data.Systems[i]} />
+          <SystemGroup bind:system={data.Systems[i]} />
         {/each}
         {#each data.Spheres as s, i (s.name)}
-          <Sphere sphere={data.Spheres[i]} />
+          <Sphere bind:sphere={data.Spheres[i]} />
         {/each}
 
         <Measurement />

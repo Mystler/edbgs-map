@@ -1,9 +1,10 @@
 export interface SpanshSystem {
   name: string;
-  id64: number;
   x: number;
   y: number;
   z: number;
+  id64?: number;
+  controlling_minor_faction?: string;
 }
 interface SpanshSearchResponse {
   results: {
@@ -24,10 +25,11 @@ export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
     // Prune to relevant data
     return {
       name: system.record.name,
-      id64: system.record.id64,
       x: system.record.x,
       y: system.record.y,
       z: system.record.z,
+      id64: system.record.id64,
+      controlling_minor_faction: system.record.controlling_minor_faction,
     };
   }
   return null;
@@ -43,7 +45,7 @@ interface SpanshRecallResponse {
   results: SpanshSystem[];
 }
 
-async function fetchSystems(filters: unknown): Promise<SpanshSystem[]> {
+async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
   // This one is more tricky. First we need to send our query specs to the save endpoint, then we can fetch the results page by page for the ID we were given.
   let systems: SpanshSystem[] = [];
   // Set up search
@@ -53,12 +55,7 @@ async function fetchSystems(filters: unknown): Promise<SpanshSystem[]> {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      filters,
-      sort: [],
-      size: 1000,
-      page: 0,
-    }),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error("Spansh error!");
   const searchData: SpanshSaveResponse = await response.json();
@@ -74,7 +71,15 @@ async function fetchSystems(filters: unknown): Promise<SpanshSystem[]> {
     const data: SpanshRecallResponse = await response.json();
     systems = systems.concat(
       data.results.map((x) => {
-        return { name: x.name, id64: x.id64, x: x.x, y: x.y, z: x.z }; // Only keep the relevant data
+        return {
+          // Only keep the relevant data
+          name: x.name,
+          x: x.x,
+          y: x.y,
+          z: x.z,
+          id64: x.id64,
+          controlling_minor_faction: x.controlling_minor_faction,
+        };
       }),
     );
     if (data.from + data.size >= data.count) {
@@ -86,7 +91,31 @@ async function fetchSystems(filters: unknown): Promise<SpanshSystem[]> {
 }
 
 export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]> {
-  return await fetchSystems({ controlling_minor_faction: { value: [name] } });
+  return await fetchSystems({
+    filters: { controlling_minor_faction: { value: [name] } },
+    sort: [],
+    size: 1000,
+    page: 0,
+  });
+}
+
+export async function fetchColonizationTargets(
+  x: number,
+  y: number,
+  z: number,
+): Promise<SpanshSystem[]> {
+  let systems = await fetchSystems({
+    filters: {
+      distance: { min: "0", max: "15" },
+      population: { comparison: "<=>", value: [0, 0] },
+    },
+    sort: [],
+    size: 1000,
+    page: 0,
+    reference_coords: { x, y, z },
+  });
+  systems = systems.filter((system) => system.controlling_minor_faction);
+  return systems;
 }
 
 interface SpanshAutocompleteResponse {

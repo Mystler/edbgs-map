@@ -101,7 +101,7 @@
   <T.CircleGeometry args={[0.5]} />
   <T.MeshBasicMaterial {color} />
 
-  {#each systems as system (system.id64)}
+  {#each systems as system (system.name)}
     <SystemInstance {system} />
   {/each}
 </InstancedMesh>

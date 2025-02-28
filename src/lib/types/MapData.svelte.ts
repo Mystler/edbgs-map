@@ -7,7 +7,9 @@ export interface FactionData {
   visible: boolean;
 }
 
-export type SystemData = FactionData;
+export interface SystemData extends FactionData {
+  position?: [x: number, y: number, z: number];
+}
 
 export type SphereType = "Fortified" | "Stronghold" | "Colonization" | "ExpansionCube";
 export interface SphereData {
@@ -59,9 +61,10 @@ export class MapData {
     displayName = "",
     color = randomColor(),
     visible = true,
+    position = undefined,
   }: Partial<SystemData> = {}) {
     if (!displayName) displayName = name;
-    this.Systems.push({ name, displayName, color, visible });
+    this.Systems.push({ name, displayName, color, visible, position });
   }
   addSphere({
     name = "",

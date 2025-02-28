@@ -12,7 +12,7 @@
   interface Props {
     sphere: SphereData;
   }
-  let { sphere }: Props = $props();
+  let { sphere = $bindable() }: Props = $props();
 
   transitions();
 
@@ -29,7 +29,7 @@
     return res;
   }
 
-  let systemData: Omit<SpanshSystem, "id64"> | undefined = $state();
+  let systemData: SpanshSystem | undefined = $state();
 
   onMount(() => {
     // If a position was supplied, then don't fetch system from Spansh and create it manually
@@ -42,7 +42,10 @@
       };
     } else {
       fetchData().then((data) => {
-        if (data) systemData = data;
+        if (data) {
+          systemData = data;
+          sphere.position = [data.x, data.y, data.z];
+        }
       });
     }
   });
