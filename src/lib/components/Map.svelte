@@ -261,8 +261,8 @@
     </ul>
     <h4>Measuring Distances</h4>
     <p>
-      When the Click Mode is set to "Measure Distance", you can click on two systems on the map to
-      measure the distance between them. The measured distance will be displayed in the bottom of
+      When "On System Click" is set to "Measure Distance", you can click on two systems on the map
+      to measure the distance between them. The measured distance will be displayed in the bottom of
       the screen. Clicking on further systems will replace the measurement to go from the last
       system you clicked on to the new one. In order to hide a measurement, you can just click on
       the last system you clicked on a second time.
