@@ -126,7 +126,7 @@
     />
     <T is={gridConnectorMaterial} />
 
-    {#each gridConnectors as { pointSystem, pointConnector }}
+    {#each gridConnectors as { pointSystem, pointConnector }, i (i)}
       <Instance
         id="line"
         position={pointConnector.toArray()}

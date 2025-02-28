@@ -38,7 +38,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each data.Factions as faction, index}
+          {#each data.Factions as faction, index (index)}
             <tr>
               <td>
                 <div transition:slide>
@@ -102,7 +102,7 @@
       <table class="mx-auto">
         <thead><tr><th>System Name</th><th>Display Name</th><th>Color</th><th></th></tr></thead>
         <tbody>
-          {#each data.Systems as system, index}
+          {#each data.Systems as system, index (index)}
             <tr>
               <td>
                 <div transition:slide>
@@ -164,7 +164,7 @@
       <table class="mx-auto">
         <thead><tr><th>Sphere</th><th>Color</th><th>Type</th><th></th></tr></thead>
         <tbody>
-          {#each data.Spheres as sphere, index}
+          {#each data.Spheres as sphere, index (index)}
             <tr>
               <td>
                 <div transition:slide>

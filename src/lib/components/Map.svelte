@@ -73,7 +73,7 @@
   <!-- HUD -->
   {#if HUDInfo.LoadingMessages.length > 0}
     <div class="pointer-events-none absolute right-2 bottom-10 w-sm rounded-xl backdrop-blur-xs">
-      {#each HUDInfo.LoadingMessages as m}
+      {#each HUDInfo.LoadingMessages as m, i (i)}
         <div class="flex items-center gap-2 p-2">
           <span
             class="size-4 animate-spin rounded-full border-4 border-(--ed-orange) border-t-transparent"

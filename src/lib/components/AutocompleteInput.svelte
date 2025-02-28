@@ -37,7 +37,7 @@
   {...rest}
 />
 <datalist id={`autocomplete-${uid}`}>
-  {#each options as option}
+  {#each options as option (option)}
     <option>{option}</option>
   {/each}
 </datalist>
