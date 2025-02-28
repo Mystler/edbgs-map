@@ -5,6 +5,7 @@ export interface SpanshSystem {
   z: number;
   id64?: number;
   controlling_minor_faction?: string;
+  needs_permit?: string;
 }
 interface SpanshSearchResponse {
   results: {
@@ -30,6 +31,7 @@ export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
       z: system.record.z,
       id64: system.record.id64,
       controlling_minor_faction: system.record.controlling_minor_faction,
+      needs_permit: system.record.needs_permit,
     };
   }
   return null;
@@ -79,6 +81,7 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
           z: x.z,
           id64: x.id64,
           controlling_minor_faction: x.controlling_minor_faction,
+          needs_permit: x.needs_permit,
         };
       }),
     );
@@ -114,7 +117,7 @@ export async function fetchColonizationTargets(
     page: 0,
     reference_coords: { x, y, z },
   });
-  systems = systems.filter((system) => !system.controlling_minor_faction);
+  systems = systems.filter((system) => !system.controlling_minor_faction && !system.needs_permit);
   return systems;
 }
 
