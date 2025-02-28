@@ -8,6 +8,7 @@
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { scale3d } from "$lib/types/Animations.svelte";
   import { transitions, global } from "@threlte/extras";
+  import SystemRenderGroup from "./SystemRenderGroup.svelte";
 
   interface Props {
     sphere: SphereData;
@@ -49,6 +50,30 @@
       });
     }
   });
+
+  let colonizationLoaded = $state(false);
+  export const isColonizationLoaded = () => colonizationLoaded;
+  let colonizationTargets: SpanshSystem[] = $state([]);
+  export function loadColonizationSystems() {
+    if (!sphere.position) return;
+    colonizationLoaded = true;
+    const m = HUDInfo.showMessage(sphere.name, "Colonization Targets");
+    fetch(
+      `${base}/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`,
+    )
+      .then((x) => x.json())
+      .then((x) => {
+        colonizationTargets = x;
+        HUDInfo.removeMessage(m);
+        if (colonizationTargets.length === 0) {
+          alert("No valid colonization targets found!");
+        }
+      })
+      .catch(() => {
+        alert(`Error when fetching colonization targets for ${sphere.name}`);
+        HUDInfo.removeMessage(m);
+      });
+  }
 </script>
 
 {#if systemData}
@@ -72,4 +97,7 @@
       side={DoubleSide}
     />
   </T.Mesh>
+{/if}
+{#if colonizationTargets.length > 0}
+  <SystemRenderGroup systems={colonizationTargets} color={sphere.color} visible={sphere.visible} />
 {/if}

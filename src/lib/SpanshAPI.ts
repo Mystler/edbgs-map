@@ -106,7 +106,7 @@ export async function fetchColonizationTargets(
 ): Promise<SpanshSystem[]> {
   let systems = await fetchSystems({
     filters: {
-      distance: { min: "0", max: "15" },
+      distance: { min: "0", max: "16" },
       population: { comparison: "<=>", value: [0, 0] },
     },
     sort: [],
@@ -114,7 +114,7 @@ export async function fetchColonizationTargets(
     page: 0,
     reference_coords: { x, y, z },
   });
-  systems = systems.filter((system) => system.controlling_minor_faction);
+  systems = systems.filter((system) => !system.controlling_minor_faction);
   return systems;
 }
 

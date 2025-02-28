@@ -17,6 +17,8 @@
   import { createShortlink } from "$lib/CustomURL";
   import Dialog from "./Dialog.svelte";
   import { setContext } from "svelte";
+  import { faDownload } from "@fortawesome/free-solid-svg-icons";
+  import FaIcon from "./FaIcon.svelte";
 
   interface Props {
     data: MapData;
@@ -33,6 +35,8 @@
   let addSphere = $state("");
 
   let controlsDialog = $state() as Dialog;
+
+  const sphereRefs: Sphere[] = $state([]);
 </script>
 
 <svelte:window
@@ -65,7 +69,7 @@
           <SystemGroup bind:system={data.Systems[i]} />
         {/each}
         {#each data.Spheres as s, i (s.name)}
-          <Sphere bind:sphere={data.Spheres[i]} />
+          <Sphere bind:sphere={data.Spheres[i]} bind:this={sphereRefs[i]} />
         {/each}
 
         <Measurement />
@@ -95,6 +99,7 @@
 
   <!-- Controls Menu -->
   <button
+    aria-label="Open Controls"
     class="hover:cur fixed top-0 left-0 z-50 p-1 text-3xl"
     onclick={() => {
       menuOpen = !menuOpen;
@@ -241,6 +246,16 @@
             <option>Stronghold</option>
             <option value="ExpansionCube">Expansion Cube</option>
           </select>
+          {#if s.type === "Colonization" && !sphereRefs[i]?.isColonizationLoaded()}
+            <button
+              aria-label="Load Colonization Targets"
+              title="Load Colonization Targets"
+              class="link"
+              onclick={() => sphereRefs[i]?.loadColonizationSystems()}
+            >
+              <FaIcon icon={faDownload} />
+            </button>
+          {/if}
         </div>
       {/each}
       <div class="flex items-center gap-1">
