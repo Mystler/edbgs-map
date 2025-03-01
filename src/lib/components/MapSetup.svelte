@@ -2,12 +2,14 @@
   import { slide } from "$lib/types/Animations.svelte";
   import { type MapData } from "../types/MapData.svelte";
   import AutocompleteInput from "./AutocompleteInput.svelte";
+  import SessionManager from "./SessionManager.svelte";
 
   interface Props {
     data: MapData;
     onConfirmRender: () => void;
   }
   let { data = $bindable(), onConfirmRender }: Props = $props();
+  let sessionManager = $state() as SessionManager;
 
   function confirm() {
     // Clean up before we give the ok to render
@@ -25,6 +27,9 @@
   <h1>Elite Dangerous &ndash; Custom Factions Map Setup</h1>
   <p>
     Here you can create a custom map to visualize. Configuration will be stored locally for you.
+  </p>
+  <p>
+    <button class="link-btn" onclick={() => sessionManager.show()}>Manage Saved Sessions</button>
   </p>
 
   <h3>Minor Factions</h3>
@@ -222,7 +227,8 @@
 
   <h3>Camera Setup</h3>
   <p>
-    By default, the camera will re-use the position from your last visit.<br />
+    By default, the camera will re-use the position from your last visit or the loaded session.<br
+    />
     If you want to initialize the camera to look at a specific system instead, please enter name and
     distance here:<br />
     <AutocompleteInput
@@ -237,3 +243,5 @@
     {`v${__VERSION__} (${__COMMIT__})`}<br />{new Date(__COMMITDATE__).toLocaleDateString()}
   </div>
 </div>
+
+<SessionManager bind:this={sessionManager} bind:mapData={data} />

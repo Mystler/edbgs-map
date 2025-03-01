@@ -18,6 +18,11 @@
 
   // See comment on CameraData for intended priority in data usage.
   let target: [x: number, y: number, z: number] = $state(cameraSetup.lookAt ?? [0, 0, 0]);
+  $effect(() => {
+    // Update if we get new position data from upstream and our derived target or position changed.
+    if (!cameraSetup.lookAtSystem && cameraSetup.lookAt) target = cameraSetup.lookAt;
+    if (target || position) controls.update();
+  });
   let position: [x: number, y: number, z: number] = $derived.by(() => {
     if (!cameraSetup.lookAtSystem && cameraSetup.position) return cameraSetup.position;
     return [

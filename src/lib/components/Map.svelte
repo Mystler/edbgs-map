@@ -19,6 +19,7 @@
   import { setContext } from "svelte";
   import { faBars, faDownload } from "@fortawesome/free-solid-svg-icons";
   import FaIcon from "./FaIcon.svelte";
+  import SessionManager from "./SessionManager.svelte";
 
   interface Props {
     data: MapData;
@@ -35,6 +36,7 @@
   let addSphere = $state("");
 
   let controlsDialog = $state() as Dialog;
+  let sessionManager = $state() as SessionManager;
 
   const sphereRefs: Sphere[] = $state([]);
 </script>
@@ -48,6 +50,9 @@
     else if (e.key === "h") {
       if (controlsDialog.isOpen()) controlsDialog.close();
       else controlsDialog.show();
+    } else if (e.key === "m") {
+      if (sessionManager.isOpen()) sessionManager.close();
+      else sessionManager.show();
     } else if (e.key === "1") HUDInfo.ClickMode = "inara";
     else if (e.key === "2") HUDInfo.ClickMode = "edsm";
     else if (e.key === "3") HUDInfo.ClickMode = "measure";
@@ -127,6 +132,8 @@
     {@render CurrentMeasurement.HUDSnippet()}
   </div>
 
+  <SessionManager bind:this={sessionManager} bind:mapData={data} />
+
   <!-- Controls Menu -->
   <button
     aria-label="Open Controls"
@@ -143,6 +150,7 @@
       <h2>Controls</h2>
       {#if page.route.id === "/"}
         <div class="absolute top-2 right-2 flex flex-col items-end">
+          <button class="link" onclick={() => sessionManager.show()}>Sessions</button>
           <button class="link" onclick={() => createShortlink(data)}>Share</button>
           <a data-sveltekit-reload href={`${base}/`}>Back</a>
         </div>
@@ -343,6 +351,7 @@
     <h4>Other Hotkeys</h4>
     <ul class="list-disc pl-4">
       <li><kbd>c</kbd>: Toggle Controls Menu</li>
+      <li><kbd>m</kbd>: Toggle Session Manager</li>
       <li><kbd>h</kbd>: Toggle Help</li>
       <li><kbd>g</kbd>: Toggle Grid</li>
       <li><kbd>p</kbd>: Toggle Performance Stats</li>
