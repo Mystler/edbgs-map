@@ -55,6 +55,7 @@ export class MapData {
     visible = true,
     labelVisible = true,
   }: Partial<FactionData> = {}) {
+    if (name && this.Factions.some((x) => x.name === name)) return;
     if (!displayName) displayName = name;
     this.Factions.push({ name, displayName, color, visible, labelVisible });
   }
@@ -66,6 +67,7 @@ export class MapData {
     labelVisible = true,
     position = undefined,
   }: Partial<SystemData> = {}) {
+    if (name && this.Systems.some((x) => x.name === name)) return;
     if (!displayName) displayName = name;
     this.Systems.push({ name, displayName, color, visible, labelVisible, position });
   }
@@ -76,6 +78,7 @@ export class MapData {
     visible = true,
     position = undefined,
   }: Partial<SphereData> = {}) {
+    if (name && this.Spheres.some((x) => x.name === name)) return;
     this.Spheres.push({ name, type, color, visible, position });
   }
 

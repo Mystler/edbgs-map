@@ -54,7 +54,34 @@
 
 {#if browser}
   <!-- Canvas -->
-  <div class="h-lvh w-lvw">
+  <div
+    class="h-lvh w-lvw"
+    role="presentation"
+    ondragover={(e) => {
+      e.preventDefault();
+    }}
+    ondrop={(e) => {
+      e.preventDefault();
+      const droplink = e.dataTransfer?.getData("text/html");
+      console.log(droplink);
+      if (droplink) {
+        // System match
+        let match = droplink.match(
+          /<a[^>]+(?:inara\.cz\/elite\/starsystem\/|spansh\.co\.uk\/system\/\d+)[^>]*>\s*(.*)\s*<\/a>/m,
+        );
+        if (match) {
+          data.addSystem({ name: match[1].trim() });
+          return;
+        }
+        // Faction match
+        match = droplink.match(/<a[^>]+(?:inara\.cz\/elite\/minorfaction\/)[^>]*>\s*(.*)\s*<\/a>/m);
+        if (match) {
+          data.addFaction({ name: match[1].trim() });
+          return;
+        }
+      }
+    }}
+  >
     <Canvas>
       <MapContent>
         {#if perfMon}
