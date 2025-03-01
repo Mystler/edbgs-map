@@ -216,7 +216,7 @@
       class="link-btn"
       onclick={() => {
         data.Spheres = [];
-      }}>Clear All Spheres</button
+      }}>Clear All Ranges</button
     >
   </p>
 

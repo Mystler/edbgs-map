@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { faXmark } from "@fortawesome/free-solid-svg-icons";
+  import FaIcon from "./FaIcon.svelte";
+
   let { children } = $props();
 
   let dialog = $state() as HTMLDialogElement;
@@ -20,7 +23,9 @@
 </script>
 
 <dialog bind:this={dialog} class="m-auto bg-transparent outline-none backdrop:backdrop-blur-xs">
-  <button class="absolute top-2 right-2 size-6" onclick={close} aria-label="Close">x</button>
+  <button class="absolute top-2 right-2 p-2" onclick={close} aria-label="Close"
+    ><FaIcon icon={faXmark} /></button
+  >
   <div class="max-w-3xl rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-4">
     {@render children?.()}
   </div>

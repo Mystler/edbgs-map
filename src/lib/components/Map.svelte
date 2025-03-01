@@ -17,7 +17,7 @@
   import { createShortlink } from "$lib/CustomURL";
   import Dialog from "./Dialog.svelte";
   import { setContext } from "svelte";
-  import { faDownload } from "@fortawesome/free-solid-svg-icons";
+  import { faBars, faDownload } from "@fortawesome/free-solid-svg-icons";
   import FaIcon from "./FaIcon.svelte";
 
   interface Props {
@@ -48,7 +48,10 @@
     else if (e.key === "h") {
       if (controlsDialog.isOpen()) controlsDialog.close();
       else controlsDialog.show();
-    }
+    } else if (e.key === "1") HUDInfo.ClickMode = "inara";
+    else if (e.key === "2") HUDInfo.ClickMode = "edsm";
+    else if (e.key === "3") HUDInfo.ClickMode = "measure";
+    else if (e.key === "4") HUDInfo.ClickMode = "range";
   }}
 />
 
@@ -127,10 +130,10 @@
   <!-- Controls Menu -->
   <button
     aria-label="Open Controls"
-    class="hover:cur fixed top-0 left-0 z-50 p-1 text-3xl"
+    class="hover:cur fixed top-0 left-0 z-50 p-2 text-3xl"
     onclick={() => {
       menuOpen = !menuOpen;
-    }}>☰</button
+    }}><FaIcon icon={faBars} /></button
   >
   {#if menuOpen}
     <div
@@ -343,6 +346,39 @@
       <li><kbd>h</kbd>: Toggle Help</li>
       <li><kbd>g</kbd>: Toggle Grid</li>
       <li><kbd>p</kbd>: Toggle Performance Stats</li>
+      <li><kbd>1 to 4</kbd>: Select the corresponding mode in "On System Click"</li>
     </ul>
+    <h4>More Tricks</h4>
+    <ul class="list-disc pl-4">
+      <li>
+        While the map is rendering, you can drag and drop system and faction links from INARA onto
+        it to load data without having to use the inputs.
+      </li>
+      <li>
+        When displaying Colonization ranges, there is a little download icon that you can click to
+        import all potential colonization target systems within that sphere.
+      </li>
+    </ul>
+    <h4>Credits</h4>
+    <p>This tool has been developed by CMDR Mystler.</p>
+    <p>
+      It is open source on <a
+        href="https://github.com/Mystler/edbgs-map"
+        target="_blank"
+        rel="noopener">GitHub</a
+      >
+      and developed using <a href="https://svelte.dev/" target="_blank" rel="noopener">Svelte</a>,
+      <a href="https://threlte.xyz/" target="_blank" rel="noopener">Threlte</a>,
+      <a href="https://www.typescriptlang.org/" target="_blank" rel="noopener">TypeScript</a>,
+      <a href="https://tailwindcss.com/" target="_blank" rel="noopener">Tailwind CSS</a>, and
+      <a href="https://fontawesome.com/" target="_blank" rel="noopener">Font Awesome</a>.
+    </p>
+    <p>
+      The data source for all Elite Dangerous data is the amazing website of <a
+        href="https://spansh.co.uk/"
+        target="_blank"
+        rel="noopener">Spansh.co.uk</a
+      >.
+    </p>
   </Dialog>
 {/if}
