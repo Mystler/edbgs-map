@@ -74,7 +74,7 @@
   </p>
   <hr />
   <div class="flex gap-1">
-    <input type="text" class="grow" bind:value={saveName} placeholder="Session Name" />
+    <input type="text" class="w-32 grow" bind:value={saveName} placeholder="Session Name" />
     <input type="button" value="Save" onclick={() => saveSession(saveName)} />
   </div>
   <hr />
