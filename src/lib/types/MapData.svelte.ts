@@ -23,7 +23,7 @@ export interface SphereData {
 export const SphereRanges: { [k in SphereType]: number } = {
   Fortified: 20,
   Stronghold: 30,
-  Colonization: 16,
+  Colonization: 15,
   ExpansionCube: 40,
 };
 

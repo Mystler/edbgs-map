@@ -97,7 +97,7 @@ export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]>
   return await fetchSystems({
     filters: { controlling_minor_faction: { value: [name] } },
     sort: [],
-    size: 1000,
+    size: 500,
     page: 0,
   });
 }
@@ -109,11 +109,11 @@ export async function fetchColonizationTargets(
 ): Promise<SpanshSystem[]> {
   let systems = await fetchSystems({
     filters: {
-      distance: { min: "0", max: "16" },
+      distance: { min: "0", max: "15" },
       population: { comparison: "<=>", value: [0, 0] },
     },
     sort: [],
-    size: 1000,
+    size: 500,
     page: 0,
     reference_coords: { x, y, z },
   });
