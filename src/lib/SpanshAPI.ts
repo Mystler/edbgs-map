@@ -102,6 +102,17 @@ export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]>
   });
 }
 
+export async function fetchFactionNCSystems(name: string): Promise<SpanshSystem[]> {
+  let systems = await fetchSystems({
+    filters: { minor_faction_presences: { value: [name] } },
+    sort: [],
+    size: 500,
+    page: 0,
+  });
+  systems = systems.filter((x) => x.controlling_minor_faction !== name);
+  return systems;
+}
+
 export async function fetchColonizationTargets(
   x: number,
   y: number,

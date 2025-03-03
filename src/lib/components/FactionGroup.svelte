@@ -15,8 +15,10 @@
   let { faction }: Props = $props();
 
   async function fetchData(): Promise<SpanshSystem[]> {
+    const ncQuery = faction.name.endsWith(" (NC)");
+    const queryName = ncQuery ? faction.name.slice(0, -5) : faction.name;
     const m = HUDInfo.showMessage(faction.name, "Faction");
-    let response = await fetch(`${base}/api/faction/${faction.name}`);
+    let response = await fetch(`${base}/api/faction/${queryName}${ncQuery ? "/nc" : ""}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data from Spansh.co.uk for faction: ${faction.name}`);
