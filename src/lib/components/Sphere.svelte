@@ -87,13 +87,13 @@
         args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]}
       />
     {:else}
-      <T.SphereGeometry args={[SphereRanges[sphere.type]]} />
+      <T.SphereGeometry args={[SphereRanges[sphere.type], 32, 32]} />
     {/if}
     <T.MeshBasicMaterial
       color={sphere.color}
       opacity={0.2}
       transparent={true}
-      depthWrite={false}
+      depthTest={false}
       side={DoubleSide}
     />
   </T.Mesh>
