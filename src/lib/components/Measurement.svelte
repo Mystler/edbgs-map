@@ -1,5 +1,5 @@
 <script module lang="ts">
-  import { Vector3 } from "three";
+  import { DoubleSide, Vector3 } from "three";
   import { T, useTask } from "@threlte/core";
   import { MeshLineGeometry, MeshLineMaterial } from "@threlte/extras";
 
@@ -77,6 +77,7 @@
       dashArray={0.05}
       dashRatio={0.2}
       {dashOffset}
+      side={DoubleSide}
     />
   </T.Mesh>
 {/if}
