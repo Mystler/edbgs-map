@@ -1,6 +1,6 @@
 import { browser } from "$app/environment";
 
-export type ClickMode = "inara" | "edsm" | "measure" | "range";
+export type ClickMode = "inara" | "edsm" | "spansh" | "measure" | "range";
 export type PanMode = "screen" | "grid";
 
 export class LoadingMessage {

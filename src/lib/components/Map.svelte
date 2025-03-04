@@ -55,8 +55,9 @@
       else sessionManager.show();
     } else if (e.key === "1") HUDInfo.ClickMode = "inara";
     else if (e.key === "2") HUDInfo.ClickMode = "edsm";
-    else if (e.key === "3") HUDInfo.ClickMode = "measure";
-    else if (e.key === "4") HUDInfo.ClickMode = "range";
+    else if (e.key === "3") HUDInfo.ClickMode = "spansh";
+    else if (e.key === "4") HUDInfo.ClickMode = "measure";
+    else if (e.key === "5") HUDInfo.ClickMode = "range";
   }}
 />
 
@@ -194,6 +195,7 @@
           <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
             <option value="inara">Open INARA</option>
             <option value="edsm">Open EDSM</option>
+            <option value="spansh">Open Spansh</option>
             <option value="measure">Measure Distance</option>
             <option value="range">Toggle Range</option>
           </select>
@@ -355,7 +357,7 @@
       <li><kbd>h</kbd>: Toggle Help</li>
       <li><kbd>g</kbd>: Toggle Grid</li>
       <li><kbd>p</kbd>: Toggle Performance Stats</li>
-      <li><kbd>1 to 4</kbd>: Select the corresponding mode in "On System Click"</li>
+      <li><kbd>1 to 5</kbd>: Select the corresponding mode in "On System Click"</li>
     </ul>
     <h4>More Tricks</h4>
     <ul class="list-disc pl-4">
