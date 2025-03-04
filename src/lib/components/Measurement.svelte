@@ -2,6 +2,7 @@
   import { DoubleSide, Vector3 } from "three";
   import { T, useTask } from "@threlte/core";
   import { MeshLineGeometry, MeshLineMaterial } from "@threlte/extras";
+  import { fade } from "$lib/types/Animations.svelte";
 
   interface MeasurementSystem {
     name: string;
@@ -60,7 +61,7 @@
 {#snippet HUDInfo()}
   {@const distance = CurrentMeasurement.getDistance()}
   {#if distance > 0}
-    <div>
+    <div transition:fade>
       {CurrentMeasurement.A} &mdash; {CurrentMeasurement.B}: {distance.toFixed(2)} Ly
     </div>
   {/if}

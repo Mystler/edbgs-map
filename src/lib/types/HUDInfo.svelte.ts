@@ -1,6 +1,12 @@
 import { browser } from "$app/environment";
 
-export type ClickMode = "inara" | "edsm" | "spansh" | "measure" | "range";
+export const ClickMode = {
+  inara: "Open Inara",
+  edsm: "Open EDSM",
+  spansh: "Open Spansh",
+  measure: "Measure Distance",
+  range: "Toggle Range",
+};
 export type PanMode = "screen" | "grid";
 
 export class LoadingMessage {
@@ -14,9 +20,12 @@ export class LoadingMessage {
 export const HUDInfo = new (class {
   CurrentSystem: string = $state("");
   LoadingMessages: LoadingMessage[] = $state([]);
+  TimedMessage: string = $state("");
+
+  #timeout: ReturnType<typeof setTimeout> | undefined;
 
   ShowGrid: boolean = $state(false);
-  ClickMode: ClickMode = $state("inara");
+  ClickMode: keyof typeof ClickMode = $state("inara");
   PanMode: PanMode = $state("screen");
   PanSpeed: number = $state(2);
 
@@ -25,7 +34,7 @@ export const HUDInfo = new (class {
       const lsGridVal = localStorage.getItem("showGrid");
       if (lsGridVal) this.ShowGrid = lsGridVal === "true";
       const lsClickVal = localStorage.getItem("clickMode");
-      if (lsClickVal) this.ClickMode = lsClickVal as ClickMode;
+      if (lsClickVal) this.ClickMode = lsClickVal as keyof typeof ClickMode;
       const lsPanMode = localStorage.getItem("panMode");
       if (lsPanMode) this.PanMode = lsPanMode as PanMode;
       const lsPanSpeed = localStorage.getItem("panSpeed");
@@ -57,5 +66,18 @@ export const HUDInfo = new (class {
 
   removeMessage(m: LoadingMessage) {
     this.LoadingMessages.splice(this.LoadingMessages.indexOf(m), 1);
+  }
+
+  showTimedMessage(msg: string, timeMs: number) {
+    if (this.#timeout) clearTimeout(this.#timeout);
+    this.TimedMessage = msg;
+    this.#timeout = setTimeout(() => {
+      this.TimedMessage = "";
+    }, timeMs);
+  }
+
+  changeClickMode(mode: keyof typeof ClickMode) {
+    this.ClickMode = mode;
+    this.showTimedMessage(`Click Mode set to: ${ClickMode[mode]}`, 2000);
   }
 })();

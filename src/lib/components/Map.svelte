@@ -8,9 +8,9 @@
   import CameraGrid from "./CameraGrid.svelte";
   import MapContent from "./MapContent.svelte";
   import { PerfMonitor } from "@threlte/extras";
-  import { slide } from "$lib/types/Animations.svelte";
+  import { slide, fade } from "$lib/types/Animations.svelte";
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { HUDInfo, ClickMode } from "$lib/types/HUDInfo.svelte";
   import { base } from "$app/paths";
   import AutocompleteInput from "./AutocompleteInput.svelte";
   import { page } from "$app/state";
@@ -44,6 +44,7 @@
 <svelte:window
   onkeydown={(e) => {
     if (e.target instanceof HTMLInputElement) return;
+    const number = parseInt(e.key);
     if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
     else if (e.key === "p") perfMon = !perfMon;
     else if (e.key === "c") menuOpen = !menuOpen;
@@ -53,11 +54,9 @@
     } else if (e.key === "m") {
       if (sessionManager.isOpen()) sessionManager.close();
       else sessionManager.show();
-    } else if (e.key === "1") HUDInfo.ClickMode = "inara";
-    else if (e.key === "2") HUDInfo.ClickMode = "edsm";
-    else if (e.key === "3") HUDInfo.ClickMode = "spansh";
-    else if (e.key === "4") HUDInfo.ClickMode = "measure";
-    else if (e.key === "5") HUDInfo.ClickMode = "range";
+    } else if (number > 0 && number <= 5) {
+      HUDInfo.changeClickMode(Object.keys(ClickMode)[number - 1] as keyof typeof ClickMode);
+    }
   }}
 />
 
@@ -128,7 +127,10 @@
   {/if}
   <div class="pointer-events-none absolute bottom-10 w-full text-center text-3xl">
     {#if HUDInfo.CurrentSystem}
-      <div>{HUDInfo.CurrentSystem}</div>
+      <div transition:fade>{HUDInfo.CurrentSystem}</div>
+    {/if}
+    {#if HUDInfo.TimedMessage}
+      <div transition:fade>{HUDInfo.TimedMessage}</div>
     {/if}
     {@render CurrentMeasurement.HUDSnippet()}
   </div>
@@ -193,11 +195,9 @@
         <div class="flex items-center gap-2">
           <span>On System Click</span>
           <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
-            <option value="inara">Open INARA</option>
-            <option value="edsm">Open EDSM</option>
-            <option value="spansh">Open Spansh</option>
-            <option value="measure">Measure Distance</option>
-            <option value="range">Toggle Range</option>
+            {#each Object.entries(ClickMode) as [mode, title] (mode)}
+              <option value={mode}>{title}</option>
+            {/each}
           </select>
         </div>
       </div>
