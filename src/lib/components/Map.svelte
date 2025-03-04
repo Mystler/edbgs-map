@@ -369,6 +369,15 @@
         When displaying Colonization ranges, there is a little download icon that you can click to
         import all potential colonization target systems within that sphere.
       </li>
+      <li>
+        You can also load the systems a faction is present in but not the controller of. To do so,
+        add a space and "(NC)" (short for not controlled) to the faction name. E.g. loading "The
+        Dark Wheel (NC)" will load all uncontrolled systems when just "The Dark Wheel" would load
+        controlled systems. By loading both you can toggle and color things individually.<br />
+        The reason this was not made accessible more easily is because I want people to consciously do
+        it and be aware that loading presence systems can cause awkward overlaps when loading multiple
+        factions that share common systems.
+      </li>
     </ul>
     <h4>Credits</h4>
     <p>This tool has been developed by CMDR Mystler.</p>
