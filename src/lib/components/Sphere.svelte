@@ -9,6 +9,7 @@
   import { scale3d } from "$lib/types/Animations.svelte";
   import { transitions, global } from "@threlte/extras";
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
+  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
 
   interface Props {
     sphere: SphereData;
@@ -41,11 +42,13 @@
         y: sphere.position[1],
         z: sphere.position[2],
       };
+      LoadedSystems.set(sphere.name, systemData);
     } else {
       fetchData().then((data) => {
         if (data) {
           systemData = data;
           sphere.position = [data.x, data.y, data.z];
+          LoadedSystems.set(sphere.name, data);
         }
       });
     }

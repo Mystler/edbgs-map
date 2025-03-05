@@ -20,6 +20,7 @@
   import { faBars, faDownload } from "@fortawesome/free-solid-svg-icons";
   import FaIcon from "./FaIcon.svelte";
   import SessionManager from "./SessionManager.svelte";
+  import SystemSearch from "./SystemSearch.svelte";
 
   interface Props {
     data: MapData;
@@ -133,6 +134,9 @@
       <div transition:fade>{HUDInfo.TimedMessage}</div>
     {/if}
     {@render CurrentMeasurement.HUDSnippet()}
+  </div>
+  <div class="absolute top-5 left-1/2 -translate-x-1/2">
+    <SystemSearch />
   </div>
 
   <SessionManager bind:this={sessionManager} bind:mapData={data} />

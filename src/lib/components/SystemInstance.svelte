@@ -6,6 +6,7 @@
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { getContext } from "svelte";
   import type { MapData } from "$lib/types/MapData.svelte";
+  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
 
   interface Props {
     system: SpanshSystem;
@@ -21,6 +22,8 @@
   });
 
   const mapData: MapData = getContext("mapData");
+
+  LoadedSystems.set(system.name, system);
 </script>
 
 <Billboard position={[system.x, system.y, -system.z]}>

@@ -1,3 +1,5 @@
+import { quadInOut } from "svelte/easing";
+import { Tween } from "svelte/motion";
 import { Vector3 } from "three";
 
 export const CurrentCamera = new (class {
@@ -12,3 +14,15 @@ export const CurrentCamera = new (class {
     return { Position: this.Position, LookAt: this.LookAt };
   }
 })();
+
+export const FlyToTarget = new Tween(
+  {
+    targetX: 0,
+    targetY: 0,
+    targetZ: 0,
+    posX: 0,
+    posY: 0,
+    posZ: 0,
+  },
+  { easing: quadInOut, duration: 1000 },
+);

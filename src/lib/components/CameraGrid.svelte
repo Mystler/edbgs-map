@@ -5,7 +5,7 @@
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
   import { base } from "$app/paths";
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { CurrentCamera, FlyToTarget } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { DoubleSide, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -175,6 +175,7 @@
 
   useTask(
     (delta) => {
+      let shouldUpdate = false;
       if (isKeyPanning) {
         const prevPlane = panPlane;
         if (keyVector.x !== 0 || keyVector.z !== 0) {
@@ -187,8 +188,22 @@
         }
         // If we are simultanously mouse panning, that gets priority for the visual display.
         if (controls.state === _STATE.PAN) panPlane = prevPlane;
-        controls.update();
+        shouldUpdate = true;
       }
+      if (FlyToTarget.current !== FlyToTarget.target) {
+        controls.target.set(
+          FlyToTarget.current.targetX,
+          FlyToTarget.current.targetY,
+          FlyToTarget.current.targetZ,
+        );
+        controls.object.position.set(
+          FlyToTarget.current.posX,
+          FlyToTarget.current.posY,
+          FlyToTarget.current.posZ,
+        );
+        shouldUpdate = true;
+      }
+      if (shouldUpdate) controls.update();
     },
     { autoInvalidate: false },
   );
