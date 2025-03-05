@@ -45,7 +45,7 @@
   }}
 />
 <datalist id="knownSystems">
-  {#each LoadedSystems.keys().toArray().sort() as name}
+  {#each LoadedSystems.keys().toArray().sort() as name (name)}
     <option>{name}</option>
   {/each}
 </datalist>

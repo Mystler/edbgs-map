@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Canvas } from "@threlte/core";
-  import type { MapData } from "../types/MapData.svelte";
+  import { MapDataRef, type MapData } from "../types/MapData.svelte";
   import FactionGroup from "./FactionGroup.svelte";
   import SystemGroup from "./SystemGroup.svelte";
   import Sphere from "./Sphere.svelte";
@@ -27,7 +27,12 @@
   }
   let { data = $bindable() }: Props = $props();
 
-  setContext("mapData", data);
+  // Create a reference and store in context. Allows tracking when mapData is swapped out, e.g. from session loading.
+  const mapDataRef = new MapDataRef(data);
+  setContext("mapData", mapDataRef);
+  $effect(() => {
+    mapDataRef.Ref = data;
+  });
 
   let perfMon = $state(false);
   let menuOpen = $state(false);

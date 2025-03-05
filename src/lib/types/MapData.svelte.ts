@@ -125,3 +125,12 @@ export class MapData {
     return data;
   }
 }
+
+/* Wrapper class for context sharing and allowing bind replacement. */
+export class MapDataRef {
+  Ref = $state() as MapData;
+
+  constructor(data: MapData) {
+    this.Ref = data;
+  }
+}
