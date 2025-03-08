@@ -47,8 +47,9 @@
     systems: SpanshSystem[];
     color: string;
     visible?: boolean;
+    zOffset?: number;
   }
-  let { systems, color, visible = true }: Props = $props();
+  let { systems, color, visible = true, zOffset = 0 }: Props = $props();
 
   interface GridConnector {
     pointSystem: Vector3;
@@ -99,7 +100,11 @@
 <!-- Render systems themselves -->
 <InstancedMesh limit={systems.length} range={systems.length} {visible}>
   <T.CircleGeometry args={[0.5]} />
-  <T.MeshBasicMaterial {color} />
+  <T.MeshBasicMaterial
+    {color}
+    polygonOffset={zOffset ? true : false}
+    polygonOffsetUnits={zOffset}
+  />
 
   {#each systems as system (system.name)}
     <SystemInstance {system} />

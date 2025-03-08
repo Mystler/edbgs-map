@@ -14,11 +14,13 @@
   }
   let { faction }: Props = $props();
 
+  let isNC = $state(false);
+
   async function fetchData(): Promise<SpanshSystem[]> {
-    const ncQuery = faction.name.endsWith(" (NC)");
-    const queryName = ncQuery ? faction.name.slice(0, -5) : faction.name;
+    isNC = faction.name.endsWith(" (NC)");
+    const queryName = isNC ? faction.name.slice(0, -5) : faction.name;
     const m = HUDInfo.showMessage(faction.name, "Faction");
-    let response = await fetch(`${base}/api/faction/${queryName}${ncQuery ? "/nc" : ""}`);
+    let response = await fetch(`${base}/api/faction/${queryName}${isNC ? "/nc" : ""}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data from Spansh.co.uk for faction: ${faction.name}`);
@@ -61,7 +63,12 @@
 
 {#key systems}
   {#if systems.length > 0}
-    <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} />
+    <SystemRenderGroup
+      {systems}
+      color={faction.color}
+      visible={faction.visible}
+      zOffset={isNC ? 1 : 0}
+    />
     <Billboard
       position={textPosition}
       visible={faction.visible}
