@@ -21,7 +21,7 @@
   $effect(() => {
     // Update if we get new position data from upstream and our derived target or position changed.
     if (!cameraSetup.lookAtSystem && cameraSetup.lookAt) target = cameraSetup.lookAt;
-    if (target || position) controls.update();
+    if (target && position) controls.update();
   });
   let position: [x: number, y: number, z: number] = $derived.by(() => {
     if (!cameraSetup.lookAtSystem && cameraSetup.position) return cameraSetup.position;
@@ -114,7 +114,7 @@
       isPanning = true;
     } else {
       // Otherwise pans vertically.
-      panPlane = "vertical";
+      if (isPanning) panPlane = "vertical";
       if (e.buttons === 1) {
         // Reset back to rotation state if only left mouse button is pressed.
         controls.state = _STATE.ROTATE;
