@@ -67,7 +67,7 @@
       {systems}
       color={faction.color}
       visible={faction.visible}
-      zOffset={isNC ? 1 : 0}
+      zOffset={isNC ? -1 : 0}
     />
     <Billboard
       position={textPosition}

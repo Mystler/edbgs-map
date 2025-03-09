@@ -10,8 +10,9 @@
 
   interface Props {
     system: SpanshSystem;
+    zOffset?: number;
   }
-  let { system }: Props = $props();
+  let { system, zOffset = 0 }: Props = $props();
 
   useInteractivity();
   const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
@@ -38,6 +39,7 @@
       systemScale.target = 1;
       HUDInfo.CurrentSystem = "";
     }}
+    position.z={zOffset * 0.01}
     scale={systemScale.current}
     onclick={() => {
       if (HUDInfo.ClickMode === "inara") {

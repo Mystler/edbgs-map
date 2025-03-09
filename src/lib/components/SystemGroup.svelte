@@ -58,7 +58,7 @@
     systems={[systemData]}
     color={system.color}
     visible={system.visible}
-    zOffset={-1}
+    zOffset={1}
   />
   <Billboard
     position={[systemData.x, systemData.y + 1, -systemData.z]}

@@ -100,14 +100,10 @@
 <!-- Render systems themselves -->
 <InstancedMesh limit={systems.length} range={systems.length} {visible}>
   <T.CircleGeometry args={[0.5]} />
-  <T.MeshBasicMaterial
-    {color}
-    polygonOffset={zOffset ? true : false}
-    polygonOffsetUnits={zOffset}
-  />
+  <T.MeshBasicMaterial {color} />
 
   {#each systems as system (system.name)}
-    <SystemInstance {system} />
+    <SystemInstance {system} {zOffset} />
   {/each}
 </InstancedMesh>
 
