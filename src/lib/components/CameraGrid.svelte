@@ -14,39 +14,46 @@
   interface Props {
     cameraSetup?: CameraData;
   }
+  // See comment on CameraData for intended priority in data usage.
   let { cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
 
-  // See comment on CameraData for intended priority in data usage.
-  let target: [x: number, y: number, z: number] = $state(cameraSetup.lookAt ?? [0, 0, 0]);
+  // These set the initial values and can be used to reinitialize to other states. They will not change as the user moves the camera.
+  const camBaseTarget = $derived.by(() => {
+    const ref = $state({ value: cameraSetup.lookAt ?? [0, 0, 0] });
+    return ref;
+  });
+  const camBasePosition = $derived.by(() => {
+    let position: [x: number, y: number, z: number];
+    if (!cameraSetup.lookAtSystem && cameraSetup.position) {
+      position = cameraSetup.position;
+    } else {
+      position = [
+        camBaseTarget.value[0] + cameraSetup.distance * 0.577,
+        camBaseTarget.value[1] + cameraSetup.distance * 0.577,
+        camBaseTarget.value[2] + cameraSetup.distance * 0.577,
+      ];
+    }
+
+    const ref = $state({ value: position });
+    return ref;
+  });
   $effect(() => {
     // Update if we get new position data from upstream and our derived target or position changed.
-    if (!cameraSetup.lookAtSystem && cameraSetup.lookAt) target = cameraSetup.lookAt;
-    if (target && position) controls.update();
+    if (camBaseTarget.value && camBasePosition.value) controls.update();
   });
-  let position: [x: number, y: number, z: number] = $derived.by(() => {
-    if (!cameraSetup.lookAtSystem && cameraSetup.position) return cameraSetup.position;
-    return [
-      target[0] + cameraSetup.distance * 0.577,
-      target[1] + cameraSetup.distance * 0.577,
-      target[2] + cameraSetup.distance * 0.577,
-    ];
-  });
+
   let cameraAngle = $state(0);
   let isPanning = $state(false);
 
-  let gridRef: [x: number, y: number, z: number] = $state([0, 0, 0]);
-  let gridLabel = $derived(`${gridRef[0]} : ${Math.round(gridRef[1])} : ${-gridRef[2]}`);
+  let gridPos: [x: number, y: number, z: number] = $state([0, 0, 0]);
+  let gridLabel = $derived(`${gridPos[0]} : ${Math.round(gridPos[1])} : ${-gridPos[2]}`);
 
   /**
    * The grid follows the camera on the y axis. Its origin and label then shift in increments of 10 ly with our camera movements.
    */
   function updateGrid(x: number, y: number, z: number) {
-    gridRef = [Math.round(x / 10) * 10, y, Math.round(z / 10) * 10];
+    gridPos = [Math.round(x / 10) * 10, y, Math.round(z / 10) * 10];
   }
-  $effect(() => {
-    updateGrid(target[0], target[1], target[2]);
-    CurrentCamera.LookAt = target;
-  });
 
   async function fetchData(): Promise<SpanshSystem | null> {
     let response = await fetch(`${base}/api/system/${cameraSetup.lookAtSystem}`);
@@ -63,7 +70,7 @@
 
   if (cameraSetup.lookAtSystem) {
     fetchData().then((data) => {
-      if (data) target = [data.x, data.y, -data.z];
+      if (data) camBaseTarget.value = [data.x, data.y, -data.z];
     });
   }
 
@@ -218,16 +225,16 @@
 
 <T.PerspectiveCamera
   makeDefault
-  {position}
+  position={camBasePosition.value}
   fov={60}
   far={5000}
   oncreate={(ref) => {
-    ref.lookAt(target[0], target[1], target[2]);
+    ref.lookAt(camBaseTarget.value[0], camBaseTarget.value[1], camBaseTarget.value[2]);
     CurrentCamera.Position = ref.position.toArray();
   }}
 >
   <OrbitControls
-    {target}
+    target={camBaseTarget.value}
     panSpeed={HUDInfo.PanSpeed}
     onchange={(e) => {
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
@@ -267,7 +274,7 @@
   />
 </T.PerspectiveCamera>
 
-<T.Group position={gridRef} visible={HUDInfo.ShowGrid}>
+<T.Group position={gridPos} visible={HUDInfo.ShowGrid}>
   <Grid
     sectionThickness={1}
     infiniteGrid
