@@ -47,11 +47,10 @@
       alert("No session found with that name.");
       return;
     }
-    const data = MapData.fromJSON(session.mapDataJSON);
-    data.sortAll();
-    data.Camera.position = session.camData.Position;
-    data.Camera.lookAt = session.camData.LookAt;
-    mapData = data;
+    mapData.setFromJSON(session.mapDataJSON);
+    mapData.sortAll();
+    mapData.Camera.position = session.camData.Position;
+    mapData.Camera.lookAt = session.camData.LookAt;
   }
 
   let dlg: Dialog;

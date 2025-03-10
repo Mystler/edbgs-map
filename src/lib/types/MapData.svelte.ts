@@ -47,6 +47,13 @@ export class MapData {
 
   Camera: CameraData = $state({ lookAtSystem: "", distance: 100 });
 
+  reset() {
+    this.Factions = [];
+    this.Systems = [];
+    this.Spheres = [];
+    this.Camera = { lookAtSystem: "", distance: 100 };
+  }
+
   // Setup Helpers
   addFaction({
     name = "",
@@ -90,6 +97,7 @@ export class MapData {
 
   /**
    * Select what to store when serializing map data.
+   * We do NOT store any camera data automatically!
    */
   toJSON(): Partial<MapData> {
     return {
@@ -101,36 +109,26 @@ export class MapData {
 
   /**
    * Safely reconstruct map data from JSON storage by respecting defaults if data is missing.
+   * This does not load or change any camera data automatically but will reset it to the defaults!
    */
-  static fromJSON(json: string): MapData {
-    const obj = JSON.parse(json);
-    const data = new MapData();
+  setFromJSON(json: string) {
+    this.reset();
 
+    const obj = JSON.parse(json);
     if ("Factions" in obj && obj.Factions instanceof Array) {
       for (const faction of obj.Factions) {
-        data.addFaction(faction);
+        this.addFaction(faction);
       }
     }
     if ("Systems" in obj && obj.Systems instanceof Array) {
       for (const system of obj.Systems) {
-        data.addSystem(system);
+        this.addSystem(system);
       }
     }
     if ("Spheres" in obj && obj.Spheres instanceof Array) {
       for (const sphere of obj.Spheres) {
-        data.addSphere(sphere);
+        this.addSphere(sphere);
       }
     }
-
-    return data;
-  }
-}
-
-/* Wrapper class for context sharing and allowing bind replacement. */
-export class MapDataRef {
-  Ref = $state() as MapData;
-
-  constructor(data: MapData) {
-    this.Ref = data;
   }
 }

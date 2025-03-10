@@ -52,8 +52,8 @@ export function createCustomURL(data: MapData) {
   return params;
 }
 
-export function readCustomURL(params: URLSearchParams): MapData {
-  const data = new MapData();
+export function readCustomURL(params: URLSearchParams, data: MapData) {
+  data.reset();
 
   // Get camera data first
   if (params.has("cpx") && params.has("cpy") && params.has("cpz")) {
@@ -144,8 +144,6 @@ export function readCustomURL(params: URLSearchParams): MapData {
   if (cf) data.addFaction(cf);
   if (cs) data.addSystem(cs);
   if (csp) data.addSphere(csp);
-
-  return data;
 }
 
 export async function createShortlink(data: MapData) {

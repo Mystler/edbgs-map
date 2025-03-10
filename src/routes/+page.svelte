@@ -19,7 +19,7 @@
     (() => {
       const saved = localStorage.getItem("customMapSetup");
       if (saved) {
-        mapData = MapData.fromJSON(saved);
+        mapData.setFromJSON(saved);
         mapData.sortAll();
       }
       const savedCamera = localStorage.getItem("customMapCamera");
@@ -37,7 +37,7 @@
     });
   } else if (browser && page.url.searchParams.size > 0) {
     (() => {
-      mapData = readCustomURL(page.url.searchParams);
+      readCustomURL(page.url.searchParams, mapData);
       mapData.sortAll();
       setupComplete = true;
     })();

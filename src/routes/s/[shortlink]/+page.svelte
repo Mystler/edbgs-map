@@ -1,11 +1,13 @@
 <script lang="ts">
   import Map from "$lib/components/Map.svelte";
   import { readCustomURL } from "$lib/CustomURL";
+  import { MapData } from "$lib/types/MapData.svelte";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
 
-  let mapData = $state(readCustomURL(new URLSearchParams(data.long)));
+  let mapData = $state(new MapData());
+  (() => readCustomURL(new URLSearchParams(data.long), mapData))();
 </script>
 
 <svelte:head>
