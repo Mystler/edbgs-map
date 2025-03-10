@@ -9,7 +9,9 @@
     mapData.Camera.lookAt = [130, -178, -90];
     mapData.Camera.distance = 125;
     mapData.addFaction({ name: "Adamantine Union", color: "#ff0000" });
+    mapData.addFaction({ name: "Adamantine Union (NC)", color: "#ffff00", labelVisible: false });
     mapData.addFaction({ name: "Prismatic Imperium", color: "#00ff00" });
+    mapData.addFaction({ name: "Prismatic Imperium (NC)", color: "#00ffff", labelVisible: false });
   })();
 </script>
 
