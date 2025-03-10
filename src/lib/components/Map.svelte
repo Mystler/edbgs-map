@@ -155,13 +155,13 @@
       class="absolute top-0 max-h-full w-screen overflow-auto bg-(--ed-orange)/20 p-2 pt-12 backdrop-blur-xs sm:w-sm"
     >
       <h2>Controls</h2>
-      {#if page.route.id === "/"}
-        <div class="absolute top-2 right-2 flex flex-col items-end">
-          <button class="link" onclick={() => sessionManager.show()}>Sessions</button>
-          <button class="link" onclick={() => createShortlink(data)}>Share</button>
+      <div class="absolute top-2 right-2 flex flex-col items-end">
+        <button class="link" onclick={() => sessionManager.show()}>Sessions</button>
+        <button class="link" onclick={() => createShortlink(data)}>Share</button>
+        {#if page.route.id === "/"}
           <a data-sveltekit-reload href={`${base}/`}>Back</a>
-        </div>
-      {/if}
+        {/if}
+      </div>
       <button class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
       <div class="align-center flex flex-col py-2">
         <div>
