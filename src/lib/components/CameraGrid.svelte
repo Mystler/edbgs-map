@@ -15,31 +15,23 @@
     cameraSetup?: CameraData;
   }
   // See comment on CameraData for intended priority in data usage.
-  let { cameraSetup = { lookAtSystem: "", distance: 100 } }: Props = $props();
+  let { cameraSetup = $bindable({ lookAtSystem: "", distance: 100 }) }: Props = $props();
 
-  // These set the initial values and can be used to reinitialize to other states. They will not change as the user moves the camera.
-  const camBaseTarget = $derived.by(() => {
-    const ref = $state({ value: cameraSetup.lookAt ?? [0, 0, 0] });
-    return ref;
-  });
-  const camBasePosition = $derived.by(() => {
-    let position: [x: number, y: number, z: number];
-    if (!cameraSetup.lookAtSystem && cameraSetup.position) {
-      position = cameraSetup.position;
-    } else {
-      position = [
-        camBaseTarget.value[0] + cameraSetup.distance * 0.577,
-        camBaseTarget.value[1] + cameraSetup.distance * 0.577,
-        camBaseTarget.value[2] + cameraSetup.distance * 0.577,
+  function updateBasePosition() {
+    cameraSetup.lookAt ??= [0, 0, 0];
+    if (cameraSetup.lookAtSystem || !cameraSetup.position) {
+      cameraSetup.position = [
+        cameraSetup.lookAt[0] + cameraSetup.distance * 0.577,
+        cameraSetup.lookAt[1] + cameraSetup.distance * 0.577,
+        cameraSetup.lookAt[2] + cameraSetup.distance * 0.577,
       ];
     }
+  }
+  updateBasePosition();
 
-    const ref = $state({ value: position });
-    return ref;
-  });
   $effect(() => {
     // Update if we get new position data from upstream and our derived target or position changed.
-    if (camBaseTarget.value && camBasePosition.value) controls.update();
+    if (cameraSetup.lookAt && cameraSetup.position) controls.update();
   });
 
   let cameraAngle = $state(0);
@@ -70,7 +62,10 @@
 
   if (cameraSetup.lookAtSystem) {
     fetchData().then((data) => {
-      if (data) camBaseTarget.value = [data.x, data.y, -data.z];
+      if (data) {
+        cameraSetup.lookAt = [data.x, data.y, -data.z];
+        updateBasePosition();
+      }
     });
   }
 
@@ -225,16 +220,17 @@
 
 <T.PerspectiveCamera
   makeDefault
-  position={camBasePosition.value}
+  position={cameraSetup.position}
   fov={60}
   far={5000}
   oncreate={(ref) => {
-    ref.lookAt(camBaseTarget.value[0], camBaseTarget.value[1], camBaseTarget.value[2]);
+    if (cameraSetup.lookAt)
+      ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
     CurrentCamera.Position = ref.position.toArray();
   }}
 >
   <OrbitControls
-    target={camBaseTarget.value}
+    target={cameraSetup.lookAt}
     panSpeed={HUDInfo.PanSpeed}
     onchange={(e) => {
       updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);

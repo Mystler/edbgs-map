@@ -96,7 +96,7 @@
         {#if perfMon}
           <PerfMonitor anchorX="right" />
         {/if}
-        <CameraGrid cameraSetup={data.Camera} />
+        <CameraGrid bind:cameraSetup={data.Camera} />
 
         {#each data.Factions as f, i (f.name)}
           <FactionGroup faction={data.Factions[i]} />
