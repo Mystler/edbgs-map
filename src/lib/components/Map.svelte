@@ -143,6 +143,7 @@
 
   <!-- Controls Menu -->
   <button
+    type="button"
     aria-label="Open Controls"
     class="hover:cur fixed top-0 left-0 z-50 p-2 text-3xl"
     onclick={() => {
@@ -156,13 +157,13 @@
     >
       <h2>Controls</h2>
       <div class="absolute top-2 right-2 flex flex-col items-end">
-        <button class="link" onclick={() => sessionManager.show()}>Sessions</button>
-        <button class="link" onclick={() => createShortlink(data)}>Share</button>
+        <button type="button" class="link" onclick={() => sessionManager.show()}>Sessions</button>
+        <button type="button" class="link" onclick={() => createShortlink(data)}>Share</button>
         {#if page.route.id === "/"}
           <a data-sveltekit-reload href={`${base}/`}>Back</a>
         {/if}
       </div>
-      <button class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
+      <button type="button" class="link-btn" onclick={() => controlsDialog.show()}>Help</button>
       <div class="align-center flex flex-col py-2">
         <div>
           <label>
@@ -226,10 +227,10 @@
           <input class="flex-none" type="color" bind:value={f.color} title="Color" />
         </div>
       {/each}
-      <div class="flex items-center gap-1">
+      <form class="flex items-center gap-1">
         <AutocompleteInput dataType="faction" class="grow p-1" bind:value={addFaction} />
         <input
-          type="button"
+          type="submit"
           class="px-2 py-1"
           value="Add"
           onclick={() => {
@@ -239,7 +240,7 @@
             }
           }}
         />
-      </div>
+      </form>
       <hr />
       <h4>Individual Systems</h4>
       {#each data.Systems as s, i (s.name)}
@@ -261,10 +262,10 @@
           <input class="flex-none" type="color" bind:value={s.color} title="Color" />
         </div>
       {/each}
-      <div class="flex items-center gap-1">
+      <form class="flex items-center gap-1">
         <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSystem} />
         <input
-          type="button"
+          type="submit"
           class="px-2 py-1"
           value="Add"
           onclick={() => {
@@ -274,7 +275,7 @@
             }
           }}
         />
-      </div>
+      </form>
       <hr />
       <h4>Ranges</h4>
       {#each data.Spheres as s, i (s.name)}
@@ -293,6 +294,7 @@
           </select>
           {#if s.type === "Colonization" && !sphereRefs[i]?.isColonizationLoaded()}
             <button
+              type="button"
               aria-label="Load Colonization Targets"
               title="Load Colonization Targets"
               class="link"
@@ -303,10 +305,10 @@
           {/if}
         </div>
       {/each}
-      <div class="flex items-center gap-1">
+      <form class="flex items-center gap-1">
         <AutocompleteInput dataType="system" class="grow p-1" bind:value={addSphere} />
         <input
-          type="button"
+          type="submit"
           class="px-2 py-1"
           value="Add"
           onclick={() => {
@@ -316,7 +318,7 @@
             }
           }}
         />
-      </div>
+      </form>
       <div class="mt-2 text-right text-xs text-zinc-400">
         {`v${__VERSION__} (${__COMMIT__})`}<br />{new Date(__COMMITDATE__).toLocaleDateString()}
       </div>

@@ -11,7 +11,7 @@
   let { data = $bindable(), onConfirmRender }: Props = $props();
   let sessionManager = $state() as SessionManager;
 
-  function confirm() {
+  function confirm(e: MouseEvent) {
     // Clean up before we give the ok to render
     data.Factions = data.Factions.filter((x) => x.name.trim() !== "");
     data.Systems = data.Systems.filter((x) => x.name.trim() !== "");
@@ -20,16 +20,19 @@
     for (const x of data.Systems) if (!x.displayName) x.displayName = x.name;
     data.sortAll();
     onConfirmRender();
+    e.preventDefault();
   }
 </script>
 
-<div class="my-4 text-center">
+<form class="my-4 text-center">
   <h1>Elite Dangerous &ndash; Custom Factions Map Setup</h1>
   <p>
     Here you can create a custom map to visualize. Configuration will be stored locally for you.
   </p>
   <p>
-    <button class="link-btn" onclick={() => sessionManager.show()}>Manage Saved Sessions</button>
+    <button type="button" class="link-btn" onclick={() => sessionManager.show()}
+      >Manage Saved Sessions</button
+    >
   </p>
 
   <h3>Minor Factions</h3>
@@ -238,10 +241,10 @@
     />
     <input type="number" step="1" bind:value={data.Camera.distance} />
   </p>
-  <p><input type="button" value="Render Map" onclick={confirm} /></p>
+  <p><input type="submit" value="Render Map" onclick={confirm} /></p>
   <div class="mt-2 text-xs text-zinc-400">
     {`v${__VERSION__} (${__COMMIT__})`}<br />{new Date(__COMMITDATE__).toLocaleDateString()}
   </div>
-</div>
+</form>
 
 <SessionManager bind:this={sessionManager} bind:mapData={data} />

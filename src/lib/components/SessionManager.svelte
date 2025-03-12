@@ -30,6 +30,7 @@
   });
 
   function saveSession(name: string) {
+    if (!name) return;
     const session: Session = {
       date: new Date().toISOString(),
       mapDataJSON: JSON.stringify(mapData),
@@ -72,10 +73,10 @@
     stored.
   </p>
   <hr />
-  <div class="flex gap-1">
+  <form class="flex gap-1">
     <input type="text" class="w-32 grow" bind:value={saveName} placeholder="Session Name" />
-    <input type="button" value="Save" onclick={() => saveSession(saveName)} />
-  </div>
+    <input type="submit" value="Save" onclick={() => saveSession(saveName)} />
+  </form>
   <hr />
   {#each sessions as [name, session] (name)}
     <div class="flex gap-4 p-2 hover:bg-zinc-700" transition:slide>
