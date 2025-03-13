@@ -1,3 +1,3 @@
 # Elite Dangerous Faction Map
 
-A minimalistic faction map tool written in Svelte and TypeScript.
+A faction map tool written with Svelte, Threlte, TypeScript, TailwindCSS, and Font Awesome.
