@@ -222,7 +222,8 @@
   makeDefault
   position={cameraSetup.position}
   fov={60}
-  far={5000}
+  near={1}
+  far={2000}
   oncreate={(ref) => {
     if (cameraSetup.lookAt)
       ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
@@ -230,6 +231,7 @@
   }}
 >
   <OrbitControls
+    maxDistance={1000}
     target={cameraSetup.lookAt}
     panSpeed={HUDInfo.PanSpeed}
     onchange={(e) => {
