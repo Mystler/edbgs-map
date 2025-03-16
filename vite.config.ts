@@ -8,7 +8,7 @@ const commit = execSync("git rev-parse --short HEAD").toString().trim();
 const commitDate = execSync("git log -1 --format=%cI").toString().trim();
 
 export default defineConfig({
-  plugins: [sveltekit(), tailwindcss()],
+  plugins: [tailwindcss(), sveltekit()],
   define: {
     __VERSION__: JSON.stringify(version),
     __COMMIT__: JSON.stringify(commit),
