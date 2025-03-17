@@ -281,6 +281,7 @@
     sectionColor="#aaaaaa"
     sectionSize={10}
     fadeDistance={200}
+    fadeStrength={3}
     fadeOrigin={CurrentCamera.LookAtVector}
   />
   <Text
