@@ -282,7 +282,11 @@
     sectionSize={10}
     fadeDistance={200}
     fadeStrength={3}
-    fadeOrigin={CurrentCamera.LookAtVector}
+    fadeOrigin={new Vector3(
+      CurrentCamera.LookAt[0],
+      CurrentCamera.LookAt[1] + CurrentCamera.Distance / 2,
+      CurrentCamera.LookAt[2],
+    )}
   />
   <Text
     position={[-0.25, 0, 0]}
