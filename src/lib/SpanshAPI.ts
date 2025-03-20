@@ -14,6 +14,19 @@ interface SpanshSearchResponse {
   }[];
 }
 
+export function pruneSystemObject(system: SpanshSystem | null): SpanshSystem | null {
+  if (!system) return null;
+  return {
+    name: system.name,
+    x: system.x,
+    y: system.y,
+    z: system.z,
+    id64: system.id64,
+    controlling_minor_faction: system.controlling_minor_faction,
+    needs_permit: system.needs_permit,
+  };
+}
+
 export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
   // Easy API call. Search should have an existing system match in the results, with type being "system" and record having the system data.
   const response = await fetch(`https://spansh.co.uk/api/search?q=${encodeURIComponent(name)}`);
@@ -22,18 +35,7 @@ export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
   const system = data.results.find(
     (result) => result.type === "system" && result.record.name.toLowerCase() === name.toLowerCase(),
   );
-  if (system) {
-    // Prune to relevant data
-    return {
-      name: system.record.name,
-      x: system.record.x,
-      y: system.record.y,
-      z: system.record.z,
-      id64: system.record.id64,
-      controlling_minor_faction: system.record.controlling_minor_faction,
-      needs_permit: system.record.needs_permit,
-    };
-  }
+  if (system) return system.record;
   return null;
 }
 
@@ -71,20 +73,7 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
     );
     if (!response.ok) throw new Error("Spansh error!");
     const data: SpanshRecallResponse = await response.json();
-    systems = systems.concat(
-      data.results.map((x) => {
-        return {
-          // Only keep the relevant data
-          name: x.name,
-          x: x.x,
-          y: x.y,
-          z: x.z,
-          id64: x.id64,
-          controlling_minor_faction: x.controlling_minor_faction,
-          needs_permit: x.needs_permit,
-        };
-      }),
-    );
+    systems = systems.concat(data.results);
     if (data.from + data.size >= data.count) {
       break; // Got all systems
     }
