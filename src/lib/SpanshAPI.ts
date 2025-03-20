@@ -14,8 +14,7 @@ interface SpanshSearchResponse {
   }[];
 }
 
-export function pruneSystemObject(system: SpanshSystem | null): SpanshSystem | null {
-  if (!system) return null;
+export function pruneSystemObject(system: SpanshSystem): SpanshSystem {
   return {
     name: system.name,
     x: system.x,
@@ -35,7 +34,7 @@ export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
   const system = data.results.find(
     (result) => result.type === "system" && result.record.name.toLowerCase() === name.toLowerCase(),
   );
-  if (system) return system.record;
+  if (system) return pruneSystemObject(system.record);
   return null;
 }
 
@@ -73,7 +72,7 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
     );
     if (!response.ok) throw new Error("Spansh error!");
     const data: SpanshRecallResponse = await response.json();
-    systems = systems.concat(data.results);
+    systems = systems.concat(data.results.map((x) => pruneSystemObject(x)));
     if (data.from + data.size >= data.count) {
       break; // Got all systems
     }

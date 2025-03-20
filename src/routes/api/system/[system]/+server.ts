@@ -1,5 +1,5 @@
 import { getCache, setTimedCache } from "$lib/RedisCache";
-import { fetchSystem, pruneSystemObject, type SpanshSystem } from "$lib/SpanshAPI";
+import { fetchSystem, type SpanshSystem } from "$lib/SpanshAPI";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ params, setHeaders }) {
@@ -9,10 +9,10 @@ export async function GET({ params, setHeaders }) {
   const cachedResult = await getCache(`edbgs-map:system:${params.system}`);
   if (cachedResult) {
     const system: SpanshSystem = JSON.parse(cachedResult);
-    return json(pruneSystemObject(system));
+    return json(system);
   } else {
     const system = await fetchSystem(params.system);
     setTimedCache(`edbgs-map:system:${params.system}`, JSON.stringify(system));
-    return json(pruneSystemObject(system));
+    return json(system);
   }
 }

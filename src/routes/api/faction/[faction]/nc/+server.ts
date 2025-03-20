@@ -1,5 +1,5 @@
 import { getCache, setTimedCache } from "$lib/RedisCache.js";
-import { fetchFactionNCSystems, pruneSystemObject, type SpanshSystem } from "$lib/SpanshAPI";
+import { fetchFactionNCSystems, type SpanshSystem } from "$lib/SpanshAPI";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ params, setHeaders }) {
@@ -9,10 +9,10 @@ export async function GET({ params, setHeaders }) {
   const cachedResult = await getCache(`edbgs-map:faction-nc:${params.faction}`);
   if (cachedResult) {
     const systems: SpanshSystem[] = JSON.parse(cachedResult);
-    return json(systems.map((x) => pruneSystemObject(x)));
+    return json(systems);
   } else {
     const systems = await fetchFactionNCSystems(params.faction);
     setTimedCache(`edbgs-map:faction-nc:${params.faction}`, JSON.stringify(systems));
-    return json(systems.map((x) => pruneSystemObject(x)));
+    return json(systems);
   }
 }
