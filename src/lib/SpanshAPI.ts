@@ -5,6 +5,9 @@ export interface SpanshSystem {
   z: number;
   id64?: number;
   controlling_minor_faction?: string;
+  controlling_power?: string;
+  power_state?: string;
+  power?: string[];
   needs_permit?: string;
 }
 interface SpanshSearchResponse {
@@ -22,6 +25,9 @@ export function pruneSystemObject(system: SpanshSystem): SpanshSystem {
     z: system.z,
     id64: system.id64,
     controlling_minor_faction: system.controlling_minor_faction,
+    controlling_power: system.controlling_power,
+    power_state: system.power_state,
+    power: system.power,
     needs_permit: system.needs_permit,
   };
 }
