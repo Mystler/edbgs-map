@@ -89,21 +89,20 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
 
 export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]> {
   return await fetchSystems({
-    filters: { controlling_minor_faction: { value: [name] } },
+    filters: { minor_faction_presences: { value: [name] } },
     sort: [],
     size: 500,
     page: 0,
   });
 }
 
-export async function fetchFactionNCSystems(name: string): Promise<SpanshSystem[]> {
-  let systems = await fetchSystems({
-    filters: { minor_faction_presences: { value: [name] } },
+export async function fetchPowerSystems(name: string): Promise<SpanshSystem[]> {
+  const systems = await fetchSystems({
+    filters: { controlling_power: { value: [name] } },
     sort: [],
     size: 500,
     page: 0,
   });
-  systems = systems.filter((x) => x.controlling_minor_faction !== name);
   return systems;
 }
 

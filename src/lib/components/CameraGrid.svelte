@@ -9,7 +9,7 @@
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { DoubleSide, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-  import ArrowShape from "./ArrowShape.svelte";
+  import ArrowShape from "./Shapes/ArrowShape.svelte";
 
   interface Props {
     cameraSetup?: CameraData;

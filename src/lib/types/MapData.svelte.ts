@@ -27,6 +27,14 @@ export const SphereRanges: { [k in SphereType]: number } = {
   ExpansionCube: 40,
 };
 
+export interface PowerData {
+  name: string;
+  color: string;
+  exploitedVisible: boolean;
+  fortifiedVisible: boolean;
+  strongholdVisible: boolean;
+}
+
 /**
  * Intended priority of usage:
  * 1. If lookAtSystem is not empty, use it and distance.
@@ -44,6 +52,7 @@ export class MapData {
   Factions: FactionData[] = $state([]);
   Systems: SystemData[] = $state([]);
   Spheres: SphereData[] = $state([]);
+  Powers: PowerData[] = $state([]);
 
   Camera: CameraData = $state({ lookAtSystem: "", distance: 100 });
 
@@ -51,6 +60,7 @@ export class MapData {
     this.Factions = [];
     this.Systems = [];
     this.Spheres = [];
+    this.Powers = [];
     this.Camera = { lookAtSystem: "", distance: 100 };
   }
 
@@ -89,10 +99,21 @@ export class MapData {
     this.Spheres.push({ name, type, color, visible, position });
   }
 
+  addPower({
+    name = "",
+    color = randomColor(),
+    exploitedVisible = true,
+    fortifiedVisible = true,
+    strongholdVisible = true,
+  }: Partial<PowerData> = {}) {
+    this.Powers.push({ name, color, exploitedVisible, fortifiedVisible, strongholdVisible });
+  }
+
   sortAll() {
     this.Factions.sort((a, b) => a.displayName.localeCompare(b.displayName));
     this.Systems.sort((a, b) => a.displayName.localeCompare(b.displayName));
     this.Spheres.sort((a, b) => a.name.localeCompare(b.name));
+    this.Powers.sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**
@@ -104,6 +125,7 @@ export class MapData {
       Factions: this.Factions,
       Systems: this.Systems,
       Spheres: this.Spheres,
+      Powers: this.Powers,
     };
   }
 
@@ -128,6 +150,11 @@ export class MapData {
     if ("Spheres" in obj && obj.Spheres instanceof Array) {
       for (const sphere of obj.Spheres) {
         this.addSphere(sphere);
+      }
+    }
+    if ("Powers" in obj && obj.Powers instanceof Array) {
+      for (const power of obj.Powers) {
+        this.addPower(power);
       }
     }
   }

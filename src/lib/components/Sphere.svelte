@@ -23,7 +23,7 @@
     let response = await fetch(`${base}/api/system/${sphere.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Error while fetching data from Spansh.co.uk for sphere: ${sphere.name}`);
+      alert(`Error while fetching data for sphere: ${sphere.name}`);
       return null;
     }
     const res = (await response.json()) as SpanshSystem | null;

@@ -42,14 +42,17 @@
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { cubicIn } from "svelte/easing";
+  import TriangleShape from "./Shapes/TriangleShape.svelte";
+  import StarShape from "./Shapes/StarShape.svelte";
 
   interface Props {
     systems: SpanshSystem[];
     color: string;
     visible?: boolean;
     zOffset?: number;
+    starType?: "circle" | "triangle" | "star";
   }
-  let { systems, color, visible = true, zOffset = 0 }: Props = $props();
+  let { systems, color, visible = true, zOffset = 0, starType = "circle" }: Props = $props();
 
   interface GridConnector {
     pointSystem: Vector3;
@@ -99,7 +102,13 @@
 
 <!-- Render systems themselves -->
 <InstancedMesh limit={systems.length} range={systems.length} {visible}>
-  <T.CircleGeometry args={[0.5]} />
+  {#if starType === "circle"}
+    <T.CircleGeometry args={[0.5]} />
+  {:else if starType === "triangle"}
+    <TriangleShape />
+  {:else if starType === "star"}
+    <StarShape />
+  {/if}
   <T.MeshBasicMaterial
     {color}
     polygonOffset={zOffset ? true : false}

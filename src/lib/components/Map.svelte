@@ -21,6 +21,8 @@
   import FaIcon from "./FaIcon.svelte";
   import SessionManager from "./SessionManager.svelte";
   import SystemSearch from "./SystemSearch.svelte";
+  import { Powers } from "$lib/Constants";
+  import PowerGroup from "./PowerGroup.svelte";
 
   interface Props {
     data: MapData;
@@ -35,6 +37,7 @@
   let addFaction = $state("");
   let addSystem = $state("");
   let addSphere = $state("");
+  let addPower = $state("");
 
   let controlsDialog = $state() as Dialog;
   let sessionManager = $state() as SessionManager;
@@ -106,6 +109,9 @@
         {/each}
         {#each data.Spheres as s, i (s.name)}
           <Sphere bind:sphere={data.Spheres[i]} bind:this={sphereRefs[i]} />
+        {/each}
+        {#each data.Powers as p, i (p.name)}
+          <PowerGroup power={data.Powers[i]} />
         {/each}
 
         <Measurement />
@@ -315,6 +321,59 @@
             if (addSphere) {
               data.addSphere({ name: addSphere });
               addSphere = "";
+            }
+          }}
+        />
+      </form>
+      <hr />
+      <h4>Powers</h4>
+      {#each data.Powers as p, i (p.name)}
+        <div class="flex items-center gap-1 py-1" transition:slide>
+          <label for={`mppv-${i}`} class="grow">{p.name}</label>
+          <div class="flex flex-col items-center">
+            <input
+              id={`mppv-${i}`}
+              type="checkbox"
+              bind:checked={p.exploitedVisible}
+              title="Exploited Systems"
+            />
+            <label for={`mppv-${i}`} class="text-[8px]" title="Exploited Systens">Exp</label>
+          </div>
+          <div class="flex flex-col items-center">
+            <input
+              id={`mppvf-${i}`}
+              type="checkbox"
+              bind:checked={p.fortifiedVisible}
+              title="Fortified Systems"
+            />
+            <label for={`mppf-${i}`} class="text-[8px]" title="Fortified Systens">For</label>
+          </div>
+          <div class="flex flex-col items-center">
+            <input
+              id={`mppvs-${i}`}
+              type="checkbox"
+              bind:checked={p.strongholdVisible}
+              title="Stronghold Systems"
+            />
+            <label for={`mppvs-${i}`} class="text-[8px]" title="Stronghold Systens">Str</label>
+          </div>
+          <input class="flex-none" type="color" bind:value={p.color} title="Color" />
+        </div>
+      {/each}
+      <form class="flex items-center gap-1">
+        <select class="grow p-1" bind:value={addPower}>
+          {#each Object.keys(Powers) as power (power)}
+            <option>{power}</option>
+          {/each}
+        </select>
+        <input
+          type="submit"
+          class="px-2 py-1"
+          value="Add"
+          onclick={() => {
+            if (addPower) {
+              data.addPower({ name: addPower, color: Powers[addPower].color });
+              addPower = "";
             }
           }}
         />

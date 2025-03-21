@@ -23,7 +23,7 @@
     let response = await fetch(`${base}/api/faction/${queryName}${isNC ? "/nc" : ""}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Error while fetching data from Spansh.co.uk for faction: ${faction.name}`);
+      alert(`Error while fetching data for faction: ${faction.name}`);
       return [];
     }
     const systems = (await response.json()) as SpanshSystem[];

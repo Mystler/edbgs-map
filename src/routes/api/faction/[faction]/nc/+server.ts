@@ -1,18 +1,18 @@
 import { getCache, setTimedCache } from "$lib/RedisCache.js";
-import { fetchFactionNCSystems, type SpanshSystem } from "$lib/SpanshAPI";
+import { fetchFactionSystems, type SpanshSystem } from "$lib/SpanshAPI";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ params, setHeaders }) {
   setHeaders({
     "cache-control": "max-age=3600",
   });
-  const cachedResult = await getCache(`edbgs-map:faction-nc:${params.faction}`);
+  const cachedResult = await getCache(`edbgs-map:faction:${params.faction}`);
+  let systems: SpanshSystem[];
   if (cachedResult) {
-    const systems: SpanshSystem[] = JSON.parse(cachedResult);
-    return json(systems);
+    systems = JSON.parse(cachedResult);
   } else {
-    const systems = await fetchFactionNCSystems(params.faction);
-    setTimedCache(`edbgs-map:faction-nc:${params.faction}`, JSON.stringify(systems));
-    return json(systems);
+    systems = await fetchFactionSystems(params.faction);
+    setTimedCache(`edbgs-map:faction:${params.faction}`, JSON.stringify(systems));
   }
+  return json(systems.filter((x) => x.controlling_minor_faction !== params.faction));
 }

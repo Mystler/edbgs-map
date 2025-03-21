@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Powers } from "$lib/Constants";
   import { slide } from "$lib/types/Animations.svelte";
   import { type MapData } from "../types/MapData.svelte";
   import AutocompleteInput from "./AutocompleteInput.svelte";
@@ -16,6 +17,7 @@
     data.Factions = data.Factions.filter((x) => x.name.trim() !== "");
     data.Systems = data.Systems.filter((x) => x.name.trim() !== "");
     data.Spheres = data.Spheres.filter((x) => x.name.trim() !== "");
+    data.Powers = data.Powers.filter((x) => x.name.trim() !== "");
     for (const x of data.Factions) if (!x.displayName) x.displayName = x.name;
     for (const x of data.Systems) if (!x.displayName) x.displayName = x.name;
     data.sortAll();
@@ -225,6 +227,63 @@
       onclick={() => {
         data.Spheres = [];
       }}>Clear All Ranges</button
+    >
+  </p>
+
+  <h3>Powers</h3>
+  {#if data.Powers.length > 0}
+    <div class="overflow-auto" transition:slide>
+      <table class="mx-auto">
+        <thead><tr><th>Power</th><th>Color</th><th></th></tr></thead>
+        <tbody>
+          {#each data.Powers as power, index (index)}
+            <tr>
+              <td>
+                <div transition:slide>
+                  <select
+                    bind:value={power.name}
+                    onchange={() => {
+                      power.color = Powers[power.name].color;
+                    }}
+                  >
+                    {#each Object.keys(Powers) as power (power)}
+                      <option>{power}</option>
+                    {/each}
+                  </select>
+                </div>
+              </td>
+              <td><div transition:slide><input type="color" bind:value={power.color} /></div></td>
+              <td>
+                <div transition:slide>
+                  <input
+                    type="button"
+                    value="X"
+                    onclick={() => {
+                      data.Powers.splice(index, 1);
+                    }}
+                  />
+                </div>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  {/if}
+  <p>
+    <input
+      type="button"
+      value="+"
+      onclick={() => {
+        data.addPower();
+      }}
+    /><br />
+    <button
+      type="button"
+      class="link-btn"
+      onclick={() => {
+        data.Powers = [];
+      }}>Clear All Powers</button
     >
   </p>
 

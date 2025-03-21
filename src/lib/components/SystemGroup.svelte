@@ -23,7 +23,7 @@
     let response = await fetch(`${base}/api/system/${system.name}`);
     HUDInfo.removeMessage(m);
     if (!response.ok) {
-      alert(`Error while fetching data from Spansh.co.uk for system: ${system.name}`);
+      alert(`Error while fetching data for system: ${system.name}`);
       return null;
     }
     const res = (await response.json()) as SpanshSystem | null;

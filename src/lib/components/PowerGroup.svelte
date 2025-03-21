@@ -1,0 +1,65 @@
+<script lang="ts">
+  import type { PowerData } from "../types/MapData.svelte";
+  import SystemRenderGroup from "./SystemRenderGroup.svelte";
+  import { base } from "$app/paths";
+  import type { SpanshSystem } from "../SpanshAPI";
+  import { onMount } from "svelte";
+  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+
+  interface Props {
+    power: PowerData;
+  }
+  let { power }: Props = $props();
+
+  async function fetchData(): Promise<SpanshSystem[]> {
+    const m = HUDInfo.showMessage(power.name, "Power");
+    let response = await fetch(`${base}/api/power/${power.name}`);
+    HUDInfo.removeMessage(m);
+    if (!response.ok) {
+      alert(`Error while fetching data for power: ${power.name}`);
+      return [];
+    }
+    const systems = (await response.json()) as SpanshSystem[];
+    if (systems.length === 0)
+      alert(`Could not find any systems controlled by power: ${power.name}`);
+    return systems;
+  }
+
+  let exploiteds: SpanshSystem[] = $state([]);
+  let fortifieds: SpanshSystem[] = $state([]);
+  let strongholds: SpanshSystem[] = $state([]);
+
+  onMount(() => {
+    fetchData().then((data) => {
+      exploiteds = data.filter((x) => x.power_state === "Exploited");
+      fortifieds = data.filter((x) => x.power_state === "Fortified");
+      strongholds = data.filter((x) => x.power_state === "Stronghold");
+    });
+  });
+</script>
+
+{#key exploiteds}
+  {#if exploiteds.length > 0}
+    <SystemRenderGroup systems={exploiteds} color={power.color} visible={power.exploitedVisible} />
+  {/if}
+{/key}
+{#key fortifieds}
+  {#if fortifieds.length > 0}
+    <SystemRenderGroup
+      systems={fortifieds}
+      color={power.color}
+      visible={power.fortifiedVisible}
+      starType="triangle"
+    />
+  {/if}
+{/key}
+{#key strongholds}
+  {#if strongholds.length > 0}
+    <SystemRenderGroup
+      systems={strongholds}
+      color={power.color}
+      visible={power.strongholdVisible}
+      starType="star"
+    />
+  {/if}
+{/key}

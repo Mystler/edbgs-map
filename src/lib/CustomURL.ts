@@ -4,6 +4,7 @@ import { CurrentCamera } from "./types/CurrentCamera.svelte";
 import {
   MapData,
   type FactionData,
+  type PowerData,
   type SphereData,
   type SphereType,
   type SystemData,
@@ -41,6 +42,13 @@ export function createCustomURL(data: MapData) {
       params.append("spz", x.position[2].toString());
     }
   }
+  for (const x of data.Powers) {
+    params.append("p", x.name);
+    params.append("pc", x.color);
+    if (!x.exploitedVisible) params.append("pev", x.exploitedVisible.toString());
+    if (!x.fortifiedVisible) params.append("pfv", x.fortifiedVisible.toString());
+    if (!x.strongholdVisible) params.append("psv", x.strongholdVisible.toString());
+  }
 
   params.append("cpx", CurrentCamera.Position[0].toFixed());
   params.append("cpy", CurrentCamera.Position[1].toFixed());
@@ -76,6 +84,7 @@ export function readCustomURL(params: URLSearchParams, data: MapData) {
   let cf: Partial<FactionData> | undefined;
   let cs: Partial<SystemData> | undefined;
   let csp: Partial<SphereData> | undefined;
+  let cp: Partial<PowerData> | undefined;
   params.forEach((value, key) => {
     if (key === "fn") {
       // New faction starts, add the previous one if it exists
@@ -138,12 +147,28 @@ export function readCustomURL(params: URLSearchParams, data: MapData) {
     } else if (key === "spz" && csp) {
       if (csp.position) csp.position[2] = parseFloat(value);
       else csp.position = [0, 0, parseFloat(value)];
+    } else if (key === "p") {
+      // New power starts, add the previous one if it exists
+      if (cp) {
+        data.addPower(cp);
+      }
+      // Start reading a new one now
+      cp = { name: value };
+    } else if (key === "pc" && cp) {
+      cp.color = value;
+    } else if (key === "pev" && cp) {
+      cp.exploitedVisible = value === "true";
+    } else if (key === "pfv" && cp) {
+      cp.fortifiedVisible = value === "true";
+    } else if (key === "psv" && cp) {
+      cp.strongholdVisible = value === "true";
     }
   });
   // Add remaining open objects if they exist
   if (cf) data.addFaction(cf);
   if (cs) data.addSystem(cs);
   if (csp) data.addSphere(csp);
+  if (cp) data.addPower(cp);
 }
 
 export async function createShortlink(data: MapData) {
