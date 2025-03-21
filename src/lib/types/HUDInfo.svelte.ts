@@ -1,4 +1,5 @@
 import { browser } from "$app/environment";
+import type { Snippet } from "svelte";
 
 export const ClickMode = {
   inara: "Open Inara",
@@ -18,7 +19,7 @@ export class LoadingMessage {
 }
 
 export const HUDInfo = new (class {
-  CurrentSystem: string = $state("");
+  CurrentSystemInfo: Snippet | undefined = $state();
   LoadingMessages: LoadingMessage[] = $state([]);
   TimedMessage: string = $state("");
 

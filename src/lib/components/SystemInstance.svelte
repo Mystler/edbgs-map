@@ -7,6 +7,7 @@
   import { getContext } from "svelte";
   import type { MapData } from "$lib/types/MapData.svelte";
   import { LoadedSystems } from "$lib/types/LoadedData.svelte";
+  import { Powers } from "$lib/Constants";
 
   interface Props {
     system: SpanshSystem;
@@ -32,12 +33,12 @@
     onpointerenter={() => {
       cursorEnter();
       systemScale.target = 2;
-      HUDInfo.CurrentSystem = system.name;
+      HUDInfo.CurrentSystemInfo = systemInfo;
     }}
     onpointerleave={() => {
       cursorLeave();
       systemScale.target = 1;
-      HUDInfo.CurrentSystem = "";
+      HUDInfo.CurrentSystemInfo = undefined;
     }}
     position.z={zOffset * 0.01}
     scale={systemScale.current}
@@ -64,13 +65,32 @@
         if (i >= 0) {
           mapData.Spheres.splice(i, 1);
         } else {
+          const type =
+            system.power_state === "Stronghold"
+              ? "Stronghold"
+              : system.power_state === "Fortified"
+                ? "Fortified"
+                : "Colonization";
           mapData.addSphere({
             name: system.name,
-            color: "#ffffff",
+            color:
+              type === "Stronghold" || type === "Fortified"
+                ? Powers[system.controlling_power!].color
+                : "#ffffff",
             position: [system.x, system.y, system.z],
+            type,
           });
         }
       }
     }}
   />
 </Billboard>
+
+{#snippet systemInfo()}
+  <div>{system.name}</div>
+  {#if system.controlling_power}
+    <div class="text-2xl" style={`color: ${Powers[system.controlling_power].color}`}>
+      {system.controlling_power} ({system.power_state})
+    </div>
+  {/if}
+{/snippet}

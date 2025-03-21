@@ -133,8 +133,8 @@
     </div>
   {/if}
   <div class="pointer-events-none absolute bottom-10 w-full text-center text-3xl">
-    {#if HUDInfo.CurrentSystem}
-      <div transition:fade>{HUDInfo.CurrentSystem}</div>
+    {#if HUDInfo.CurrentSystemInfo}
+      <div transition:fade>{@render HUDInfo.CurrentSystemInfo()}</div>
     {/if}
     {#if HUDInfo.TimedMessage}
       <div transition:fade>{HUDInfo.TimedMessage}</div>
@@ -329,15 +329,15 @@
       <h4>Powers</h4>
       {#each data.Powers as p, i (p.name)}
         <div class="flex items-center gap-1 py-1" transition:slide>
-          <label for={`mppv-${i}`} class="grow">{p.name}</label>
+          <label for={`mppve-${i}`} class="grow">{p.name}</label>
           <div class="flex flex-col items-center">
             <input
-              id={`mppv-${i}`}
+              id={`mppve-${i}`}
               type="checkbox"
               bind:checked={p.exploitedVisible}
               title="Exploited Systems"
             />
-            <label for={`mppv-${i}`} class="text-[8px]" title="Exploited Systens">Exp</label>
+            <label for={`mppve-${i}`} class="text-[8px]" title="Exploited Systens">Exp</label>
           </div>
           <div class="flex flex-col items-center">
             <input
@@ -346,7 +346,7 @@
               bind:checked={p.fortifiedVisible}
               title="Fortified Systems"
             />
-            <label for={`mppf-${i}`} class="text-[8px]" title="Fortified Systens">For</label>
+            <label for={`mppvf-${i}`} class="text-[8px]" title="Fortified Systens">For</label>
           </div>
           <div class="flex flex-col items-center">
             <input
