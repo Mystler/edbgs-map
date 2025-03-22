@@ -32,15 +32,19 @@
 
 <script lang="ts">
   import { T } from "@threlte/core";
-  import { Instance, InstancedMesh } from "@threlte/extras";
+  import { InstancedMesh } from "@threlte/extras";
   import { type SpanshSystem } from "../SpanshAPI";
   import SystemInstance from "./SystemInstance.svelte";
   import {
+    CircleGeometry,
     DoubleSide,
     DynamicDrawUsage,
     InstancedBufferAttribute,
+    PlaneGeometry,
     RawShaderMaterial,
     Vector3,
+    InstancedMesh as ThreeInstancedMesh,
+    Object3D,
   } from "three";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -72,7 +76,7 @@
         CurrentCamera.LookAtVector.y,
         pointSystem.z,
       );
-      const length = pointConnector.distanceTo(pointSystem);
+      const length = Math.abs(pointSystem.y - pointConnector.y);
       if (length >= gcMaxLength) continue;
       const distance = CurrentCamera.LookAtVector.distanceTo(pointConnector);
       if (distance >= gcMaxDistance) continue;
@@ -99,11 +103,41 @@
   const opacityBuffer = new InstancedBufferAttribute(opacities, 1);
   opacityBuffer.setUsage(DynamicDrawUsage);
 
+  const gcLine = new PlaneGeometry(0.1, 1);
+  gcLine.translate(0, 0.5, 0);
+  gcLine.setAttribute("opacity", opacityBuffer);
+  const gcCircle = new CircleGeometry(0.33);
+  gcCircle.setAttribute("opacity", opacityBuffer);
+  const gcLineMesh = new ThreeInstancedMesh(gcLine, gridConnectorMaterial, systems.length);
+  const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gridConnectorMaterial, systems.length);
+  const gcLineDummy = new Object3D();
+  const gcCircleDummy = new Object3D();
   $effect(() => {
-    gridConnectors.forEach((x, i) => {
-      opacities[i] = x.opacity;
+    gridConnectors.forEach((gc, i) => {
+      opacities[i] = gc.opacity;
+      gcLineDummy.position.set(gc.pointConnector.x, gc.pointConnector.y, gc.pointConnector.z);
+      gcLineDummy.rotation.y = Math.atan2(
+        CurrentCamera.PositionVector.x - gc.pointSystem.x,
+        CurrentCamera.PositionVector.z - gc.pointSystem.z,
+      );
+      gcLineDummy.scale.y =
+        gc.pointSystem.y -
+        gc.pointConnector.y -
+        Math.sign(gc.pointSystem.y - gc.pointConnector.y) * 0.1;
+      gcLineDummy.updateMatrix();
+      gcLineMesh.setMatrixAt(i, gcLineDummy.matrix);
+      gcCircleDummy.position.set(gc.pointConnector.x, gc.pointConnector.y, gc.pointConnector.z);
+      gcCircleDummy.rotation.x = -Math.PI / 2;
+      gcCircleDummy.updateMatrix();
+      gcCircleMesh.setMatrixAt(i, gcCircleDummy.matrix);
     });
     opacityBuffer.needsUpdate = true;
+    gcLineMesh.count = gridConnectors.length;
+    gcLineMesh.instanceMatrix.needsUpdate = true;
+    gcLineMesh.computeBoundingSphere();
+    gcCircleMesh.count = gridConnectors.length;
+    gcCircleMesh.instanceMatrix.needsUpdate = true;
+    gcCircleMesh.computeBoundingSphere();
   });
 </script>
 
@@ -129,38 +163,5 @@
 </InstancedMesh>
 
 <!-- Render grid connectors -->
-<InstancedMesh id="line" limit={systems.length} range={systems.length} frustumCulled={false}>
-  <T.PlaneGeometry
-    args={[0.1, 1]}
-    oncreate={(ref) => {
-      ref.translate(0, 0.5, 0);
-      ref.setAttribute("opacity", opacityBuffer);
-    }}
-  />
-  <T is={gridConnectorMaterial} />
-
-  <InstancedMesh id="circle" limit={systems.length} range={systems.length} frustumCulled={false}>
-    <T.CircleGeometry
-      args={[0.33]}
-      oncreate={(ref) => {
-        ref.setAttribute("opacity", opacityBuffer);
-      }}
-    />
-    <T is={gridConnectorMaterial} />
-
-    {#each gridConnectors as { pointSystem, pointConnector }, i (i)}
-      <Instance
-        id="line"
-        position={pointConnector.toArray()}
-        rotation.y={Math.atan2(
-          CurrentCamera.PositionVector.x - pointSystem.x,
-          CurrentCamera.PositionVector.z - pointSystem.z,
-        )}
-        scale.y={pointSystem.y -
-          pointConnector.y -
-          Math.sign(pointSystem.y - pointConnector.y) * 0.1}
-      />
-      <Instance id="circle" position={pointConnector.toArray()} rotation={[-Math.PI / 2, 0, 0]} />
-    {/each}
-  </InstancedMesh>
-</InstancedMesh>
+<T is={gcLineMesh} />
+<T is={gcCircleMesh} />
