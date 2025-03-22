@@ -1,4 +1,7 @@
 <script module lang="ts">
+  const gcMaxCamDistance = 50;
+  const gcMaxLength = 15;
+  const gcMaxDistance = 50;
   const gridConnectorMaterial = new RawShaderMaterial({
     vertexShader: `
       precision highp float;
@@ -60,32 +63,36 @@
     opacity: number;
   }
   let gridConnectors: GridConnector[] = $derived.by(() => {
-    if (!HUDInfo.ShowGrid || !visible || CurrentCamera.Distance >= 50) return [];
-    return systems
-      .map((system) => {
-        const pointSystem = new Vector3(system.x, system.y, -system.z);
-        const pointConnector = new Vector3(
-          pointSystem.x,
-          CurrentCamera.LookAtVector.y,
-          pointSystem.z,
-        );
-        const opacity =
-          1 - // Flip curve to turn fading range into opacity
-          cubicIn(
-            // Easing function for our range between 0 and 1
-            Math.min(
-              // Create a 0-1 range that is the max of three fading thresholds
-              1,
-              Math.max(
-                CurrentCamera.Distance / 50, // Camera zoom distance
-                pointConnector.distanceTo(pointSystem) / 15, // Connector length
-                CurrentCamera.LookAtVector.distanceTo(pointConnector) / 50, // Connector to lookAt distance
-              ),
+    if (!HUDInfo.ShowGrid || !visible || CurrentCamera.Distance >= gcMaxCamDistance) return [];
+    const gcSystems: GridConnector[] = [];
+    for (const system of systems) {
+      const pointSystem = new Vector3(system.x, system.y, -system.z);
+      const pointConnector = new Vector3(
+        pointSystem.x,
+        CurrentCamera.LookAtVector.y,
+        pointSystem.z,
+      );
+      const length = pointConnector.distanceTo(pointSystem);
+      if (length >= gcMaxLength) continue;
+      const distance = CurrentCamera.LookAtVector.distanceTo(pointConnector);
+      if (distance >= gcMaxDistance) continue;
+      const opacity =
+        1 - // Flip curve to turn fading range into opacity
+        cubicIn(
+          // Easing function for our range between 0 and 1
+          Math.min(
+            // Create a 0-1 range that is the max of three fading thresholds
+            1,
+            Math.max(
+              CurrentCamera.Distance / gcMaxCamDistance, // Camera zoom distance
+              length / gcMaxLength, // Connector length
+              distance / 50, // Connector to lookAt distance
             ),
-          );
-        return { pointSystem, pointConnector, opacity };
-      })
-      .filter((x) => x.opacity > 0);
+          ),
+        );
+      gcSystems.push({ pointSystem, pointConnector, opacity });
+    }
+    return gcSystems;
   });
 
   const opacities = new Float32Array(systems.length);
