@@ -262,6 +262,7 @@
         v.multiplyScalar(distance);
         controls._panOffset.add(v);
       };
+      CurrentCamera.Controls = ref;
     }}
     onstart={() => {
       if (controls.state === _STATE.PAN) isPanning = true;

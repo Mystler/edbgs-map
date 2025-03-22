@@ -51,6 +51,7 @@
   import { cubicIn } from "svelte/easing";
   import TriangleShape from "./Shapes/TriangleShape.svelte";
   import StarShape from "./Shapes/StarShape.svelte";
+  import { untrack } from "svelte";
 
   interface Props {
     systems: SpanshSystem[];
@@ -66,8 +67,8 @@
     pointConnector: Vector3;
     opacity: number;
   }
-  let gridConnectors: GridConnector[] = $derived.by(() => {
-    if (!HUDInfo.ShowGrid || !visible || CurrentCamera.Distance >= gcMaxCamDistance) return [];
+  function calculateGridConnectors(): GridConnector[] {
+    if (CurrentCamera.Distance >= gcMaxCamDistance) return [];
     const gcSystems: GridConnector[] = [];
     for (const system of systems) {
       const pointSystem = new Vector3(system.x, system.y, -system.z);
@@ -97,7 +98,7 @@
       gcSystems.push({ pointSystem, pointConnector, opacity });
     }
     return gcSystems;
-  });
+  }
 
   const opacities = new Float32Array(systems.length);
   const opacityBuffer = new InstancedBufferAttribute(opacities, 1);
@@ -112,7 +113,11 @@
   const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gridConnectorMaterial, systems.length);
   const gcLineDummy = new Object3D();
   const gcCircleDummy = new Object3D();
-  $effect(() => {
+
+  let lastConnectors = 0;
+  function onCameraChange() {
+    if (!HUDInfo.ShowGrid || !visible) return;
+    const gridConnectors = calculateGridConnectors();
     gridConnectors.forEach((gc, i) => {
       opacities[i] = gc.opacity;
       gcLineDummy.position.set(gc.pointConnector.x, gc.pointConnector.y, gc.pointConnector.z);
@@ -131,13 +136,30 @@
       gcCircleDummy.updateMatrix();
       gcCircleMesh.setMatrixAt(i, gcCircleDummy.matrix);
     });
-    opacityBuffer.needsUpdate = true;
-    gcLineMesh.count = gridConnectors.length;
-    gcLineMesh.instanceMatrix.needsUpdate = true;
-    gcLineMesh.computeBoundingSphere();
-    gcCircleMesh.count = gridConnectors.length;
-    gcCircleMesh.instanceMatrix.needsUpdate = true;
-    gcCircleMesh.computeBoundingSphere();
+    if (gridConnectors.length > 0 || lastConnectors > 0) {
+      opacityBuffer.needsUpdate = true;
+      gcLineMesh.count = gridConnectors.length;
+      gcLineMesh.instanceMatrix.needsUpdate = true;
+      gcLineMesh.computeBoundingSphere();
+      gcCircleMesh.count = gridConnectors.length;
+      gcCircleMesh.instanceMatrix.needsUpdate = true;
+      gcCircleMesh.computeBoundingSphere();
+    }
+    lastConnectors = gridConnectors.length;
+  }
+
+  $effect(() => {
+    // Force update when visibility is back on
+    if (HUDInfo.ShowGrid && visible) {
+      untrack(() => onCameraChange());
+    }
+  });
+
+  $effect(() => {
+    CurrentCamera.Controls?.addEventListener("change", onCameraChange);
+    return () => {
+      CurrentCamera.Controls?.removeEventListener("change", onCameraChange);
+    };
   });
 </script>
 
@@ -163,5 +185,5 @@
 </InstancedMesh>
 
 <!-- Render grid connectors -->
-<T is={gcLineMesh} />
-<T is={gcCircleMesh} />
+<T is={gcLineMesh} visible={HUDInfo.ShowGrid && visible} />
+<T is={gcCircleMesh} visible={HUDInfo.ShowGrid && visible} />

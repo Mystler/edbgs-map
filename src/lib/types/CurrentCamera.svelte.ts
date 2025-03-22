@@ -1,6 +1,7 @@
 import { quadInOut } from "svelte/easing";
 import { Tween } from "svelte/motion";
 import { Vector3 } from "three";
+import type { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 
 export const CurrentCamera = new (class {
   Position: [x: number, y: number, z: number] = $state([10, 10, 10]);
@@ -9,6 +10,8 @@ export const CurrentCamera = new (class {
   PositionVector = $derived(new Vector3(...this.Position));
   LookAtVector = $derived(new Vector3(...this.LookAt));
   Distance = $derived(this.PositionVector.distanceTo(this.LookAtVector));
+
+  Controls: OrbitControls | undefined = $state();
 
   toJSON(): Partial<typeof CurrentCamera> {
     return { Position: this.Position, LookAt: this.LookAt };
