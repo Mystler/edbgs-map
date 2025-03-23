@@ -7,7 +7,7 @@
   import { base } from "$app/paths";
   import { CurrentCamera, FlyToTarget } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { DoubleSide, type Matrix4, MOUSE, Vector3 } from "three";
+  import { DoubleSide, Group, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
   import ArrowShape from "./Shapes/ArrowShape.svelte";
 
@@ -37,14 +37,16 @@
   let cameraAngle = $state(0);
   let isPanning = $state(false);
 
-  let gridPos: [x: number, y: number, z: number] = $state([0, 0, 0]);
-  let gridLabel = $derived(`${gridPos[0]} : ${Math.round(gridPos[1])} : ${-gridPos[2]}`);
+  let arrowGroup = $state() as Group;
+  let gridGroup = $state() as Group;
+  let gridLabel = $state("");
 
   /**
    * The grid follows the camera on the y axis. Its origin and label then shift in increments of 10 ly with our camera movements.
    */
   function updateGrid(x: number, y: number, z: number) {
-    gridPos = [Math.round(x / 10) * 10, y, Math.round(z / 10) * 10];
+    gridGroup.position.set(Math.round(x / 10) * 10, y, Math.round(z / 10) * 10);
+    gridLabel = `${gridGroup.position.x} : ${Math.round(gridGroup.position.y)} : ${-gridGroup.position.z}`;
   }
 
   async function fetchData(): Promise<SpanshSystem | null> {
@@ -239,6 +241,7 @@
       CurrentCamera.LookAt = e.target.target.toArray();
       CurrentCamera.Position = e.target.object.position.toArray();
       cameraAngle = e.target.getAzimuthalAngle();
+      arrowGroup.position.set(...e.target.target.toArray());
     }}
     bind:ref={controls}
     mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
@@ -273,7 +276,7 @@
   />
 </T.PerspectiveCamera>
 
-<T.Group position={gridPos} visible={HUDInfo.ShowGrid}>
+<T.Group bind:ref={gridGroup} visible={HUDInfo.ShowGrid}>
   <Grid
     sectionThickness={1}
     infiniteGrid
@@ -301,11 +304,7 @@
   />
 </T.Group>
 
-<T.Group
-  position={CurrentCamera.LookAt}
-  visible={HUDInfo.ShowGrid}
-  scale={CurrentCamera.Distance / 40}
->
+<T.Group bind:ref={arrowGroup} visible={HUDInfo.ShowGrid} scale={CurrentCamera.Distance / 40}>
   <T.Mesh rotation={[-Math.PI / 2, 0, 0]}>
     <T.RingGeometry args={[1, 1.2, 32]} />
     <T.MeshBasicMaterial color="#00aaaa" side={DoubleSide} />
