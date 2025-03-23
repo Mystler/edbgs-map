@@ -110,7 +110,7 @@
         {#each data.Spheres as s, i (s.name)}
           <Sphere bind:sphere={data.Spheres[i]} bind:this={sphereRefs[i]} />
         {/each}
-        {#each data.Powers as p, i (p.name)}
+        {#each data.Powers as _, i (i)}
           <PowerGroup power={data.Powers[i]} />
         {/each}
 
@@ -327,7 +327,7 @@
       </form>
       <hr />
       <h4>Powers</h4>
-      {#each data.Powers as p, i (p.name)}
+      {#each data.Powers as p, i (i)}
         <div class="flex items-center gap-1 py-1" transition:slide>
           <label for={`mppve-${i}`} class="grow">{p.name}</label>
           <div class="flex flex-col items-center">
