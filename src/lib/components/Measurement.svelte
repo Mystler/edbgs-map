@@ -48,12 +48,13 @@
 
 <script lang="ts">
   let dashOffset = $state(0);
-  useTask(
+  const { start, stop } = useTask(
     (delta) => {
       dashOffset -= delta / 20;
     },
     { autoInvalidate: false },
   );
+  stop();
 
   let points = $derived(CurrentMeasurement.Points);
 </script>
@@ -68,7 +69,7 @@
 {/snippet}
 
 {#if points.length > 0}
-  <T.Mesh>
+  <T.Mesh oncreate={() => start()} ondestroy={() => stop()}>
     <MeshLineGeometry {points} />
     <MeshLineMaterial
       width={0.25}
