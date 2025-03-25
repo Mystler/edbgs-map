@@ -12,8 +12,9 @@
   interface Props {
     system: SpanshSystem;
     zOffset?: number;
+    visible?: boolean;
   }
-  let { system, zOffset = 0 }: Props = $props();
+  let { system, zOffset = 0, visible = true }: Props = $props();
 
   useInteractivity();
   const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
@@ -28,7 +29,7 @@
   LoadedSystems.set(system.name, system);
 </script>
 
-<Billboard position={[system.x, system.y, -system.z]}>
+<Billboard position={[system.x, system.y, -system.z]} follow={visible}>
   <Instance
     onpointerenter={() => {
       cursorEnter();

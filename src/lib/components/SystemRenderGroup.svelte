@@ -164,7 +164,7 @@
 </script>
 
 <!-- Render systems themselves -->
-<InstancedMesh limit={systems.length} range={systems.length} {visible}>
+<InstancedMesh limit={systems.length} range={systems.length} {visible} update={visible}>
   {#if starType === "circle"}
     <T.CircleGeometry args={[0.5]} />
   {:else if starType === "triangle"}
@@ -180,7 +180,7 @@
   />
 
   {#each systems as system (system.name)}
-    <SystemInstance {system} {zOffset} />
+    <SystemInstance {system} {zOffset} {visible} />
   {/each}
 </InstancedMesh>
 
