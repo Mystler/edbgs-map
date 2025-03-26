@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Billboard, Instance, useCursor, useInteractivity } from "@threlte/extras";
+  import { Instance, useCursor, useInteractivity } from "@threlte/extras";
   import { type SpanshSystem } from "../SpanshAPI";
   import { Spring } from "svelte/motion";
   import { CurrentMeasurement } from "./Measurement.svelte";
@@ -8,13 +8,16 @@
   import type { MapData } from "$lib/types/MapData.svelte";
   import { LoadedSystems } from "$lib/types/LoadedData.svelte";
   import { Powers } from "$lib/Constants";
+  import { T } from "@threlte/core";
+  import type { Group, Matrix4 } from "three";
 
   interface Props {
     system: SpanshSystem;
     zOffset?: number;
     visible?: boolean;
+    update?: (mat: Matrix4) => void;
   }
-  let { system, zOffset = 0, visible = true }: Props = $props();
+  let { system, visible = true, update = () => {} }: Props = $props();
 
   useInteractivity();
   const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
@@ -27,10 +30,28 @@
   const mapData: MapData = getContext("mapData");
 
   LoadedSystems.set(system.name, system);
+  let vInstance: Group;
+
+  $effect.pre(() => {
+    if (systemScale.target != systemScale.current) {
+      // Only cause matrix recalculations when we are actually animating. Re-use same matrix for both visual and raycast mesh.
+      vInstance.updateMatrix();
+      update(vInstance.matrixWorld);
+    }
+  });
 </script>
 
-<Billboard position={[system.x, system.y, -system.z]} follow={visible}>
+<T.Group position={[system.x, system.y, -system.z]}>
   <Instance
+    oncreate={(ref) => {
+      vInstance = ref as Group;
+    }}
+    id="visual"
+    scale={systemScale.current}
+  />
+  <Instance
+    id="raycast"
+    {visible}
     onpointerenter={() => {
       cursorEnter();
       systemScale.target = 2;
@@ -41,7 +62,6 @@
       systemScale.target = 1;
       HUDInfo.CurrentSystemInfo = undefined;
     }}
-    position.z={zOffset * 0.01}
     scale={systemScale.current}
     onclick={() => {
       if (HUDInfo.ClickMode === "inara") {
@@ -85,7 +105,7 @@
       }
     }}
   />
-</Billboard>
+</T.Group>
 
 {#snippet systemInfo()}
   <div>{system.name}</div>

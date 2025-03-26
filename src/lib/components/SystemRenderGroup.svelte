@@ -45,6 +45,9 @@
     Vector3,
     InstancedMesh as ThreeInstancedMesh,
     Object3D,
+    ShaderMaterial,
+    Color,
+    Uniform,
   } from "three";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -61,6 +64,36 @@
     starType?: "circle" | "triangle" | "star";
   }
   let { systems, color, visible = true, zOffset = 0, starType = "circle" }: Props = $props();
+
+  const systemsMaterial = new ShaderMaterial({
+    uniforms: {
+      color: { value: new Color(color).convertLinearToSRGB() },
+    },
+    vertexShader: `
+      uniform vec3 color;
+      varying vec3 f_color;
+      void main() {
+        vec3 up = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+        vec3 right = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+        vec3 billboarded = right * position.x + up * position.y;
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(billboarded, 1.0);
+        f_color = color;
+      }
+    `,
+    fragmentShader: `
+      precision highp float;
+      varying vec3 f_color;
+      void main() {
+        gl_FragColor = vec4(f_color.xyz, 1.0);
+      }
+    `,
+  });
+  let hitSize = $derived(starType === "star" ? 1.5 : starType === "triangle" ? 1 : 0.5);
+
+  $effect.pre(() => {
+    const uColor = systemsMaterial.uniforms.color as Uniform<Color>;
+    uColor.value.set(new Color(color).convertLinearToSRGB());
+  });
 
   interface GridConnector {
     pointSystem: Vector3;
@@ -161,10 +194,19 @@
       CurrentCamera.Controls?.removeEventListener("change", onCameraChange);
     };
   });
+  let vMesh = $state() as ThreeInstancedMesh;
+  let rMesh = $state() as ThreeInstancedMesh;
 </script>
 
 <!-- Render systems themselves -->
-<InstancedMesh limit={systems.length} range={systems.length} {visible} update={visible}>
+<InstancedMesh
+  id="visual"
+  bind:ref={vMesh}
+  limit={systems.length}
+  range={systems.length}
+  {visible}
+  update={false}
+>
   {#if starType === "circle"}
     <T.CircleGeometry args={[0.5]} />
   {:else if starType === "triangle"}
@@ -172,16 +214,39 @@
   {:else if starType === "star"}
     <StarShape />
   {/if}
-  <T.MeshBasicMaterial
+  <T
+    is={systemsMaterial}
     {color}
     polygonOffset={zOffset ? true : false}
     polygonOffsetFactor={-zOffset * 4}
     polygonOffsetUnits={-zOffset * 4}
   />
 
-  {#each systems as system (system.name)}
-    <SystemInstance {system} {zOffset} {visible} />
-  {/each}
+  <InstancedMesh
+    id="raycast"
+    bind:ref={rMesh}
+    limit={systems.length}
+    range={systems.length}
+    visible={false}
+    update={false}
+  >
+    <T.SphereGeometry args={[hitSize, 16, 16]} />
+    <T.MeshBasicMaterial />
+
+    {#each systems as system, i (system.name)}
+      <SystemInstance
+        {system}
+        {zOffset}
+        {visible}
+        update={(mat) => {
+          // Reusing the same matrix for both meshes since they should be equal.
+          vMesh.setMatrixAt(i, mat);
+          vMesh.instanceMatrix.needsUpdate = true;
+          rMesh.setMatrixAt(i, mat); // Do not need to set needsUpdate for this since we don't draw it.
+        }}
+      />
+    {/each}
+  </InstancedMesh>
 </InstancedMesh>
 
 <!-- Render grid connectors -->

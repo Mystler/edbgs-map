@@ -23,6 +23,7 @@
   import SystemSearch from "./SystemSearch.svelte";
   import { Powers } from "$lib/Constants";
   import PowerGroup from "./PowerGroup.svelte";
+  import { NoToneMapping } from "three";
 
   interface Props {
     data: MapData;
@@ -94,7 +95,7 @@
       }
     }}
   >
-    <Canvas>
+    <Canvas toneMapping={NoToneMapping}>
       <MapContent>
         {#if perfMon}
           <PerfMonitor anchorX="right" />
