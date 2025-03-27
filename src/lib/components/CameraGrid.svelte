@@ -229,7 +229,6 @@
   oncreate={(ref) => {
     if (cameraSetup.lookAt)
       ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
-    CurrentCamera.Position = ref.position.toArray();
   }}
 >
   <OrbitControls

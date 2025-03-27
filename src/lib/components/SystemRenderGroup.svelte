@@ -2,23 +2,16 @@
   const gcMaxCamDistance = 50;
   const gcMaxLength = 15;
   const gcMaxDistance = 50;
-  const gridConnectorMaterial = new RawShaderMaterial({
+  const gridConnectorMaterial = new ShaderMaterial({
     vertexShader: `
-      precision highp float;
-      attribute mat4 instanceMatrix;
-      attribute vec3 position;
       attribute float opacity;
       varying float f_opacity;
-      uniform mat4 projectionMatrix;
-      uniform mat4 viewMatrix;
-      uniform mat4 modelMatrix;
       void main() {
         gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(position, 1.0);
         f_opacity = opacity;
       }
     `,
     fragmentShader: `
-      precision highp float;
       varying float f_opacity;
       void main() {
         gl_FragColor = vec4(1.0, 1.0, 1.0, f_opacity);
@@ -41,7 +34,6 @@
     DynamicDrawUsage,
     InstancedBufferAttribute,
     PlaneGeometry,
-    RawShaderMaterial,
     Vector3,
     InstancedMesh as ThreeInstancedMesh,
     Object3D,
@@ -81,10 +73,9 @@
       }
     `,
     fragmentShader: `
-      precision highp float;
       varying vec3 f_color;
       void main() {
-        gl_FragColor = vec4(f_color.xyz, 1.0);
+        gl_FragColor = vec4(f_color, 1.0);
       }
     `,
   });

@@ -41,13 +41,12 @@
   });
 </script>
 
-<T.Group position={[system.x, system.y, -system.z]}>
+<T.Group position={[system.x, system.y, -system.z]} scale={systemScale.current}>
   <Instance
     oncreate={(ref) => {
       vInstance = ref as Group;
     }}
     id="visual"
-    scale={systemScale.current}
   />
   <Instance
     id="raycast"
@@ -62,7 +61,6 @@
       systemScale.target = 1;
       HUDInfo.CurrentSystemInfo = undefined;
     }}
-    scale={systemScale.current}
     onclick={() => {
       if (HUDInfo.ClickMode === "inara") {
         window.open(
