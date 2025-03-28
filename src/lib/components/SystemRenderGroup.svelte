@@ -1,28 +1,3 @@
-<script module lang="ts">
-  const gcMaxCamDistance = 50;
-  const gcMaxLength = 15;
-  const gcMaxDistance = 50;
-  const gridConnectorMaterial = new ShaderMaterial({
-    vertexShader: `
-      attribute float opacity;
-      varying float f_opacity;
-      void main() {
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(position, 1.0);
-        f_opacity = opacity;
-      }
-    `,
-    fragmentShader: `
-      varying float f_opacity;
-      void main() {
-        gl_FragColor = vec4(1.0, 1.0, 1.0, f_opacity);
-      }
-    `,
-    transparent: true,
-    depthWrite: false,
-  });
-  gridConnectorMaterial.side = DoubleSide;
-</script>
-
 <script lang="ts">
   import { T } from "@threlte/core";
   import { InstancedMesh } from "@threlte/extras";
@@ -31,8 +6,6 @@
   import {
     CircleGeometry,
     DoubleSide,
-    DynamicDrawUsage,
-    InstancedBufferAttribute,
     PlaneGeometry,
     Vector3,
     InstancedMesh as ThreeInstancedMesh,
@@ -43,7 +16,6 @@
   } from "three";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { cubicIn } from "svelte/easing";
   import TriangleShape from "./Shapes/TriangleShape.svelte";
   import StarShape from "./Shapes/StarShape.svelte";
   import { untrack } from "svelte";
@@ -86,55 +58,81 @@
     uColor.value.set(new Color(color).convertLinearToSRGB());
   });
 
-  interface GridConnector {
-    pointSystem: Vector3;
-    pointConnector: Vector3;
-    opacity: number;
-  }
-  function calculateGridConnectors(): GridConnector[] {
+  const gcMaxCamDistance = 50;
+  const gcMaxLength = 15;
+  const gcMaxDistance = 50;
+  const gcMaterial = new ShaderMaterial({
+    vertexShader: `
+      uniform float gcMaxCamDistance;
+      uniform float gcMaxLength;
+      uniform float gcMaxDistance;
+      uniform vec3 target;
+      uniform float camDistance;
+      varying float f_opacity;
+      void main() {
+        vec3 sysPos = instanceMatrix[3].xyz;
+        // Transform the instance vertices to connect to the grid plane
+        float length = target.y - sysPos.y;
+        float offset = sign(length) * 0.1;
+        float scaleY = length - offset;
+        vec3 newPosition = vec3(position.x, position.y * scaleY + offset, position.z);
+        // Calculate fading
+        float gcDist = distance(sysPos.xz, target.xz);
+        float fade = min(1.0, max(max(camDistance / gcMaxCamDistance, abs(length) / gcMaxLength), gcDist / gcMaxDistance));
+        float opacity = 1.0 - fade * fade * fade;
+        // Rotate around Y axis towards camera
+        mat4 rotY = mat4(1.0);
+        float angle = atan(cameraPosition.x - sysPos.x, cameraPosition.z - sysPos.z);
+        rotY[0][0] = cos(angle);
+        rotY[0][2] = -sin(angle);
+        rotY[2][0] = sin(angle);
+        rotY[2][2] = cos(angle);
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * rotY * vec4(newPosition, 1.0);
+        f_opacity = opacity;
+      }
+    `,
+    fragmentShader: `
+      varying float f_opacity;
+      void main() {
+        gl_FragColor = vec4(1.0, 1.0, 1.0, f_opacity);
+      }
+    `,
+    uniforms: {
+      gcMaxCamDistance: { value: gcMaxCamDistance },
+      gcMaxLength: { value: gcMaxLength },
+      gcMaxDistance: { value: gcMaxDistance },
+      target: { value: CurrentCamera.LookAtVector },
+      camDistance: { value: CurrentCamera.Distance },
+    },
+    transparent: true,
+    depthWrite: false,
+  });
+  gcMaterial.side = DoubleSide;
+
+  function calculateGridConnectors(): [x: number, y: number, z: number][] {
     if (CurrentCamera.Distance >= gcMaxCamDistance) return [];
-    const gcSystems: GridConnector[] = [];
+    const gcSystems: [x: number, y: number, z: number][] = [];
     for (const system of systems) {
-      const pointSystem = new Vector3(system.x, system.y, -system.z);
-      const pointConnector = new Vector3(
-        pointSystem.x,
-        CurrentCamera.LookAtVector.y,
-        pointSystem.z,
-      );
-      const length = Math.abs(pointSystem.y - pointConnector.y);
+      const length = Math.abs(system.y - CurrentCamera.LookAtVector.y);
       if (length >= gcMaxLength) continue;
-      const distance = CurrentCamera.LookAtVector.distanceTo(pointConnector);
+      const distance = CurrentCamera.LookAtVector.distanceTo({
+        x: system.x,
+        y: CurrentCamera.LookAtVector.y,
+        z: -system.z,
+      });
       if (distance >= gcMaxDistance) continue;
-      const opacity =
-        1 - // Flip curve to turn fading range into opacity
-        cubicIn(
-          // Easing function for our range between 0 and 1
-          Math.min(
-            // Create a 0-1 range that is the max of three fading thresholds
-            1,
-            Math.max(
-              CurrentCamera.Distance / gcMaxCamDistance, // Camera zoom distance
-              length / gcMaxLength, // Connector length
-              distance / 50, // Connector to lookAt distance
-            ),
-          ),
-        );
-      gcSystems.push({ pointSystem, pointConnector, opacity });
+      gcSystems.push([system.x, system.y, -system.z]);
     }
     return gcSystems;
   }
 
-  const opacities = new Float32Array(systems.length);
-  const opacityBuffer = new InstancedBufferAttribute(opacities, 1);
-  opacityBuffer.setUsage(DynamicDrawUsage);
-
   const gcLine = new PlaneGeometry(0.1, 1);
   gcLine.translate(0, 0.5, 0);
-  gcLine.setAttribute("opacity", opacityBuffer);
   const gcCircle = new CircleGeometry(0.33);
-  gcCircle.setAttribute("opacity", opacityBuffer);
-  const gcLineMesh = new ThreeInstancedMesh(gcLine, gridConnectorMaterial, systems.length);
-  const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gridConnectorMaterial, systems.length);
+  gcCircle.rotateX(-Math.PI / 2);
+  gcCircle.translate(0, 1, 0);
+  const gcLineMesh = new ThreeInstancedMesh(gcLine, gcMaterial, systems.length);
+  const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gcMaterial, systems.length);
   const gcLineDummy = new Object3D();
   const gcCircleDummy = new Object3D();
 
@@ -143,31 +141,24 @@
     if (!HUDInfo.ShowGrid || !visible) return;
     const gridConnectors = calculateGridConnectors();
     gridConnectors.forEach((gc, i) => {
-      opacities[i] = gc.opacity;
-      gcLineDummy.position.set(gc.pointConnector.x, gc.pointConnector.y, gc.pointConnector.z);
-      gcLineDummy.rotation.y = Math.atan2(
-        CurrentCamera.PositionVector.x - gc.pointSystem.x,
-        CurrentCamera.PositionVector.z - gc.pointSystem.z,
-      );
-      gcLineDummy.scale.y =
-        gc.pointSystem.y -
-        gc.pointConnector.y -
-        Math.sign(gc.pointSystem.y - gc.pointConnector.y) * 0.1;
+      gcLineDummy.position.set(gc[0], gc[1], gc[2]);
       gcLineDummy.updateMatrix();
       gcLineMesh.setMatrixAt(i, gcLineDummy.matrix);
-      gcCircleDummy.position.set(gc.pointConnector.x, gc.pointConnector.y, gc.pointConnector.z);
-      gcCircleDummy.rotation.x = -Math.PI / 2;
+      gcCircleDummy.position.set(gc[0], gc[1], gc[2]);
       gcCircleDummy.updateMatrix();
       gcCircleMesh.setMatrixAt(i, gcCircleDummy.matrix);
     });
     if (gridConnectors.length > 0 || lastConnectors > 0) {
-      opacityBuffer.needsUpdate = true;
       gcLineMesh.count = gridConnectors.length;
       gcLineMesh.instanceMatrix.needsUpdate = true;
       gcLineMesh.computeBoundingSphere();
       gcCircleMesh.count = gridConnectors.length;
       gcCircleMesh.instanceMatrix.needsUpdate = true;
       gcCircleMesh.computeBoundingSphere();
+      const target = gcMaterial.uniforms.target as Uniform<Vector3>;
+      target.value.set(...CurrentCamera.LookAt);
+      const camDistance = gcMaterial.uniforms.camDistance as Uniform<number>;
+      camDistance.value = CurrentCamera.Distance;
     }
     lastConnectors = gridConnectors.length;
   }
