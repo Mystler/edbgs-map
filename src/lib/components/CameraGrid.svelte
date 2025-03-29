@@ -1,6 +1,13 @@
 <script lang="ts">
   import { T, useTask } from "@threlte/core";
-  import { Grid, Instance, InstancedMesh, OrbitControls, Text } from "@threlte/extras";
+  import {
+    Grid,
+    Instance,
+    InstancedMesh,
+    OrbitControls,
+    Text,
+    useInteractivity,
+  } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
@@ -10,6 +17,8 @@
   import { DoubleSide, Group, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
   import ArrowShape from "./Shapes/ArrowShape.svelte";
+
+  const { enabled: interactivityEnabled } = useInteractivity();
 
   interface Props {
     cameraSetup?: CameraData;
@@ -179,6 +188,9 @@
 
   useTask(
     (delta) => {
+      // Disable interactivity while panning the camera.
+      interactivityEnabled.set(!isPanning && !isKeyPanning);
+
       let shouldUpdate = false;
       if (isKeyPanning) {
         const prevPlane = panPlane;
