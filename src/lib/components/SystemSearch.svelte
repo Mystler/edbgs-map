@@ -8,7 +8,7 @@
 
 <input
   type="text"
-  class="opacity-10 transition-opacity duration-400 focus:opacity-100 [@media(pointer:fine)]:hover:opacity-100"
+  class="opacity-10 transition-opacity duration-400 focus:opacity-100 pointer-fine:hover:opacity-100"
   placeholder="Go to loaded system..."
   list="knownSystems"
   bind:value={search}
