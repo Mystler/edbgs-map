@@ -8,6 +8,7 @@
   import { DefaultMapFont } from "../Constants";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { calculateGeometricMedian } from "$lib/Helpers";
 
   interface Props {
     faction: FactionData;
@@ -38,25 +39,10 @@
   onMount(() => {
     fetchData().then((data) => {
       systems = data;
-      let mins = [100000, 100000, 100000],
-        maxs = [-100000, -100000, -100000];
-      for (const system of systems) {
-        mins = [
-          Math.min(mins[0], system.x),
-          Math.min(mins[1], system.y),
-          Math.min(mins[2], -system.z),
-        ];
-        maxs = [
-          Math.max(maxs[0], system.x),
-          Math.max(maxs[1], system.y),
-          Math.max(maxs[2], -system.z),
-        ];
-        textPosition = [
-          (mins[0] + maxs[0]) / 2,
-          (mins[1] + maxs[1]) / 2 + 2,
-          (mins[2] + maxs[2]) / 2,
-        ];
-      }
+
+      if (systems.length === 0) return;
+      const median = calculateGeometricMedian(systems);
+      textPosition = [median.x, median.y + 2, -median.z];
     });
   });
 </script>
