@@ -126,17 +126,19 @@
     return gcSystems;
   }
 
+  let lastConnectors = 0;
   const gcLine = new PlaneGeometry(0.1, 1);
   gcLine.translate(0, 0.5, 0);
   const gcCircle = new CircleGeometry(0.33);
   gcCircle.rotateX(-Math.PI / 2);
   gcCircle.translate(0, 1, 0);
   const gcLineMesh = new ThreeInstancedMesh(gcLine, gcMaterial, systems.length);
+  gcLineMesh.count = 0;
   const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gcMaterial, systems.length);
+  gcCircleMesh.count = 0;
   const gcLineDummy = new Object3D();
   const gcCircleDummy = new Object3D();
 
-  let lastConnectors = 0;
   function onCameraChange() {
     if (!HUDInfo.ShowGrid || !visible) return;
     const gridConnectors = calculateGridConnectors();
