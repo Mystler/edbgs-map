@@ -1,3 +1,5 @@
+import type { Powers } from "./Constants";
+
 export interface SpanshSystem {
   name: string;
   x: number;
@@ -9,6 +11,21 @@ export interface SpanshSystem {
   power_state?: string;
   power?: string[];
   needs_permit?: string;
+}
+export interface SpanshDumpPPData {
+  name: string;
+  id64: number;
+  date: string;
+  powerState?: string;
+  powerStateControlProgress?: number;
+  powerStateReinforcement?: number;
+  powerStateUndermining?: number;
+  controllingPower?: keyof typeof Powers;
+  powers?: (keyof typeof Powers)[];
+  powerConflictProgress?: {
+    power: keyof typeof Powers;
+    progress: number;
+  }[];
 }
 interface SpanshSearchResponse {
   results: {
@@ -32,6 +49,21 @@ export function pruneSystemObject(system: SpanshSystem): SpanshSystem {
   };
 }
 
+export function pruneSystemDumpPPObject(system: SpanshDumpPPData): SpanshDumpPPData {
+  return {
+    name: system.name,
+    id64: system.id64,
+    date: system.date,
+    powerState: system.powerState,
+    powerStateControlProgress: system.powerStateControlProgress,
+    powerStateReinforcement: system.powerStateReinforcement,
+    powerStateUndermining: system.powerStateUndermining,
+    controllingPower: system.controllingPower,
+    powers: system.powers,
+    powerConflictProgress: system.powerConflictProgress,
+  };
+}
+
 export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
   // Easy API call. Search should have an existing system match in the results, with type being "system" and record having the system data.
   const response = await fetch(`https://spansh.co.uk/api/search?q=${encodeURIComponent(name)}`);
@@ -41,6 +73,15 @@ export async function fetchSystem(name: string): Promise<SpanshSystem | null> {
     (result) => result.type === "system" && result.record.name.toLowerCase() === name.toLowerCase(),
   );
   if (system) return pruneSystemObject(system.record);
+  return null;
+}
+
+export async function fetchSystemPPData(id64: number): Promise<SpanshDumpPPData | null> {
+  // Easy API call. Search should have an existing system match in the results, with type being "system" and record having the system data.
+  const response = await fetch(`https://spansh.co.uk/api/dump/${encodeURIComponent(id64)}`);
+  if (!response.ok) throw new Error("Spansh error!");
+  const data: { system: SpanshDumpPPData } = await response.json();
+  if (data && data.system) return pruneSystemDumpPPObject(data.system);
   return null;
 }
 
