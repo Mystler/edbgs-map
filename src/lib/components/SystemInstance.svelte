@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Instance, useCursor, useInteractivity } from "@threlte/extras";
-  import { type SpanshSystem } from "../SpanshAPI";
+  import { type SpanshDumpPPData, type SpanshSystem } from "../SpanshAPI";
   import { Spring } from "svelte/motion";
   import { CurrentMeasurement } from "./Measurement.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -10,6 +10,8 @@
   import { Powers } from "$lib/Constants";
   import { T } from "@threlte/core";
   import type { Group, Matrix4 } from "three";
+  import { base } from "$app/paths";
+  import Dialog from "./Dialog.svelte";
 
   interface Props {
     system: SpanshSystem;
@@ -39,6 +41,29 @@
       update(vInstance.matrixWorld);
     }
   });
+
+  let ppData = $state<Promise<SpanshDumpPPData | null>>();
+  let showPPData = $state(false);
+  async function fetchPPData(): Promise<SpanshDumpPPData | null> {
+    let id64 = system.id64;
+    let response;
+    if (!id64) {
+      response = await fetch(`${base}/api/system/${system.name}`);
+      if (!response.ok) {
+        alert(`Error while fetching data for system: ${system.name}`);
+        return null;
+      }
+      const idquery = (await response.json()) as SpanshSystem | null;
+      id64 = idquery?.id64;
+    }
+    response = await fetch(`${base}/api/power/system/${system.id64}`);
+    if (!response.ok) {
+      alert(`Error while fetching powerplay data for system: ${system.name}`);
+      return null;
+    }
+    const res = (await response.json()) as SpanshDumpPPData | null;
+    return res;
+  }
 </script>
 
 <T.Group position={[system.x, system.y, -system.z]} scale={systemScale.current}>
@@ -100,6 +125,12 @@
             type,
           });
         }
+      } else if (HUDInfo.ClickMode === "powerplay") {
+        if (!ppData) {
+          ppData = fetchPPData();
+        }
+        showPPData = true;
+        HUDInfo.CurrentPPInfo = systemPPInfo;
       }
     }}
   />
@@ -111,5 +142,60 @@
     <div class="text-2xl" style={`color: ${Powers[system.controlling_power].color}`}>
       {system.controlling_power} ({system.power_state})
     </div>
+  {/if}
+{/snippet}
+
+{#snippet systemPPInfo()}
+  {#if ppData && showPPData}
+    <Dialog
+      onclose={() => {
+        showPPData = false;
+      }}
+      showImmediately={true}
+    >
+      <div>
+        <h2>{system.name}</h2>
+        {#await ppData}
+          <div
+            class="mx-auto size-32 animate-spin rounded-full border-24 border-(--ed-orange) border-t-transparent"
+          ></div>
+        {:then ppInfo}
+          <p><i>(This dialog is a Work in Progress.)</i></p>
+          {#if ppInfo?.controllingPower}
+            <h3 style={`color: ${Powers[ppInfo.controllingPower].color}`}>
+              {ppInfo.controllingPower}
+            </h3>
+            <h4>{ppInfo.powerState}</h4>
+            <div class="flex flex-col gap-2">
+              <div>
+                <b>Progress:</b>
+                {((ppInfo.powerStateControlProgress ?? 0) * 100).toFixed(2)}%
+              </div>
+              <div>
+                <b>Reinforcement:</b>
+                {ppInfo.powerStateReinforcement?.toLocaleString("en-US")}
+              </div>
+              <div>
+                <b>Undermining:</b>
+                {ppInfo.powerStateUndermining?.toLocaleString("en-US")}
+              </div>
+            </div>
+          {:else if ppInfo?.powerConflictProgress}
+            <h3>Acquisition System</h3>
+            <div class="flex flex-col gap-2">
+              {#each ppInfo.powerConflictProgress.sort((a, b) => b.progress - a.progress) as acqPower, index (acqPower.power)}
+                <div>
+                  <b>{index + 1}.</b>
+                  <b style={`color: ${Powers[acqPower.power].color}`}>{acqPower.power}:</b>
+                  {(acqPower.progress * 100).toFixed(2)}%
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p>No Powerplay information found for this system.</p>
+          {/if}
+        {/await}
+      </div>
+    </Dialog>
   {/if}
 {/snippet}

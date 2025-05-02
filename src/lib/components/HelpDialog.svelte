@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { ClickMode } from "$lib/types/HUDInfo.svelte";
   import Dialog from "./Dialog.svelte";
 
   interface Props {
@@ -44,7 +45,10 @@
     <li><kbd>h</kbd>: Toggle Help</li>
     <li><kbd>g</kbd>: Toggle Grid</li>
     <li><kbd>p</kbd>: Toggle Performance Stats</li>
-    <li><kbd>1 to 5</kbd>: Select the corresponding mode in "On System Click"</li>
+    <li>
+      <kbd>1 to {Object.keys(ClickMode).length}</kbd>: Select the corresponding mode in "On System
+      Click"
+    </li>
   </ul>
   <h4>More Tricks</h4>
   <ul class="list-disc pl-4">

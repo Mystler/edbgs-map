@@ -60,7 +60,7 @@
     } else if (e.key === "m") {
       if (sessionManager.isOpen()) sessionManager.close();
       else sessionManager.show();
-    } else if (number > 0 && number <= 5) {
+    } else if (number > 0 && number <= Object.keys(ClickMode).length) {
       HUDInfo.changeClickMode(Object.keys(ClickMode)[number - 1] as keyof typeof ClickMode);
     }
   }}
@@ -146,6 +146,10 @@
   <div class="absolute top-5 left-1/2 -translate-x-1/2">
     <SystemSearch />
   </div>
+
+  {#if HUDInfo.CurrentPPInfo}
+    {@render HUDInfo.CurrentPPInfo()}
+  {/if}
 
   <SessionManager bind:this={sessionManager} bind:mapData={data} />
 

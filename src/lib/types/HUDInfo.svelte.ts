@@ -7,6 +7,7 @@ export const ClickMode = {
   spansh: "Open Spansh",
   measure: "Measure Distance",
   range: "Toggle Range",
+  powerplay: "Show Powerplay Status",
 };
 export type PanMode = "screen" | "grid";
 
@@ -19,7 +20,8 @@ export class LoadingMessage {
 }
 
 export const HUDInfo = new (class {
-  CurrentSystemInfo: Snippet | undefined = $state();
+  CurrentSystemInfo = $state<Snippet>();
+  CurrentPPInfo = $state<Snippet>();
   LoadingMessages: LoadingMessage[] = $state([]);
   TimedMessage: string = $state("");
 
