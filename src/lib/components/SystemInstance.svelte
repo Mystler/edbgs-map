@@ -166,7 +166,7 @@
       showImmediately={true}
     >
       <div class="text-center sm:min-w-sm">
-        <h2 class="pr-6">{system.name}</h2>
+        <h2 class="px-6">{system.name}</h2>
         {#await ppData}
           <div class="flex justify-center overflow-hidden">
             <span
