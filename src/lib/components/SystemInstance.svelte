@@ -162,6 +162,7 @@
     <Dialog
       onclose={() => {
         showPPData = false;
+        ppData = undefined;
       }}
       showImmediately={true}
     >
