@@ -160,14 +160,16 @@
             {/if}
             <div class="flex flex-col gap-2">
               {#each sorted as acqPower, index (acqPower.power)}
+                {@const powerColor = Powers[acqPower.power].color}
+                {@const normalizedProgress = (acqPower.progress / normalize) * 100}
                 <div>
                   <b>{index + 1}.</b>
-                  <b style={`color: ${Powers[acqPower.power].color}`}>{acqPower.power}:</b>
+                  <b style={`color: ${powerColor}`}>{acqPower.power}:</b>
                   {(acqPower.progress * 100).toFixed(2)}%
                 </div>
                 <div
                   class="h-8"
-                  style={`background-color: ${Powers[acqPower.power].color}; width: ${(acqPower.progress / normalize) * 100}%`}
+                  style={`background: linear-gradient(90deg, ${powerColor}, ${powerColor} ${normalizedProgress}%, var(--color-zinc-700) ${normalizedProgress}%`}
                 ></div>
               {/each}
             </div>
