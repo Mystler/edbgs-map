@@ -25,6 +25,7 @@
   import PowerGroup from "./PowerGroup.svelte";
   import { NoToneMapping } from "three";
   import HelpDialog from "./HelpDialog.svelte";
+  import PowerplayInfo from "./PowerplayInfo.svelte";
 
   interface Props {
     data: MapData;
@@ -147,10 +148,7 @@
     <SystemSearch />
   </div>
 
-  {#if HUDInfo.CurrentPPInfo}
-    {@render HUDInfo.CurrentPPInfo()}
-  {/if}
-
+  <PowerplayInfo />
   <SessionManager bind:this={sessionManager} bind:mapData={data} />
 
   <!-- Controls Menu -->

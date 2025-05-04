@@ -1,4 +1,5 @@
 import { browser } from "$app/environment";
+import type { SpanshSystem } from "$lib/SpanshAPI";
 import type { Snippet } from "svelte";
 
 export const ClickMode = {
@@ -21,7 +22,7 @@ export class LoadingMessage {
 
 export const HUDInfo = new (class {
   CurrentSystemInfo = $state<Snippet>();
-  CurrentPPInfo = $state<Snippet>();
+  CurrentPPInfo = $state<SpanshSystem>();
   LoadingMessages: LoadingMessage[] = $state([]);
   TimedMessage: string = $state("");
 
