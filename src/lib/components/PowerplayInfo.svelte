@@ -85,6 +85,14 @@
               <div>
                 <b>Cycle Start:</b>
                 {(controlData.startProgress * 100).toFixed(2)}%
+                {#if (ppInfo.powerStateControlProgress ?? 0) > 1 && controlData.adjustedProgress >= 0.25 && ppInfo.powerState !== "Stronghold"}
+                  <br />
+                  <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
+                  <i class="text-xs text-yellow-500">
+                    Next tier cap has been reached. Reverse calculation of cycle start value will be
+                    inaccurate!
+                  </i>
+                {/if}
               </div>
               <div>
                 <b>Current Progress:</b>
