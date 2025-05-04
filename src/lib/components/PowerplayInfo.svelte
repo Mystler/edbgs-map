@@ -62,6 +62,8 @@
           {#if ppInfo?.controllingPower}
             <!-- PP Control System Display -->
             {@const controlData = calculatePPControlSegments(ppInfo)}
+            {@const cpDiff =
+              (ppInfo.powerStateReinforcement ?? 0) - (ppInfo.powerStateUndermining ?? 0)}
             <h3 style={`color: ${Powers[ppInfo.controllingPower].color}`}>
               {ppInfo.controllingPower}
             </h3>
@@ -82,6 +84,9 @@
                   </span>
                 </div>
               </div>
+              <div class={[cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
+                {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
+              </div>
               <div>
                 <b>Cycle Start:</b>
                 {(controlData.startProgress * 100).toFixed(2)}%
@@ -100,9 +105,9 @@
                 {#if (ppInfo.powerStateControlProgress ?? 0) > 1 && ppInfo.powerState !== "Stronghold"}
                   ({(controlData.adjustedProgress * 100).toFixed(2)}%)
                 {/if}
-                {#if (ppInfo.powerStateReinforcement ?? 0) > (ppInfo.powerStateUndermining ?? 0)}
+                {#if cpDiff > 0}
                   <FaIcon class="inline text-[#00a5ff]" icon={faChevronUp} />
-                {:else if (ppInfo.powerStateReinforcement ?? 0) < (ppInfo.powerStateUndermining ?? 0)}
+                {:else if cpDiff < 0}
                   <FaIcon class="inline text-[#ff3632]" icon={faChevronDown} />
                 {/if}
               </div>
