@@ -218,6 +218,7 @@
             relative
             live
             timestamp={ppInfo.date}
+            title={undefined}
           />
         </Tooltip>
       </i>
