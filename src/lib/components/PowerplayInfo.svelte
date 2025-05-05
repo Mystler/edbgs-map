@@ -16,6 +16,7 @@
   import { calculatePPControlSegments, getLastPPTickDate } from "$lib/Helpers";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { Powers } from "$lib/Constants";
+  import Tooltip from "./Tooltip.svelte";
 
   async function fetchPPData(): Promise<SpanshDumpPPData | null> {
     const system = HUDInfo.CurrentPPInfo;
@@ -203,18 +204,22 @@
     <p>
       <i>
         Last Update:<br />
-        <Time
-          class={{
-            "text-red-500": date && date < lastTick,
-            underline: true,
-            "decoration-dashed": true,
-            "decoration-1": true,
-          }}
-          relative
-          live
-          timestamp={ppInfo.date}
-          title={date.toLocaleString()}
-        />
+        <Tooltip>
+          {#snippet tooltip()}
+            {date.toLocaleString()}
+          {/snippet}
+          <Time
+            class={{
+              "text-red-500": date && date < lastTick,
+              underline: true,
+              "decoration-dashed": true,
+              "decoration-1": true,
+            }}
+            relative
+            live
+            timestamp={ppInfo.date}
+          />
+        </Tooltip>
       </i>
     </p>
   {/if}
