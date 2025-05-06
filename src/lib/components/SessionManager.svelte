@@ -64,13 +64,13 @@
 
 <Dialog bind:this={dlg}>
   <h2>Session Manager</h2>
-  <p>
+  <p class="text-sm">
     Here, you can save your current view under a name so that you can load it again in the future.
   </p>
-  <p>
-    The current view settings will all be stored. Note, however, that factions will always load
-    their latest system list and that colonization targets for each colonization range are also not
-    stored.
+  <p class="text-sm">
+    The current view settings will all be stored. Note, however, that factions and powers will
+    always load their latest system list and that colonization targets for each colonization range
+    are also not stored.
   </p>
   <hr />
   <form class="flex gap-1">
