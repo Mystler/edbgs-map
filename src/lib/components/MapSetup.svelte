@@ -38,6 +38,15 @@
   </p>
 
   <h3>Minor Factions</h3>
+  <p>
+    <button
+      type="button"
+      class="link-btn"
+      onclick={() => {
+        data.Factions = [];
+      }}>Clear All Factions</button
+    >
+  </p>
   {#if data.Factions.length > 0}
     <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
@@ -96,17 +105,19 @@
       onclick={() => {
         data.addFaction();
       }}
-    /><br />
+    />
+  </p>
+
+  <h3>Individual Systems</h3>
+  <p>
     <button
       type="button"
       class="link-btn"
       onclick={() => {
-        data.Factions = [];
-      }}>Clear All Factions</button
+        data.Systems = [];
+      }}>Clear All Systems</button
     >
   </p>
-
-  <h3>Individual Systems</h3>
   {#if data.Systems.length > 0}
     <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
@@ -158,17 +169,19 @@
       onclick={() => {
         data.addSystem();
       }}
-    /><br />
+    />
+  </p>
+
+  <h3>Ranges</h3>
+  <p>
     <button
       type="button"
       class="link-btn"
       onclick={() => {
-        data.Systems = [];
-      }}>Clear All Systems</button
+        data.Spheres = [];
+      }}>Clear All Ranges</button
     >
   </p>
-
-  <h3>Ranges</h3>
   {#if data.Spheres.length > 0}
     <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
@@ -220,17 +233,19 @@
       onclick={() => {
         data.addSphere();
       }}
-    /><br />
+    />
+  </p>
+
+  <h3>Powers</h3>
+  <p>
     <button
       type="button"
       class="link-btn"
       onclick={() => {
-        data.Spheres = [];
-      }}>Clear All Ranges</button
+        data.Powers = [];
+      }}>Clear All Powers</button
     >
   </p>
-
-  <h3>Powers</h3>
   {#if data.Powers.length > 0}
     <div class="overflow-auto" transition:slide>
       <table class="mx-auto">
@@ -277,14 +292,7 @@
       onclick={() => {
         data.addPower();
       }}
-    /><br />
-    <button
-      type="button"
-      class="link-btn"
-      onclick={() => {
-        data.Powers = [];
-      }}>Clear All Powers</button
-    >
+    />
   </p>
 
   <h3>Camera Setup</h3>
