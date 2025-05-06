@@ -4,11 +4,13 @@ A faction map tool written with Svelte, Threlte, TypeScript, TailwindCSS, and Fo
 
 ## Setup
 
-In order to use Redis for caching, enable it before building by creating a file called `.env.local` and put in the line:
+In order to use Valkey for caching, enable it before building by creating a file called `.env.local` and put in the line:
 
 ```
-VITE_USE_REDIS=true
+VITE_USE_VALKEY=true
 ```
+
+(You can also set `VITE_VALKEY_HOST` and `VITE_VALKEY_PORT` to use non-default connection information.)
 
 This uses PNPM as the intended package manager. To use the codebase:
 
@@ -31,9 +33,9 @@ module.exports = {
       name: "edbgs-map",
       script: "build/index.js",
       env: {
-        PORT: 8001,
+        PORT: 8000,
         HOST: "127.0.0.1",
-        ORIGIN: "https://www.prismatic-imperium.com",
+        ORIGIN: "https://www.example.com",
       },
     },
   ],

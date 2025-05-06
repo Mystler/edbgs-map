@@ -1,4 +1,4 @@
-import { getCache, setTimedCache } from "$lib/RedisCache";
+import { getCache, setTimedCache } from "$lib/ValkeyCache";
 import { fetchSystemPPData, type SpanshDumpPPData } from "$lib/SpanshAPI";
 import { json } from "@sveltejs/kit";
 
