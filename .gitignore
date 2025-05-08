@@ -1,5 +1,4 @@
 node_modules
-.vscode/tasks.json
 
 # Output
 .output
@@ -23,5 +22,8 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
+# Project
+.vscode/tasks.json
+dump.rdb
 db.sqlite3
 pm2.config.cjs
