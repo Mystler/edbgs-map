@@ -70,7 +70,7 @@
             </h3>
             <h4>{ppInfo.powerState}</h4>
             <div class="flex flex-col items-center gap-2">
-              <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+              <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 font-medium">
                 <div class="flex items-center justify-end gap-2">
                   <span class="text-[#ff3632]">
                     {ppInfo.powerStateUndermining?.toLocaleString("en-US")}
@@ -85,7 +85,13 @@
                   </span>
                 </div>
               </div>
-              <div class={[cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
+              <div
+                class={[
+                  "font-semibold",
+                  cpDiff > 0 && "text-[#00a5ff]",
+                  cpDiff < 0 && "text-[#ff3632]",
+                ]}
+              >
                 {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
               </div>
               <div>
