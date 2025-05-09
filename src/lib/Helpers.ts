@@ -91,7 +91,12 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
     totalCP - (data.powerStateReinforcement ?? 0) + (data.powerStateUndermining ?? 0);
   let currentBar = totalCPToBarPercent(totalCP);
   let startBar = totalCPToBarPercent(cycleStartCP);
-  const adjustedProgress = segmentProgress > 1 ? (currentBar % 0.25) / 0.25 : segmentProgress;
+  const adjustedProgress =
+    segmentProgress > 1
+      ? (currentBar % 0.25) / 0.25
+      : segmentProgress < 0
+        ? -(1 - (currentBar % 0.25) / 0.25)
+        : segmentProgress;
 
   currentBar = Math.max(0, Math.min(1, currentBar));
   startBar = Math.max(0, Math.min(1, startBar));

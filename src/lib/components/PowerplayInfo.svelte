@@ -97,11 +97,11 @@
               <div>
                 <b>Cycle Start:</b>
                 {(controlData.startProgress * 100).toFixed(2)}%
-                {#if (ppInfo.powerStateControlProgress ?? 0) > 1 && controlData.adjustedProgress >= 0.25 && ppInfo.powerState !== "Stronghold"}
+                {#if ((ppInfo.powerStateControlProgress ?? 0) > 1 && controlData.adjustedProgress >= 0.25 && ppInfo.powerState !== "Stronghold") || ((ppInfo.powerStateControlProgress ?? 0) < 0 && controlData.adjustedProgress <= -0.25 && ppInfo.powerState !== "Exploited")}
                   <br />
                   <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
                   <i class="text-xs text-yellow-500">
-                    Next tier cap has been reached. Reverse calculation of cycle start value will be
+                    Tier cap has been reached. Reverse calculation of cycle start value will be
                     inaccurate!
                   </i>
                 {/if}
@@ -109,7 +109,7 @@
               <div>
                 <b>Current Progress:</b>
                 {((ppInfo.powerStateControlProgress ?? 0) * 100).toFixed(2)}%
-                {#if (ppInfo.powerStateControlProgress ?? 0) > 1 && ppInfo.powerState !== "Stronghold"}
+                {#if ((ppInfo.powerStateControlProgress ?? 0) > 1 && ppInfo.powerState !== "Stronghold") || ((ppInfo.powerStateControlProgress ?? 0) < 0 && ppInfo.powerState !== "Exploited")}
                   ({(controlData.adjustedProgress * 100).toFixed(2)}%)
                 {/if}
                 {#if cpDiff > 0}
