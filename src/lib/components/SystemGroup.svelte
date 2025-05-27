@@ -54,12 +54,7 @@
 </script>
 
 {#if systemData}
-  <SystemRenderGroup
-    systems={[systemData]}
-    color={system.color}
-    visible={system.visible}
-    zOffset={1}
-  />
+  <SystemRenderGroup systems={[systemData]} color={system.color} visible={system.visible} zOffset={1} />
   <Billboard
     position={[systemData.x, systemData.y + 1, -systemData.z]}
     visible={system.visible}

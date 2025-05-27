@@ -127,9 +127,7 @@
     <div class="pointer-events-none absolute right-2 bottom-10 w-sm rounded-xl backdrop-blur-xs">
       {#each HUDInfo.LoadingMessages as m, i (i)}
         <div class="flex items-center gap-2 p-2">
-          <span
-            class="size-4 animate-spin rounded-full border-4 border-(--ed-orange) border-t-transparent"
-          ></span>
+          <span class="size-4 animate-spin rounded-full border-4 border-(--ed-orange) border-t-transparent"></span>
           <span class="grow">{m.Message}</span>
         </div>
       {/each}
@@ -183,22 +181,8 @@
         </div>
         <div class="flex items-center gap-2">
           <span>Pan Speed</span>
-          <input
-            class="grow"
-            type="range"
-            min="0.5"
-            max="3"
-            step="0.1"
-            bind:value={HUDInfo.PanSpeed}
-          />
-          <input
-            type="number"
-            class="w-14 p-1"
-            bind:value={HUDInfo.PanSpeed}
-            min="0.5"
-            max="3"
-            step="0.5"
-          />
+          <input class="grow" type="range" min="0.5" max="3" step="0.1" bind:value={HUDInfo.PanSpeed} />
+          <input type="number" class="w-14 p-1" bind:value={HUDInfo.PanSpeed} min="0.5" max="3" step="0.5" />
         </div>
         <div class="flex items-center gap-2">
           <span>Panning Mode</span>
@@ -226,12 +210,7 @@
             <label for={`mfsc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
           </div>
           <div class="flex flex-col items-center">
-            <input
-              id={`mfscl-${i}`}
-              type="checkbox"
-              bind:checked={f.labelVisible}
-              title="Show Label"
-            />
+            <input id={`mfscl-${i}`} type="checkbox" bind:checked={f.labelVisible} title="Show Label" />
             <label for={`mfscl-${i}`} class="text-[8px]" title="Show Label">Lbl</label>
           </div>
           <input class="flex-none" type="color" bind:value={f.color} title="Color" />
@@ -261,12 +240,7 @@
             <label for={`mssc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
           </div>
           <div class="flex flex-col items-center">
-            <input
-              id={`msscl-${i}`}
-              type="checkbox"
-              bind:checked={s.labelVisible}
-              title="Show Label"
-            />
+            <input id={`msscl-${i}`} type="checkbox" bind:checked={s.labelVisible} title="Show Label" />
             <label for={`msscl-${i}`} class="text-[8px]" title="Show Label">Lbl</label>
           </div>
           <input class="flex-none" type="color" bind:value={s.color} title="Color" />
@@ -335,30 +309,15 @@
         <div class="flex items-center gap-1 py-1" transition:slide>
           <label for={`mppve-${i}`} class="grow">{p.name}</label>
           <div class="flex flex-col items-center">
-            <input
-              id={`mppve-${i}`}
-              type="checkbox"
-              bind:checked={p.exploitedVisible}
-              title="Exploited Systems"
-            />
+            <input id={`mppve-${i}`} type="checkbox" bind:checked={p.exploitedVisible} title="Exploited Systems" />
             <label for={`mppve-${i}`} class="text-[8px]" title="Exploited Systens">Exp</label>
           </div>
           <div class="flex flex-col items-center">
-            <input
-              id={`mppvf-${i}`}
-              type="checkbox"
-              bind:checked={p.fortifiedVisible}
-              title="Fortified Systems"
-            />
+            <input id={`mppvf-${i}`} type="checkbox" bind:checked={p.fortifiedVisible} title="Fortified Systems" />
             <label for={`mppvf-${i}`} class="text-[8px]" title="Fortified Systens">For</label>
           </div>
           <div class="flex flex-col items-center">
-            <input
-              id={`mppvs-${i}`}
-              type="checkbox"
-              bind:checked={p.strongholdVisible}
-              title="Stronghold Systems"
-            />
+            <input id={`mppvs-${i}`} type="checkbox" bind:checked={p.strongholdVisible} title="Stronghold Systems" />
             <label for={`mppvs-${i}`} class="text-[8px]" title="Stronghold Systens">Str</label>
           </div>
           <input class="flex-none" type="color" bind:value={p.color} title="Color" />

@@ -28,13 +28,9 @@
 
 <form class="my-4 text-center">
   <h1>Elite Dangerous &ndash; Custom Factions Map Setup</h1>
+  <p>Here you can create a custom map to visualize. Configuration will be stored locally for you.</p>
   <p>
-    Here you can create a custom map to visualize. Configuration will be stored locally for you.
-  </p>
-  <p>
-    <button type="button" class="link-btn" onclick={() => sessionManager.show()}
-      >Manage Saved Sessions</button
-    >
+    <button type="button" class="link-btn" onclick={() => sessionManager.show()}>Manage Saved Sessions</button>
   </p>
 
   <h3>Minor Factions</h3>
@@ -61,11 +57,7 @@
             <tr>
               <td>
                 <div transition:slide>
-                  <AutocompleteInput
-                    dataType="faction"
-                    class="w-32 sm:w-52 md:w-72"
-                    bind:value={faction.name}
-                  />
+                  <AutocompleteInput dataType="faction" class="w-32 sm:w-52 md:w-72" bind:value={faction.name} />
                 </div>
               </td>
               <td>
@@ -127,11 +119,7 @@
             <tr>
               <td>
                 <div transition:slide>
-                  <AutocompleteInput
-                    dataType="system"
-                    class="w-32 sm:w-52 md:w-72"
-                    bind:value={system.name}
-                  />
+                  <AutocompleteInput dataType="system" class="w-32 sm:w-52 md:w-72" bind:value={system.name} />
                 </div>
               </td>
               <td>
@@ -191,11 +179,7 @@
             <tr>
               <td>
                 <div transition:slide>
-                  <AutocompleteInput
-                    dataType="system"
-                    class="w-32 sm:w-52 md:w-72"
-                    bind:value={sphere.name}
-                  />
+                  <AutocompleteInput dataType="system" class="w-32 sm:w-52 md:w-72" bind:value={sphere.name} />
                 </div>
               </td>
               <td><div transition:slide><input type="color" bind:value={sphere.color} /></div></td>
@@ -297,10 +281,9 @@
 
   <h3>Camera Setup</h3>
   <p>
-    By default, the camera will re-use the position from your last visit or the loaded session.<br
+    By default, the camera will re-use the position from your last visit or the loaded session.<br />
+    If you want to initialize the camera to look at a specific system instead, please enter name and distance here:<br
     />
-    If you want to initialize the camera to look at a specific system instead, please enter name and
-    distance here:<br />
     <AutocompleteInput
       dataType="system"
       placeholder="System to look at (optional)"

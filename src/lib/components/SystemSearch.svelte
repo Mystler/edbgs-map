@@ -16,9 +16,7 @@
     if (e.currentTarget.value) {
       const system = LoadedSystems.get(e.currentTarget.value.trim());
       if (system) {
-        if (
-          CurrentCamera.LookAtVector.distanceTo(new Vector3(system.x, system.y, -system.z)) > 0.1
-        ) {
+        if (CurrentCamera.LookAtVector.distanceTo(new Vector3(system.x, system.y, -system.z)) > 0.1) {
           // Hard set tween to current position first
           FlyToTarget.set(
             {

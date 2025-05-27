@@ -25,9 +25,7 @@
       return;
     }
     timeout = setTimeout(async () => {
-      const response = await fetch(
-        `${base}/api/${dataType}/${encodeURIComponent(string)}/autocomplete`,
-      );
+      const response = await fetch(`${base}/api/${dataType}/${encodeURIComponent(string)}/autocomplete`);
       if (response.ok) {
         options = await response.json();
       }

@@ -55,16 +55,13 @@
         <h2 class="px-6">{HUDInfo.CurrentPPInfo.name}</h2>
         {#await ppData}
           <div class="flex justify-center overflow-hidden">
-            <span
-              class="size-32 animate-spin rounded-full border-24 border-(--ed-orange) border-t-transparent"
-            ></span>
+            <span class="size-32 animate-spin rounded-full border-24 border-(--ed-orange) border-t-transparent"></span>
           </div>
         {:then ppInfo}
           {#if ppInfo?.controllingPower}
             <!-- PP Control System Display -->
             {@const controlData = calculatePPControlSegments(ppInfo)}
-            {@const cpDiff =
-              (ppInfo.powerStateReinforcement ?? 0) - (ppInfo.powerStateUndermining ?? 0)}
+            {@const cpDiff = (ppInfo.powerStateReinforcement ?? 0) - (ppInfo.powerStateUndermining ?? 0)}
             <h3 style={`color: ${Powers[ppInfo.controllingPower].color}`}>
               {ppInfo.controllingPower}
             </h3>
@@ -85,13 +82,7 @@
                   </span>
                 </div>
               </div>
-              <div
-                class={[
-                  "font-semibold",
-                  cpDiff > 0 && "text-[#00a5ff]",
-                  cpDiff < 0 && "text-[#ff3632]",
-                ]}
-              >
+              <div class={["font-semibold", cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
                 {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
               </div>
               <div>
@@ -101,8 +92,7 @@
                   <br />
                   <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
                   <i class="text-xs text-yellow-500">
-                    Tier cap has been reached. Reverse calculation of cycle start value will be
-                    inaccurate!
+                    Tier cap has been reached. Reverse calculation of cycle start value will be inaccurate!
                   </i>
                 {/if}
               </div>

@@ -20,8 +20,7 @@
       return [];
     }
     const systems = (await response.json()) as SpanshSystem[];
-    if (systems.length === 0)
-      alert(`Could not find any systems controlled by power: ${power.name}`);
+    if (systems.length === 0) alert(`Could not find any systems controlled by power: ${power.name}`);
     return systems;
   }
 
@@ -45,21 +44,11 @@
 {/key}
 {#key fortifieds}
   {#if fortifieds.length > 0}
-    <SystemRenderGroup
-      systems={fortifieds}
-      color={power.color}
-      visible={power.fortifiedVisible}
-      starType="triangle"
-    />
+    <SystemRenderGroup systems={fortifieds} color={power.color} visible={power.fortifiedVisible} starType="triangle" />
   {/if}
 {/key}
 {#key strongholds}
   {#if strongholds.length > 0}
-    <SystemRenderGroup
-      systems={strongholds}
-      color={power.color}
-      visible={power.strongholdVisible}
-      starType="star"
-    />
+    <SystemRenderGroup systems={strongholds} color={power.color} visible={power.strongholdVisible} starType="star" />
   {/if}
 {/key}

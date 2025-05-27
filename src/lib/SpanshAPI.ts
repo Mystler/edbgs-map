@@ -114,9 +114,7 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
   // Fetch all relevant result pages for the search reference
   let page = 0;
   while (true) {
-    response = await fetch(
-      `https://spansh.co.uk/api/systems/search/recall/${searchData.search_reference}/${page}`,
-    );
+    response = await fetch(`https://spansh.co.uk/api/systems/search/recall/${searchData.search_reference}/${page}`);
     if (!response.ok) throw new Error("Spansh error!");
     const data: SpanshRecallResponse = await response.json();
     systems = systems.concat(data.results.map((x) => pruneSystemObject(x)));
@@ -147,11 +145,7 @@ export async function fetchPowerSystems(name: string): Promise<SpanshSystem[]> {
   return systems;
 }
 
-export async function fetchColonizationTargets(
-  x: number,
-  y: number,
-  z: number,
-): Promise<SpanshSystem[]> {
+export async function fetchColonizationTargets(x: number, y: number, z: number): Promise<SpanshSystem[]> {
   let systems = await fetchSystems({
     filters: {
       distance: { min: "0", max: "15" },
@@ -172,9 +166,7 @@ interface SpanshAutocompleteResponse {
 type AutoCompleteType = "autocomplete_controlling_minor_faction" | "system_names";
 
 export async function autoComplete(name: string, type: AutoCompleteType): Promise<string[]> {
-  const response = await fetch(
-    `https://spansh.co.uk/api/systems/field_values/${type}?q=${encodeURIComponent(name)}`,
-  );
+  const response = await fetch(`https://spansh.co.uk/api/systems/field_values/${type}?q=${encodeURIComponent(name)}`);
   if (response.ok) {
     const data: SpanshAutocompleteResponse = await response.json();
     return data.values;

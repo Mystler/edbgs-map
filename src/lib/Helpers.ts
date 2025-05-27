@@ -36,9 +36,7 @@ export function calculateGeometricMedian(points: SpanshSystem[]) {
 
     for (const point of points) {
       const distance = Math.sqrt(
-        Math.pow(point.x - current.x, 2) +
-          Math.pow(point.y - current.y, 2) +
-          Math.pow(point.z - current.z, 2),
+        Math.pow(point.x - current.x, 2) + Math.pow(point.y - current.y, 2) + Math.pow(point.z - current.z, 2),
       );
       if (distance > 0) {
         const weight = 1 / distance;
@@ -82,13 +80,10 @@ export function getLastPPTickDate() {
  */
 export function calculatePPControlSegments(data: SpanshDumpPPData) {
   const segmentProgress = data.powerStateControlProgress ?? 0;
-  const tierStart =
-    data.powerState === "Stronghold" ? 1350000 : data.powerState === "Fortified" ? 700000 : 350000;
-  const tierRange =
-    data.powerState === "Stronghold" ? 1000000 : data.powerState === "Fortified" ? 650000 : 350000;
+  const tierStart = data.powerState === "Stronghold" ? 1350000 : data.powerState === "Fortified" ? 700000 : 350000;
+  const tierRange = data.powerState === "Stronghold" ? 1000000 : data.powerState === "Fortified" ? 650000 : 350000;
   const totalCP = Math.round(tierStart + segmentProgress * tierRange);
-  const cycleStartCP =
-    totalCP - (data.powerStateReinforcement ?? 0) + (data.powerStateUndermining ?? 0);
+  const cycleStartCP = totalCP - (data.powerStateReinforcement ?? 0) + (data.powerStateUndermining ?? 0);
   let currentBar = totalCPToBarPercent(totalCP);
   let startBar = totalCPToBarPercent(cycleStartCP);
   const adjustedProgress =

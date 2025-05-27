@@ -28,8 +28,7 @@
       return [];
     }
     const systems = (await response.json()) as SpanshSystem[];
-    if (systems.length === 0)
-      alert(`Could not find any systems controlled by faction: ${faction.name}`);
+    if (systems.length === 0) alert(`Could not find any systems controlled by faction: ${faction.name}`);
     return systems;
   }
 
@@ -49,12 +48,7 @@
 
 {#key systems}
   {#if systems.length > 0}
-    <SystemRenderGroup
-      {systems}
-      color={faction.color}
-      visible={faction.visible}
-      zOffset={isNC ? -1 : 0}
-    />
+    <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} zOffset={isNC ? -1 : 0} />
     <Billboard
       position={textPosition}
       visible={faction.visible}

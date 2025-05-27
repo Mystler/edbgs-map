@@ -183,14 +183,7 @@
 </script>
 
 <!-- Render systems themselves -->
-<InstancedMesh
-  id="visual"
-  bind:ref={vMesh}
-  limit={systems.length}
-  range={systems.length}
-  {visible}
-  update={false}
->
+<InstancedMesh id="visual" bind:ref={vMesh} limit={systems.length} range={systems.length} {visible} update={false}>
   {#if starType === "circle"}
     <T.CircleGeometry args={[0.5]} />
   {:else if starType === "triangle"}

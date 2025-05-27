@@ -61,9 +61,7 @@
     if (!sphere.position) return;
     colonizationLoaded = true;
     const m = HUDInfo.showMessage(sphere.name, "Colonization Targets");
-    fetch(
-      `${base}/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`,
-    )
+    fetch(`${base}/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`)
       .then((x) => x.json())
       .then((x) => {
         colonizationTargets = x;
@@ -80,25 +78,13 @@
 </script>
 
 {#if systemData}
-  <T.Mesh
-    position={[systemData.x, systemData.y, -systemData.z]}
-    visible={sphere.visible}
-    transition={global(scale3d)}
-  >
+  <T.Mesh position={[systemData.x, systemData.y, -systemData.z]} visible={sphere.visible} transition={global(scale3d)}>
     {#if sphere.type === "ExpansionCube"}
-      <T.BoxGeometry
-        args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]}
-      />
+      <T.BoxGeometry args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]} />
     {:else}
       <T.SphereGeometry args={[SphereRanges[sphere.type], 32, 32]} />
     {/if}
-    <T.MeshBasicMaterial
-      color={sphere.color}
-      opacity={0.2}
-      transparent={true}
-      depthTest={false}
-      side={DoubleSide}
-    />
+    <T.MeshBasicMaterial color={sphere.color} opacity={0.2} transparent={true} depthTest={false} side={DoubleSide} />
   </T.Mesh>
 {/if}
 {#if colonizationTargets.length > 0}

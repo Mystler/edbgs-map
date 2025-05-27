@@ -1,13 +1,6 @@
 <script lang="ts">
   import { T, useTask } from "@threlte/core";
-  import {
-    Grid,
-    Instance,
-    InstancedMesh,
-    OrbitControls,
-    Text,
-    useInteractivity,
-  } from "@threlte/extras";
+  import { Grid, Instance, InstancedMesh, OrbitControls, Text, useInteractivity } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
@@ -61,9 +54,7 @@
   async function fetchData(): Promise<SpanshSystem | null> {
     let response = await fetch(`${base}/api/system/${cameraSetup.lookAtSystem}`);
     if (!response.ok) {
-      alert(
-        `Error while fetching data from Spansh.co.uk for camera system: ${cameraSetup.lookAtSystem}`,
-      );
+      alert(`Error while fetching data from Spansh.co.uk for camera system: ${cameraSetup.lookAtSystem}`);
       return null;
     }
     const res = (await response.json()) as SpanshSystem | null;
@@ -207,16 +198,8 @@
         shouldUpdate = true;
       }
       if (FlyToTarget.current !== FlyToTarget.target) {
-        controls.target.set(
-          FlyToTarget.current.targetX,
-          FlyToTarget.current.targetY,
-          FlyToTarget.current.targetZ,
-        );
-        controls.object.position.set(
-          FlyToTarget.current.posX,
-          FlyToTarget.current.posY,
-          FlyToTarget.current.posZ,
-        );
+        controls.target.set(FlyToTarget.current.targetX, FlyToTarget.current.targetY, FlyToTarget.current.targetZ);
+        controls.object.position.set(FlyToTarget.current.posX, FlyToTarget.current.posY, FlyToTarget.current.posZ);
         shouldUpdate = true;
       }
       if (shouldUpdate) controls.update();
@@ -225,12 +208,7 @@
   );
 </script>
 
-<svelte:window
-  onmouseup={onMouseChange}
-  onmousedown={onMouseChange}
-  onkeydown={onKeyDown}
-  onkeyup={onKeyUp}
-/>
+<svelte:window onmouseup={onMouseChange} onmousedown={onMouseChange} onkeydown={onKeyDown} onkeyup={onKeyUp} />
 
 <T.PerspectiveCamera
   makeDefault
@@ -239,8 +217,7 @@
   near={1}
   far={2000}
   oncreate={(ref) => {
-    if (cameraSetup.lookAt)
-      ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
+    if (cameraSetup.lookAt) ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
   }}
 >
   <OrbitControls
