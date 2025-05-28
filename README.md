@@ -48,3 +48,7 @@ Then, you can use:
 pm2 start pm2.config.cjs # To run
 pm2 restart pm2.config.cjs # To restart
 ```
+
+## PP-Alerts
+
+WIP; TODO

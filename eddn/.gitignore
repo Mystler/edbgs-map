@@ -1,0 +1,4 @@
+dist/
+node_modules/
+
+pm2.config.cjs
