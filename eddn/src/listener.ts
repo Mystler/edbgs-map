@@ -4,10 +4,6 @@ import { setTimedCache } from "./valkey.js";
 
 let lastMessage: Date | undefined;
 
-function log(msg: string) {
-  console.log(`${new Date().toLocaleString()}: ${msg}`);
-}
-
 async function runEDDNListener() {
   const sock = new Subscriber();
   sock.connect("tcp://eddn.edcd.io:9500");
@@ -59,7 +55,7 @@ async function runTimeoutCatcher() {
   setInterval(async () => {
     const now = new Date();
     if (now.valueOf() - (lastMessage?.valueOf() ?? 0) > 300000) {
-      log("No EDDN messages received in 5 minutes. Exiting to schedule restart!");
+      console.log("No EDDN messages received in 5 minutes. Exiting to schedule restart!");
       process.exit(1);
     }
   }, 300000);
