@@ -35,5 +35,5 @@ interface SpanshDumpPPData {
   powerStateUndermining?: number;
   controllingPower?: string;
   powers?: string[];
-  powerConflictProgress?: { Power: string; ConflictProgress: number }[];
+  powerConflictProgress?: { power: string; progress: number }[];
 }

@@ -20,29 +20,42 @@ async function runEDDNListener() {
     if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
       // Regular journal event for carrier location tracking
       const data = eddn.message as EDDNJournalMessage;
-      if (data.PowerplayStateControlProgress && data.PowerplayStateReinforcement && data.PowerplayStateUndermining) {
-        // Reinforcement system
-        if (
-          data.PowerplayStateReinforcement > 10000 ||
-          data.PowerplayStateUndermining > 10000 ||
-          data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3)
-        ) {
-          // Prune data down to target data
-          const alert: SpanshDumpPPData = {
-            date: data.timestamp,
-            name: data.StarSystem,
-            id64: data.SystemAddress,
-            controllingPower: data.ControllingPower,
-            powerConflictProgress: data.PowerplayConflictProgress,
-            powerState: data.PowerplayState,
-            powerStateControlProgress: data.PowerplayStateControlProgress,
-            powerStateReinforcement: data.PowerplayStateReinforcement,
-            powerStateUndermining: data.PowerplayStateUndermining,
-            powers: data.Powers,
-          };
-          // Cache Alert
-          setTimedCache(`edbgs-map:pp-alert:${data.SystemAddress}`, JSON.stringify(alert));
+      // Reinforcement system
+      if (
+        (data.PowerplayStateReinforcement && data.PowerplayStateReinforcement > 10000) ||
+        (data.PowerplayStateUndermining && data.PowerplayStateUndermining > 10000) ||
+        data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3)
+      ) {
+        // Fix negative overflow
+        if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
+          let scale = 1;
+          scale = 120000;
+          if (data.PowerplayState === "Exploited") {
+            scale = 350000;
+          } else if (data.PowerplayState === "Fortified") {
+            scale = 650000;
+          } else if (data.PowerplayState === "Stronghold") {
+            scale = 1000000;
+          }
+          data.PowerplayStateControlProgress -= 4294967296 / scale;
         }
+        // Prune data down to target data
+        const alert: SpanshDumpPPData = {
+          date: data.timestamp,
+          name: data.StarSystem,
+          id64: data.SystemAddress,
+          controllingPower: data.ControllingPower,
+          powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
+            return { power: x.Power, progress: x.ConflictProgress };
+          }),
+          powerState: data.PowerplayState,
+          powerStateControlProgress: data.PowerplayStateControlProgress,
+          powerStateReinforcement: data.PowerplayStateReinforcement,
+          powerStateUndermining: data.PowerplayStateUndermining,
+          powers: data.Powers,
+        };
+        // Cache Alert
+        setTimedCache(`edbgs-map:pp-alert:${data.SystemAddress}`, JSON.stringify(alert));
       }
     }
   }
