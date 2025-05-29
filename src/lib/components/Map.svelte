@@ -25,7 +25,7 @@
   import PowerGroup from "./PowerGroup.svelte";
   import { NoToneMapping } from "three";
   import HelpDialog from "./HelpDialog.svelte";
-  import PowerplayInfo from "./PowerplayInfo.svelte";
+  import PowerplaySystemDialog from "./PowerplaySystemDialog.svelte";
 
   interface Props {
     data: MapData;
@@ -146,7 +146,7 @@
     <SystemSearch />
   </div>
 
-  <PowerplayInfo />
+  <PowerplaySystemDialog />
   <SessionManager bind:this={sessionManager} bind:mapData={data} />
 
   <!-- Controls Menu -->
