@@ -4,7 +4,7 @@ A faction map tool written with Svelte, Threlte, TypeScript, TailwindCSS, and Fo
 
 ## Setup
 
-In order to use Valkey for caching, enable it before building by creating a file called `.env.local` and put in the line:
+In order to use Valkey for caching, make sure Valkey is installed and enable it before building by creating a file called `.env.local` and putting in the line:
 
 ```
 VITE_USE_VALKEY=true
@@ -37,6 +37,7 @@ module.exports = {
         HOST: "127.0.0.1",
         ORIGIN: "https://www.example.com",
       },
+      time: true,
     },
   ],
 };
@@ -49,6 +50,14 @@ pm2 start pm2.config.cjs # To run
 pm2 restart pm2.config.cjs # To restart
 ```
 
-## PP-Alerts
+## PP Alerts
 
-WIP; TODO
+In order to collect Powerplay Alerts, switch into the `eddn` subfolder, build it, and run the eddn listener as a separate service.
+It will use the Valkey connection information of the base repository, so make sure it is enabled via the `.env.local` file described above.
+
+```bash
+cd eddn
+pnpm i
+pnpm build
+pnpm start
+```
