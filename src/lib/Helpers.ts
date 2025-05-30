@@ -115,3 +115,18 @@ function totalCPToBarPercent(cp: number) {
   }
   return bar;
 }
+
+export function powerStateColor(state?: string) {
+  switch (state) {
+    case "Stronghold":
+      return "#985cb6";
+    case "Fortified":
+      return "#519d52";
+    case "Exploited":
+      return "#b24241";
+    case "Unoccupied":
+      return "#646464";
+    default:
+      return "#ffffff";
+  }
+}

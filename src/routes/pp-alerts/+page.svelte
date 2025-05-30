@@ -1,0 +1,155 @@
+<script lang="ts">
+  import { getLastPPTickDate, powerStateColor } from "$lib/Helpers";
+  import Time from "svelte-time";
+  import type { PageProps } from "./$types";
+  import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
+  import { slide } from "$lib/types/Animations.svelte";
+  import { Powers } from "$lib/Constants";
+  import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+
+  let { data }: PageProps = $props();
+  const lastTick = getLastPPTickDate();
+
+  let displaySystemId = $state<number>();
+
+  const sortingFunctions: { [index: string]: (a: SpanshDumpPPData, b: SpanshDumpPPData) => number } = {
+    "Total Control Points": (a, b) => {
+      return (
+        (a.powerConflictProgress
+          ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
+          : (a.powerStateReinforcement ?? 0) + (a.powerStateUndermining ?? 0)) -
+        (b.powerConflictProgress
+          ? Math.floor(b.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
+          : (b.powerStateReinforcement ?? 0) + (b.powerStateUndermining ?? 0))
+      );
+    },
+    "Control Point Difference": (a, b) => {
+      return (
+        (a.powerConflictProgress
+          ? Math.abs(
+              a.powerConflictProgress
+                .toSorted((x, y) => y.progress - x.progress)
+                .slice(0, 2)
+                .reduce((sum, x, i) => sum + (i === 1 ? -1 : 1) * x.progress * 120000, 0),
+            )
+          : (a.powerStateReinforcement ?? 0) - (a.powerStateUndermining ?? 0)) -
+        (b.powerConflictProgress
+          ? Math.abs(
+              b.powerConflictProgress
+                .toSorted((x, y) => y.progress - x.progress)
+                .slice(0, 2)
+                .reduce((sum, x, i) => sum + (i === 1 ? -1 : 1) * x.progress * 120000, 0),
+            )
+          : (b.powerStateReinforcement ?? 0) - (b.powerStateUndermining ?? 0))
+      );
+    },
+  };
+  let sortBy = $state<keyof typeof sortingFunctions>("Total Control Points");
+  let descending = $state(true);
+
+  let sortedSystems = $derived.by(() => {
+    return data.systems?.toSorted((a, b) => (descending ? -1 : 1) * sortingFunctions[sortBy](a, b));
+  });
+</script>
+
+<div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
+  <h1 class="text-center">Powerplay Alerts</h1>
+  <p class="text-center">Welcome to the War Room.</p>
+  <p class="text-center">
+    This shows all systems that were detected in the last 48h with more than 10k CP of merits this cycle (for Control
+    Systems) or above the 30% conflict threshold (for Acquisitions).
+  </p>
+  <div class="mb-2 flex-col">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="flex flex-col">
+        <b>Sort By</b>
+        <label class="text-sm"><input type="checkbox" title="Descending" bind:checked={descending} /> Desc</label>
+      </div>
+      <select class="max-sm:grow-1" bind:value={sortBy}>
+        {#each Object.keys(sortingFunctions) as sort (sort)}
+          <option>{sort}</option>
+        {/each}
+      </select>
+    </div>
+  </div>
+  {#if sortedSystems}
+    <div class="flex items-start">
+      <div class="flex w-full flex-col gap-2">
+        {#each sortedSystems as system (system.id64)}
+          {@const lastUpdate = new Date(system.date)}
+          {@const cpDiff = (system.powerStateReinforcement ?? 0) - (system.powerStateUndermining ?? 0)}
+          <button
+            onclick={() => {
+              displaySystemId = displaySystemId !== system.id64 ? system.id64 : undefined;
+            }}
+            class={[
+              "flex min-h-20 items-center gap-2 rounded-xl border-2 p-2 text-right",
+              lastUpdate < lastTick
+                ? "border-red-500 bg-red-900/20 hover:bg-red-900/50"
+                : "border-(--ed-orange) bg-zinc-800 hover:bg-zinc-700",
+            ]}
+          >
+            <div
+              class="w-4 flex-none self-stretch"
+              style={`background-color: ${system.controllingPower ? Powers[system.controllingPower].color : "transparent"}`}
+            ></div>
+            <div class="grow-1 text-left font-semibold">{system.name}</div>
+            {#if system.powerStateControlProgress}
+              <div class={["font-semibold", cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
+                {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
+              </div>
+              <div class="basis-32 max-sm:hidden">
+                {((system.powerStateReinforcement ?? 0) + (system.powerStateUndermining ?? 0)).toLocaleString(
+                  "en-US",
+                )}<br />
+                Total
+              </div>
+            {:else}
+              <div class="flex flex-col font-semibold">
+                {#each system.powerConflictProgress
+                  ?.toSorted((a, b) => b.progress - a.progress)
+                  .slice(0, 2) ?? [] as acqPower (acqPower.power)}
+                  <span style={`color: ${Powers[acqPower.power].color}`}>{(acqPower.progress * 100).toFixed(1)}%</span>
+                {/each}
+              </div>
+              <div class="basis-32 max-sm:hidden">
+                {Math.floor(
+                  system.powerConflictProgress?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
+                ).toLocaleString("en-US")}<br />
+                Total
+              </div>
+            {/if}
+            <div
+              class="basis-40 max-lg:hidden"
+              style={`color: ${system.controllingPower ? Powers[system.controllingPower].color : "inherit"}`}
+            >
+              {system.controllingPower}
+            </div>
+            <div class="basis-32 max-sm:hidden" style={`color: ${powerStateColor(system.powerState)}`}>
+              {system.powerState}
+            </div>
+            <div class="basis-32 max-lg:hidden">
+              <Time
+                class={{
+                  "text-red-500": lastUpdate < lastTick,
+                }}
+                relative
+                live
+                timestamp={system.date}
+                title={undefined}
+              />
+            </div>
+          </button>
+          {#if displaySystemId === system.id64}
+            <div transition:slide class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
+              <h2>{system.name}</h2>
+              <PowerplaySystemInfo data={system} />
+            </div>
+          {/if}
+        {/each}
+      </div>
+    </div>
+  {:else}
+    <p>No systems are currently logged.</p>
+  {/if}
+</div>
