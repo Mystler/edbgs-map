@@ -156,8 +156,11 @@
             ></div>
             <div class="grow-1 text-left font-semibold">{system.name}</div>
             {#if system.powerStateControlProgress}
-              <div class={["font-semibold", cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
-                {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
+              <div class="flex flex-col">
+                <span class={["font-semibold", cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
+                  {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
+                </span>
+                <span class="text-xs">({((system.powerStateControlProgress ?? 0) * 100).toFixed(2)}%)</span>
               </div>
               <div class="basis-32 max-sm:hidden">
                 {((system.powerStateReinforcement ?? 0) + (system.powerStateUndermining ?? 0)).toLocaleString(
