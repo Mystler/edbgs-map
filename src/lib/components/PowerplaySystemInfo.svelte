@@ -125,7 +125,7 @@
       <FaIcon icon={faTriangleExclamation} class="inline" /> Conflict Threshold reached!
     </p>
   {/if}
-  <div class="flex flex-col gap-2">
+  <div class="mb-2 flex flex-col gap-2">
     {#each sorted as acqPower, index (acqPower.power)}
       {@const powerColor = Powers[acqPower.power].color}
       {@const normalizedProgress = (acqPower.progress / normalize) * 100}
