@@ -132,7 +132,7 @@
       <div>
         <b>{index + 1}.</b>
         <b style={`color: ${powerColor}`}>{acqPower.power}:</b>
-        {(acqPower.progress * 100).toFixed(2)}%
+        {(acqPower.progress * 100).toFixed(2)}% ({Math.floor(acqPower.progress * 120000).toLocaleString("en-US")})
       </div>
       <div
         class="h-8"
