@@ -68,6 +68,11 @@
   );
 </script>
 
+<svelte:head>
+  <title>Powerplay Alerts</title>
+  <meta name="description" content="Frontier did not give us the War Room, so I made my own..." />
+</svelte:head>
+
 <div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
   <h1 class="text-center">Powerplay Alerts</h1>
   <p class="text-center">Welcome to the War Room.</p>
