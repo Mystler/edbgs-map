@@ -20,12 +20,14 @@ async function runEDDNListener() {
     if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
       // Regular journal event for carrier location tracking
       const data = eddn.message as EDDNJournalMessage;
-      // Reinforcement system
+      // PP Alert filter
       if (
         (data.PowerplayStateReinforcement && data.PowerplayStateReinforcement > 10000) ||
         (data.PowerplayStateUndermining && data.PowerplayStateUndermining > 10000) ||
         data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3)
       ) {
+        // Abort if the message is an outdated one
+        if (lastMessage.valueOf() - new Date(data.timestamp).valueOf() > 300000) continue;
         // Fix negative overflow
         if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
           let scale = 1;
