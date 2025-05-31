@@ -7,10 +7,15 @@
   import { Powers } from "$lib/Constants";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import { browser } from "$app/environment";
+  import { invalidate } from "$app/navigation";
+  import { onMount } from "svelte";
+  import FaIcon from "$lib/components/FaIcon.svelte";
+  import { faRotate } from "@fortawesome/free-solid-svg-icons";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
 
+  let lastRefresh = $state(new Date());
   let displaySystemId = $state<number>();
 
   let availableStates = $derived(
@@ -105,6 +110,18 @@
       localStorage.setItem("ppAlertsSortDesc", JSON.stringify(descending));
     });
   }
+
+  // Auto refreshing
+  function refresh() {
+    invalidate("app:pp-alerts");
+    lastRefresh = new Date();
+  }
+  onMount(() => {
+    const refreshId = setInterval(refresh, 600000);
+    return () => {
+      clearInterval(refreshId);
+    };
+  });
 </script>
 
 <svelte:head>
@@ -115,9 +132,28 @@
 <div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
   <h1 class="text-center">Powerplay Alerts</h1>
   <p class="text-center">Welcome to the War Room.</p>
-  <p class="text-center">
-    This shows all systems that were detected in the last 48h with more than 10k CP of merits this cycle (for Control
-    Systems) or above the 30% conflict threshold (for Acquisitions).
+  <p class="text-center text-sm">
+    This shows all systems that were detected in the last 48h with more than 10k CP of total merits (for Control
+    Systems) or above the 30% threshold (for Acquisitions).
+  </p>
+  <p class="text-right text-xs text-zinc-500">
+    Last Refresh:
+    {#key lastRefresh}<Time relative live timestamp={lastRefresh} title={undefined} />{/key}
+    <button
+      type="button"
+      class="size-6"
+      onclick={(e) => {
+        const button = e.currentTarget;
+        const icon = button.querySelector("svg");
+        icon?.classList.add("animate-spin");
+        button.disabled = true;
+        refresh();
+        setTimeout(() => {
+          icon?.classList.remove("animate-spin");
+          button.disabled = false;
+        }, 1000);
+      }}><FaIcon class="inline" icon={faRotate} /></button
+    >
   </p>
   <div class="mb-2 flex flex-col gap-2">
     <div class="flex flex-wrap items-center gap-2">
