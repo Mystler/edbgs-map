@@ -26,6 +26,9 @@
   import { NoToneMapping } from "three";
   import HelpDialog from "./HelpDialog.svelte";
   import PowerplaySystemDialog from "./PowerplaySystemDialog.svelte";
+  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
+  import { FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
+  import { type SpanshDumpPPData } from "$lib/SpanshAPI";
 
   interface Props {
     data: MapData;
@@ -77,21 +80,40 @@
     }}
     ondrop={(e) => {
       e.preventDefault();
+      const systemDrop = e.dataTransfer?.getData("json/edbgs-map-pp-alert");
+      if (systemDrop) {
+        const system: SpanshDumpPPData = JSON.parse(systemDrop);
+        if (!LoadedSystems.has(system.name)) {
+          FlyToSystemOnceLoaded.value = system.name;
+          data.addSystem({
+            name: system.name,
+            color: system.controllingPower ? Powers[system.controllingPower].color : "#ffffff",
+          });
+        } else {
+          FlyToSystem(system.name);
+        }
+        return;
+      }
       const droplink = e.dataTransfer?.getData("text/html");
-      console.log(droplink);
       if (droplink) {
         // System match
         let match = droplink.match(
           /<a[^>]+(?:inara\.cz\/elite\/starsystem\/|spansh\.co\.uk\/system\/\d+)[^>]*>\s*(.*)\s*<\/a>/m,
         );
         if (match) {
-          data.addSystem({ name: match[1].trim() });
+          const name = match[1].trim().replace(/<[^>]*>/g, "");
+          if (!LoadedSystems.has(name)) {
+            FlyToSystemOnceLoaded.value = name;
+            data.addSystem({ name });
+          } else {
+            FlyToSystem(name);
+          }
           return;
         }
         // Faction match
         match = droplink.match(/<a[^>]+(?:inara\.cz\/elite\/minorfaction\/)[^>]*>\s*(.*)\s*<\/a>/m);
         if (match) {
-          data.addFaction({ name: match[1].trim() });
+          data.addFaction({ name: match[1].trim().replace(/<[^>]*>/g, "") });
           return;
         }
       }

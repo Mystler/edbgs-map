@@ -10,6 +10,7 @@
   import { Powers } from "$lib/Constants";
   import { T } from "@threlte/core";
   import type { Group, Matrix4 } from "three";
+  import { FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
 
   interface Props {
     system: SpanshSystem;
@@ -30,6 +31,9 @@
   const mapData: MapData = getContext("mapData");
 
   LoadedSystems.set(system.name, system);
+  if (FlyToSystemOnceLoaded.value === system.name) {
+    FlyToSystem(system.name);
+  }
   let vInstance: Group;
 
   $effect.pre(() => {

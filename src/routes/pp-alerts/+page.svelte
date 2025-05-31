@@ -224,6 +224,10 @@
                 ? "border-red-500 bg-red-900/20 hover:bg-red-900/50"
                 : "border-(--ed-orange) bg-zinc-800 hover:bg-zinc-700",
             ]}
+            draggable="true"
+            ondragstart={(e) => {
+              e.dataTransfer?.setData("json/edbgs-map-pp-alert", JSON.stringify(system));
+            }}
           >
             <div
               class="w-4 flex-none self-stretch"
