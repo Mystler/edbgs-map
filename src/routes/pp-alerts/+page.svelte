@@ -6,6 +6,7 @@
   import { slide } from "$lib/types/Animations.svelte";
   import { Powers } from "$lib/Constants";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+  import { browser } from "$app/environment";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -66,6 +67,32 @@
   let sortedSystems = $derived(
     filteredSystems?.toSorted((a, b) => (descending ? -1 : 1) * sortingFunctions[sortBy](a, b)),
   );
+
+  // Local Storage handling
+  if (browser) {
+    (() => {
+      const lsPowers = localStorage.getItem("ppAlertsFilterPowers");
+      if (lsPowers) filterPowers = JSON.parse(lsPowers);
+      const lsStates = localStorage.getItem("ppAlertsFilterStates");
+      if (lsStates) filterStates = JSON.parse(lsStates);
+      const lsSortBy = localStorage.getItem("ppAlertsSortBy");
+      if (lsSortBy) sortBy = JSON.parse(lsSortBy);
+      const lsSortDesc = localStorage.getItem("ppAlertsSortDesc");
+      if (lsSortDesc) descending = JSON.parse(lsSortDesc);
+    })();
+    $effect(() => {
+      localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsFilterStates", JSON.stringify(filterStates));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsSortBy", JSON.stringify(sortBy));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsSortDesc", JSON.stringify(descending));
+    });
+  }
 </script>
 
 <svelte:head>
