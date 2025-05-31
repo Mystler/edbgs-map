@@ -51,6 +51,18 @@
           : (b.powerStateReinforcement ?? 0) - (b.powerStateUndermining ?? 0))
       );
     },
+    "Total Undermining": (a, b) => {
+      return (a.powerStateUndermining ?? 0) - (b.powerStateUndermining ?? 0);
+    },
+    "Total Reinforcement": (a, b) => {
+      return (a.powerStateReinforcement ?? 0) - (b.powerStateReinforcement ?? 0);
+    },
+    "Highest Acquisition": (a, b) => {
+      return (
+        (a.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0) -
+        (b.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0)
+      );
+    },
   };
   let sortBy = $state<keyof typeof sortingFunctions>("Total Control Points");
   let descending = $state(true);
