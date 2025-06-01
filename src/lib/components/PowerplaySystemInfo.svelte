@@ -55,7 +55,7 @@
         <br />
         <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
         <i class="text-xs text-yellow-500">
-          Tier cap has been reached. Reverse calculation of cycle start value will be inaccurate!
+          Tier cap has been reached. Reverse calculation of cycle start value will be wrong and moving!
         </i>
       {/if}
     </div>

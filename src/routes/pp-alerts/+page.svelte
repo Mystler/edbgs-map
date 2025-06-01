@@ -10,18 +10,20 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import FaIcon from "$lib/components/FaIcon.svelte";
-  import { faRotate } from "@fortawesome/free-solid-svg-icons";
+  import { faCaretDown, faCaretRight, faRotate } from "@fortawesome/free-solid-svg-icons";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
 
   let lastRefresh = $state(new Date());
+  let showFilters = $state(true);
   let displaySystemId = $state<number>();
 
   let availableStates = $derived(
     [...new Set(data.systems?.filter((x) => x.powerState).map((x) => x.powerState!) ?? [])].sort(),
   );
 
+  let searchSystem = $state("");
   let filterPowers: string[] = $state(Object.keys(Powers));
   let filterStates: string[] = $state((() => availableStates)());
 
@@ -77,7 +79,8 @@
       (x) =>
         (filterPowers.includes(x.controllingPower ?? "") ||
           new Set(filterPowers).intersection(new Set(x.powerConflictProgress?.map((x) => x.power) ?? [])).size > 0) &&
-        filterStates.includes(x.powerState ?? ""),
+        filterStates.includes(x.powerState ?? "") &&
+        (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())),
     ),
   );
 
@@ -96,6 +99,8 @@
       if (lsSortBy) sortBy = JSON.parse(lsSortBy);
       const lsSortDesc = localStorage.getItem("ppAlertsSortDesc");
       if (lsSortDesc) descending = JSON.parse(lsSortDesc);
+      const lsShowFilters = localStorage.getItem("ppAlertsShowFilters");
+      if (lsShowFilters) showFilters = JSON.parse(lsShowFilters);
     })();
     $effect(() => {
       localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
@@ -108,6 +113,9 @@
     });
     $effect(() => {
       localStorage.setItem("ppAlertsSortDesc", JSON.stringify(descending));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsShowFilters", JSON.stringify(showFilters));
     });
   }
 
@@ -159,7 +167,9 @@
     <div class="flex flex-wrap items-center gap-2">
       <div class="flex flex-col">
         <b>Sort By</b>
-        <label class="text-sm"><input type="checkbox" title="Descending" bind:checked={descending} /> Desc</label>
+        <label class="ext-sm">
+          <input type="checkbox" class="align-middle" title="Descending" bind:checked={descending} /> Desc
+        </label>
       </div>
       <select class="px-2 max-sm:grow-1" bind:value={sortBy}>
         {#each Object.keys(sortingFunctions) as sort (sort)}
@@ -167,45 +177,56 @@
         {/each}
       </select>
     </div>
-    <div class="border-1 border-zinc-500"></div>
-    <div class="flex justify-end">
-      <button
-        type="button"
-        class="link-btn"
-        onclick={() => {
-          if (filterPowers.length > 0) filterPowers = [];
-          else filterPowers = Object.keys(Powers);
-        }}>Toggle All</button
-      >
+    <div class="flex items-center gap-2">
+      <button type="button" class="flex items-center gap-1" onclick={() => (showFilters = !showFilters)}>
+        <b>Filters</b>
+        <FaIcon class="text-xl" icon={showFilters ? faCaretDown : faCaretRight} />
+      </button>
+      <div class="h-0 grow-1 border-1 border-zinc-500"></div>
     </div>
-    <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
-      {#each Object.keys(Powers) as power (power)}
-        <label
-          class={[
-            "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center font-semibold hover:bg-zinc-700",
-            filterPowers.includes(power) ? "opacity-100" : "opacity-20",
-          ]}
-        >
-          <span style={`color: ${Powers[power].color}`}>{power}</span>
-          <input type="checkbox" class="hidden" name="filterPowers" bind:group={filterPowers} value={power} />
-        </label>
-      {/each}
-    </div>
-    <div class="border-1 border-zinc-500"></div>
-    <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
-      {#each availableStates as state (state)}
-        <label
-          class={[
-            "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,_var(--text-base))] font-semibold hover:bg-zinc-700",
-            filterStates.includes(state) ? "opacity-100" : "opacity-20",
-          ]}
-        >
-          <span style={`color: ${powerStateColor(state)}`}>{state}</span>
-          <input type="checkbox" class="hidden" name="filterStates" bind:group={filterStates} value={state} />
-        </label>
-      {/each}
-    </div>
-    <div class="border-1 border-zinc-500"></div>
+    {#if showFilters}
+      <div transition:slide class="flex flex-col gap-2">
+        <div class="flex justify-between gap-2">
+          <input type="text" class="w-78 py-1 max-sm:grow-1" placeholder="Search System..." bind:value={searchSystem} />
+          <button
+            type="button"
+            class="link-btn"
+            onclick={() => {
+              if (filterPowers.length > 0) filterPowers = [];
+              else filterPowers = Object.keys(Powers);
+            }}>Toggle All Powers</button
+          >
+        </div>
+        <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+          {#each Object.keys(Powers) as power (power)}
+            <label
+              class={[
+                "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center font-semibold hover:bg-zinc-700",
+                filterPowers.includes(power) ? "opacity-100" : "opacity-20",
+              ]}
+            >
+              <span style={`color: ${Powers[power].color}`}>{power}</span>
+              <input type="checkbox" class="hidden" name="filterPowers" bind:group={filterPowers} value={power} />
+            </label>
+          {/each}
+        </div>
+        <div class="border-1 border-zinc-500"></div>
+        <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+          {#each availableStates as state (state)}
+            <label
+              class={[
+                "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,_var(--text-base))] font-semibold hover:bg-zinc-700",
+                filterStates.includes(state) ? "opacity-100" : "opacity-20",
+              ]}
+            >
+              <span style={`color: ${powerStateColor(state)}`}>{state}</span>
+              <input type="checkbox" class="hidden" name="filterStates" bind:group={filterStates} value={state} />
+            </label>
+          {/each}
+        </div>
+        <div class="border-1 border-zinc-500"></div>
+      </div>
+    {/if}
   </div>
   {#if sortedSystems}
     <div class="flex items-start">
