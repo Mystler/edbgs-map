@@ -284,6 +284,7 @@
                 <span class="text-xs">({((system.powerStateControlProgress ?? 0) * 100).toFixed(2)}%)</span>
               </div>
               <div class="basis-32 max-sm:hidden">
+                <!-- Control system specific -->
                 {#if sortBy === "Total Reinforcement"}
                   {(system.powerStateReinforcement ?? 0).toLocaleString("en-US")}<br />
                   Reinforcement
@@ -298,6 +299,7 @@
                 {/if}
               </div>
             {:else}
+              <!-- Acquisition system specific -->
               <div class="flex flex-col font-semibold">
                 {#each system.powerConflictProgress
                   ?.toSorted((a, b) => b.progress - a.progress)
@@ -306,10 +308,18 @@
                 {/each}
               </div>
               <div class="basis-32 max-sm:hidden">
-                {Math.floor(
-                  system.powerConflictProgress?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
-                ).toLocaleString("en-US")}<br />
-                Total
+                {#if sortBy === "Highest Acquisition"}
+                  {Math.floor(
+                    (system.powerConflictProgress?.toSorted((a, b) => b.progress - a.progress).at(0)?.progress ?? 0) *
+                      120000,
+                  ).toLocaleString("en-US")}<br />
+                  1st Place
+                {:else}
+                  {Math.floor(
+                    system.powerConflictProgress?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
+                  ).toLocaleString("en-US")}<br />
+                  Total
+                {/if}
               </div>
             {/if}
             <div
