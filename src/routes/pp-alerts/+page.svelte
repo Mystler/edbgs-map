@@ -27,7 +27,7 @@
   let filterPowers: string[] = $state(Object.keys(Powers));
   let filterStates: string[] = $state((() => availableStates)());
 
-  const sortingFunctions: { [index: string]: (a: SpanshDumpPPData, b: SpanshDumpPPData) => number } = {
+  const sortingFunctions = {
     "Total Control Points": (a, b) => {
       return (
         (a.powerConflictProgress
@@ -70,7 +70,7 @@
         (b.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0)
       );
     },
-  };
+  } as const satisfies Record<string, (a: SpanshDumpPPData, b: SpanshDumpPPData) => number>;
   let sortBy = $state<keyof typeof sortingFunctions>("Total Control Points");
   let descending = $state(true);
 
@@ -138,6 +138,7 @@
 </svelte:head>
 
 <div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
+  <!-- Intro section -->
   <h1 class="text-center">Powerplay Alerts</h1>
   <p class="text-center">Welcome to the War Room.</p>
   <p class="text-center text-sm">
@@ -164,6 +165,7 @@
     >
   </p>
   <div class="mb-2 flex flex-col gap-2">
+    <!-- Sorting -->
     <div class="flex flex-wrap items-center gap-2">
       <div class="flex flex-col">
         <b>Sort By</b>
@@ -185,6 +187,7 @@
       <div class="h-0 grow-1 border-1 border-zinc-500"></div>
     </div>
     {#if showFilters}
+      <!-- Filters -->
       <div transition:slide class="flex flex-col gap-2">
         <div class="flex justify-between gap-2">
           <div class="relative">
@@ -245,6 +248,7 @@
       </div>
     {/if}
   </div>
+  <!-- Systems list -->
   {#if sortedSystems}
     <div class="flex items-start">
       <div class="flex w-full flex-col gap-2">
@@ -280,10 +284,18 @@
                 <span class="text-xs">({((system.powerStateControlProgress ?? 0) * 100).toFixed(2)}%)</span>
               </div>
               <div class="basis-32 max-sm:hidden">
-                {((system.powerStateReinforcement ?? 0) + (system.powerStateUndermining ?? 0)).toLocaleString(
-                  "en-US",
-                )}<br />
-                Total
+                {#if sortBy === "Total Reinforcement"}
+                  {(system.powerStateReinforcement ?? 0).toLocaleString("en-US")}<br />
+                  Reinforcement
+                {:else if sortBy === "Total Undermining"}
+                  {(system.powerStateUndermining ?? 0).toLocaleString("en-US")}<br />
+                  Undermining
+                {:else}
+                  {((system.powerStateReinforcement ?? 0) + (system.powerStateUndermining ?? 0)).toLocaleString(
+                    "en-US",
+                  )}<br />
+                  Total
+                {/if}
               </div>
             {:else}
               <div class="flex flex-col font-semibold">
