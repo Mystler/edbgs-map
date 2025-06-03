@@ -10,7 +10,7 @@
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
   import FaIcon from "$lib/components/FaIcon.svelte";
-  import { faCaretDown, faCaretRight, faRotate } from "@fortawesome/free-solid-svg-icons";
+  import { faCaretDown, faCaretRight, faRotate, faXmark } from "@fortawesome/free-solid-svg-icons";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -187,7 +187,24 @@
     {#if showFilters}
       <div transition:slide class="flex flex-col gap-2">
         <div class="flex justify-between gap-2">
-          <input type="text" class="w-78 py-1 max-sm:grow-1" placeholder="Search System..." bind:value={searchSystem} />
+          <div class="relative">
+            <input
+              type="text"
+              class="w-78 p-1 pr-4 max-sm:grow-1"
+              placeholder="Search System..."
+              bind:value={searchSystem}
+            />
+            {#if searchSystem}
+              <button
+                type="button"
+                class="absolute top-1/2 right-1 -translate-y-1/2"
+                title="Clear Search"
+                onclick={() => {
+                  searchSystem = "";
+                }}><FaIcon icon={faXmark} /></button
+              >
+            {/if}
+          </div>
           <button
             type="button"
             class="link-btn"
