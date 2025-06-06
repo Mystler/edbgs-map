@@ -26,6 +26,7 @@
   let searchSystem = $state("");
   let filterPowers: string[] = $state(Object.keys(Powers));
   let filterStates: string[] = $state((() => availableStates)());
+  let includePrevCycle = $state(false);
 
   const sortingFunctions = {
     "Total Control Points": (a, b) => {
@@ -80,7 +81,8 @@
         (filterPowers.includes(x.controllingPower ?? "") ||
           new Set(filterPowers).intersection(new Set(x.powerConflictProgress?.map((x) => x.power) ?? [])).size > 0) &&
         filterStates.includes(x.powerState ?? "") &&
-        (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())),
+        (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())) &&
+        (includePrevCycle || new Date(x.date) > lastTick),
     ),
   );
 
@@ -101,6 +103,8 @@
       if (lsSortDesc) descending = JSON.parse(lsSortDesc);
       const lsShowFilters = localStorage.getItem("ppAlertsShowFilters");
       if (lsShowFilters) showFilters = JSON.parse(lsShowFilters);
+      const lsIncludePrevious = localStorage.getItem("ppAlertsIncludePrevious");
+      if (lsIncludePrevious) includePrevCycle = JSON.parse(lsIncludePrevious);
     })();
     $effect(() => {
       localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
@@ -116,6 +120,9 @@
     });
     $effect(() => {
       localStorage.setItem("ppAlertsShowFilters", JSON.stringify(showFilters));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsIncludePrevious", JSON.stringify(includePrevCycle));
     });
   }
 
@@ -244,6 +251,8 @@
             </label>
           {/each}
         </div>
+        <div class="border-1 border-zinc-500"></div>
+        <div><label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label></div>
         <div class="border-1 border-zinc-500"></div>
       </div>
     {/if}
