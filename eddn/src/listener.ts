@@ -30,8 +30,7 @@ async function runEDDNListener() {
         if (lastMessage.valueOf() - new Date(data.timestamp).valueOf() > 300000) continue;
         // Fix negative overflow
         if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
-          let scale = 1;
-          scale = 120000;
+          let scale = 120000;
           if (data.PowerplayState === "Exploited") {
             scale = 350000;
           } else if (data.PowerplayState === "Fortified") {
