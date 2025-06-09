@@ -59,6 +59,14 @@
           : (b.powerStateReinforcement ?? 0) - (b.powerStateUndermining ?? 0))
       );
     },
+    "Segment Control Progress": (a, b) => {
+      return (
+        (a.powerStateControlProgress ?? 0) +
+        (a.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0) -
+        (b.powerStateControlProgress ?? 0) -
+        (b.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0)
+      );
+    },
     "Total Undermining": (a, b) => {
       return (a.powerStateUndermining ?? 0) - (b.powerStateUndermining ?? 0);
     },
