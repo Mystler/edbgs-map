@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "target": "es2022",
+    "target": "esnext",
     "module": "nodenext",
     "removeComments": true,
     "noImplicitAny": true,

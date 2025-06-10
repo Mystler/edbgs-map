@@ -31,6 +31,11 @@ if (process.env.VITE_USE_VALKEY === "true") {
   console.error("Parent environment was not set to use Valkey via VITE_USE_VALKEY=true in .env.local!");
 }
 
+export async function getCache(key: string): Promise<string | null> {
+  if (!client || isReconnecting) return null;
+  return await client.get(key);
+}
+
 export async function setTimedCache(key: string, value: string, ttl: number = 172800) {
   if (!client || isReconnecting) return;
   await client.set(key, value, "EX", ttl);

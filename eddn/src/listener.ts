@@ -1,6 +1,7 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
-import { setTimedCache } from "./valkey.js";
+import { getCache, setTimedCache } from "./valkey.js";
+import { getLastPPTickDate } from "./powerplay.js";
 
 let lastMessage: Date | undefined;
 
@@ -26,8 +27,31 @@ async function runEDDNListener() {
         (data.PowerplayStateUndermining && data.PowerplayStateUndermining > 10000) ||
         data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3)
       ) {
-        // Abort if the message is an outdated one
-        if (lastMessage.valueOf() - new Date(data.timestamp).valueOf() > 300000) continue;
+        const date = new Date(data.timestamp);
+        // Grab existing cache
+        const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
+        const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
+        if (prevData) {
+          const prevDate = new Date(prevData.date);
+          // Reject outdated data
+          if (prevDate > date) continue; // Already got newer data (by timestamp)
+          if (prevDate > getLastPPTickDate()) {
+            // During the same cycle, control numbers are only allowed to go up.
+            if (
+              (data.PowerplayStateReinforcement &&
+                data.PowerplayStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
+              (data.PowerplayStateUndermining && data.PowerplayStateUndermining < (prevData.powerStateUndermining ?? 0))
+            )
+              continue; // Reinforcement or UM went down, skip
+            if (
+              data.PowerplayConflictProgress &&
+              data.PowerplayConflictProgress.toSorted((a, b) => b.ConflictProgress - a.ConflictProgress).some(
+                (x, i) => (prevData.powerConflictProgress?.[i]?.progress ?? 0) > x.ConflictProgress,
+              )
+            )
+              continue; // Acquisition went down, skip
+          }
+        }
         // Fix negative overflow
         if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
           let scale = 120000;
