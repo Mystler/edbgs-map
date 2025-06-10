@@ -27,6 +27,7 @@
   let filterPowers: string[] = $state(Object.keys(Powers));
   let filterStates: string[] = $state((() => availableStates)());
   let includePrevCycle = $state(false);
+  let excludeMaxedStrongholds = $state(false);
 
   const sortingFunctions = {
     "Total Control Points": (a, b) => {
@@ -90,7 +91,8 @@
           new Set(filterPowers).intersection(new Set(x.powerConflictProgress?.map((x) => x.power) ?? [])).size > 0) &&
         filterStates.includes(x.powerState ?? "") &&
         (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())) &&
-        (includePrevCycle || new Date(x.date) > lastTick),
+        (includePrevCycle || new Date(x.date) > lastTick) &&
+        (!excludeMaxedStrongholds || x.powerState !== "Stronghold" || (x.powerStateControlProgress ?? 0) < 1.0),
     ),
   );
 
@@ -113,6 +115,8 @@
       if (lsShowFilters) showFilters = JSON.parse(lsShowFilters);
       const lsIncludePrevious = localStorage.getItem("ppAlertsIncludePrevious");
       if (lsIncludePrevious) includePrevCycle = JSON.parse(lsIncludePrevious);
+      const lsExcludeMaxed = localStorage.getItem("ppAlertsExcludeMaxedStrongholds");
+      if (lsExcludeMaxed) excludeMaxedStrongholds = JSON.parse(lsExcludeMaxed);
     })();
     $effect(() => {
       localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
@@ -131,6 +135,9 @@
     });
     $effect(() => {
       localStorage.setItem("ppAlertsIncludePrevious", JSON.stringify(includePrevCycle));
+    });
+    $effect(() => {
+      localStorage.setItem("ppAlertsExcludeMaxedStrongholds", JSON.stringify(excludeMaxedStrongholds));
     });
   }
 
@@ -184,7 +191,7 @@
     <div class="flex flex-wrap items-center gap-2">
       <div class="flex flex-col">
         <b>Sort By</b>
-        <label class="ext-sm">
+        <label class="text-sm">
           <input type="checkbox" class="align-middle" title="Descending" bind:checked={descending} /> Desc
         </label>
       </div>
@@ -260,7 +267,10 @@
           {/each}
         </div>
         <div class="border-1 border-zinc-500"></div>
-        <div><label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label></div>
+        <div class="flex flex-wrap gap-2">
+          <label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label>
+          <label><input type="checkbox" bind:checked={excludeMaxedStrongholds} /> Exclude Maxed Strongholds</label>
+        </div>
         <div class="border-1 border-zinc-500"></div>
       </div>
     {/if}
