@@ -1,7 +1,7 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
 import { getCache, setTimedCache } from "./valkey.js";
-import { getLastPPTickDate } from "./powerplay.js";
+import { checkForSnipe, getLastPPTickDate, updateLastPPTickDate } from "./powerplay.js";
 
 let lastMessage: Date | undefined;
 
@@ -19,68 +19,73 @@ async function runEDDNListener() {
     const eddn: EDDNMessage = JSON.parse(inflateSync(msg).toString());
     if (!eddn.header.gameversion?.startsWith("4")) continue;
     if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
-      // Regular journal event for carrier location tracking
+      // Regular journal event
       const data = eddn.message as EDDNJournalMessage;
+      const date = new Date(data.timestamp);
+      // Calculate latest PP tick, for re-use
+      updateLastPPTickDate();
+      // Fix negative overflow
+      if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
+        let scale = 120000;
+        if (data.PowerplayState === "Exploited") {
+          scale = 350000;
+        } else if (data.PowerplayState === "Fortified") {
+          scale = 650000;
+        } else if (data.PowerplayState === "Stronghold") {
+          scale = 1000000;
+        }
+        data.PowerplayStateControlProgress -= 4294967296 / scale;
+      }
+      // Prune data down to PP target data in Spansh Format
+      const ppData: SpanshDumpPPData = {
+        date: data.timestamp,
+        name: data.StarSystem,
+        id64: data.SystemAddress,
+        controllingPower: data.ControllingPower,
+        powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
+          return { power: x.Power, progress: x.ConflictProgress };
+        }),
+        powerState: data.PowerplayState,
+        powerStateControlProgress: data.PowerplayStateControlProgress,
+        powerStateReinforcement: data.PowerplayStateReinforcement,
+        powerStateUndermining: data.PowerplayStateUndermining,
+        powers: data.Powers,
+      };
+      // Grab existing cache
+      const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
+      const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
+      if (prevData) {
+        const prevDate = new Date(prevData.date);
+        // Reject outdated data
+        if (prevDate > date) continue; // Already got newer data (by timestamp)
+        if (prevDate > getLastPPTickDate()) {
+          // During the same cycle, control numbers are only allowed to go up.
+          if (
+            (data.PowerplayStateReinforcement &&
+              data.PowerplayStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
+            (data.PowerplayStateUndermining && data.PowerplayStateUndermining < (prevData.powerStateUndermining ?? 0))
+          )
+            continue; // Reinforcement or UM went down, skip
+          if (
+            data.PowerplayConflictProgress &&
+            data.PowerplayConflictProgress.toSorted((a, b) => b.ConflictProgress - a.ConflictProgress).some(
+              (x, i) => (prevData.powerConflictProgress?.[i]?.progress ?? 0) > x.ConflictProgress,
+            )
+          )
+            continue; // Acquisition went down, skip
+        }
+      }
+      // Do some data analysis if a snipe may have happened and log it asynchronously.
+      const snipe = checkForSnipe(prevData, ppData);
       // PP Alert filter
       if (
         (data.PowerplayStateReinforcement && data.PowerplayStateReinforcement > 10000) ||
         (data.PowerplayStateUndermining && data.PowerplayStateUndermining > 10000) ||
-        data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3)
+        data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3) ||
+        snipe
       ) {
-        const date = new Date(data.timestamp);
-        // Grab existing cache
-        const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
-        const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
-        if (prevData) {
-          const prevDate = new Date(prevData.date);
-          // Reject outdated data
-          if (prevDate > date) continue; // Already got newer data (by timestamp)
-          if (prevDate > getLastPPTickDate()) {
-            // During the same cycle, control numbers are only allowed to go up.
-            if (
-              (data.PowerplayStateReinforcement &&
-                data.PowerplayStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
-              (data.PowerplayStateUndermining && data.PowerplayStateUndermining < (prevData.powerStateUndermining ?? 0))
-            )
-              continue; // Reinforcement or UM went down, skip
-            if (
-              data.PowerplayConflictProgress &&
-              data.PowerplayConflictProgress.toSorted((a, b) => b.ConflictProgress - a.ConflictProgress).some(
-                (x, i) => (prevData.powerConflictProgress?.[i]?.progress ?? 0) > x.ConflictProgress,
-              )
-            )
-              continue; // Acquisition went down, skip
-          }
-        }
-        // Fix negative overflow
-        if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
-          let scale = 120000;
-          if (data.PowerplayState === "Exploited") {
-            scale = 350000;
-          } else if (data.PowerplayState === "Fortified") {
-            scale = 650000;
-          } else if (data.PowerplayState === "Stronghold") {
-            scale = 1000000;
-          }
-          data.PowerplayStateControlProgress -= 4294967296 / scale;
-        }
-        // Prune data down to target data
-        const alert: SpanshDumpPPData = {
-          date: data.timestamp,
-          name: data.StarSystem,
-          id64: data.SystemAddress,
-          controllingPower: data.ControllingPower,
-          powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
-            return { power: x.Power, progress: x.ConflictProgress };
-          }),
-          powerState: data.PowerplayState,
-          powerStateControlProgress: data.PowerplayStateControlProgress,
-          powerStateReinforcement: data.PowerplayStateReinforcement,
-          powerStateUndermining: data.PowerplayStateUndermining,
-          powers: data.Powers,
-        };
         // Cache Alert
-        setTimedCache(`edbgs-map:pp-alert:${data.SystemAddress}`, JSON.stringify(alert));
+        setTimedCache(`edbgs-map:pp-alert:${data.SystemAddress}`, JSON.stringify(ppData));
       }
     }
   }
