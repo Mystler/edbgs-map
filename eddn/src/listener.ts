@@ -22,6 +22,8 @@ async function runEDDNListener() {
       // Regular journal event
       const data = eddn.message as EDDNJournalMessage;
       const date = new Date(data.timestamp);
+      // Reject timestamps older than 5min
+      if (lastMessage.valueOf() - new Date(data.timestamp).valueOf() > 300000) continue;
       // Calculate latest PP tick, for re-use
       updateLastPPTickDate();
       // Fix negative overflow
