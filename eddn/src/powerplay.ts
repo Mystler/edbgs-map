@@ -30,7 +30,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       const prevValue = prevData?.powerConflictProgress?.find((x) => x.power === p.power)?.progress ?? 0;
       const diff = p.progress - prevValue;
       if (p.progress >= 0.5 && diff >= 0.2) {
-        logSnipe(currData.name, "Acquisition", p.power, diff * 120000, prevData, currData);
+        logSnipe(currData.name, "Acquisition", p.power, Math.floor(diff * 120000), prevData, currData);
         hadSnipe = true;
       }
     }
@@ -45,7 +45,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
         currData.name,
         "EOC Acquisition",
         currData.controllingPower,
-        (1 - lastCycleAcqProgress) * 120000,
+        Math.floor((1 - lastCycleAcqProgress) * 120000),
         prevData,
         currData,
       );
