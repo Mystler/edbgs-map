@@ -26,3 +26,16 @@ export async function dbGet<T>(sql: string, ...params: unknown[]): Promise<T | u
     });
   });
 }
+
+/** Wrapper for the db.all function that allows async awaiting for the results. */
+export async function dbGetAll<T>(sql: string, ...params: unknown[]): Promise<T[]> {
+  return await new Promise<T[]>((resolve, reject) => {
+    db.all<T>(sql, params, (err, rows) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(rows);
+      }
+    });
+  });
+}
