@@ -27,9 +27,10 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     // (For now, ignore that a system having been controlled before may have been a snipe since it could have dropped via nearby fort-drop.)
     let hadSnipe = false;
     for (const p of currData.powerConflictProgress) {
-      const prevValue = prevData?.powerConflictProgress?.find((x) => x.power === p.power)?.progress ?? 0;
-      const diff = p.progress - prevValue;
-      if (p.progress >= 0.5 && diff >= 0.2) {
+      const prevValue = prevData?.powerConflictProgress?.find((x) => x.power === p.power)?.progress;
+      const diff = p.progress - (prevValue ?? 0);
+      // Check for 20%+ snipes if we know previous data, full acquisition if we don't
+      if ((prevValue && p.progress >= 0.5 && diff >= 0.2) || (!prevValue && p.progress >= 1)) {
         logSnipe(currData.name, "Acquisition", p.power, Math.floor(diff * 120000), prevData, currData);
         hadSnipe = true;
       }
