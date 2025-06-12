@@ -39,11 +39,16 @@
     (() => {
       const lsFilterTypes = localStorage.getItem("ppSnipesFilterTypes");
       if (lsFilterTypes) filterTypes = JSON.parse(lsFilterTypes);
+      const lsShowFilters = localStorage.getItem("ppSnipesShowFilters");
+      if (lsShowFilters) showFilters = JSON.parse(lsShowFilters);
       const lsExcludeNoPreviousData = localStorage.getItem("ppSnipesExcludeNoPreviousData");
       if (lsExcludeNoPreviousData) excludeNoPreviousData = JSON.parse(lsExcludeNoPreviousData);
     })();
     $effect(() => {
       localStorage.setItem("ppSnipesFilterTypes", JSON.stringify(filterTypes));
+    });
+    $effect(() => {
+      localStorage.setItem("ppSnipesShowFilters", JSON.stringify(showFilters));
     });
     $effect(() => {
       localStorage.setItem("ppSnipesExcludeNoPreviousData", JSON.stringify(excludeNoPreviousData));
