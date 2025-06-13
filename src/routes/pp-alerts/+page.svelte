@@ -169,7 +169,7 @@
   </p>
   <p class="text-right text-xs text-zinc-500">
     Last Refresh:
-    {#key lastRefresh}<Time relative live timestamp={lastRefresh} title={undefined} />{/key}
+    {#key lastRefresh}<Time relative live={5000} timestamp={lastRefresh} title={undefined} />{/key}
     <button
       type="button"
       class="size-6"

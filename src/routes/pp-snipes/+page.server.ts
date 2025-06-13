@@ -1,7 +1,9 @@
 import { dbGetAll } from "$lib/DB.js";
 import { error } from "@sveltejs/kit";
 
-export async function load() {
+export async function load({ depends }) {
+  depends("app:pp-snipes");
+
   const q = await dbGetAll<{
     id: number;
     system: string;

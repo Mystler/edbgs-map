@@ -8,15 +8,26 @@
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import { browser } from "$app/environment";
   import FaIcon from "$lib/components/FaIcon.svelte";
-  import { faArrowDown, faArrowRight, faCaretDown, faCaretRight, faXmark } from "@fortawesome/free-solid-svg-icons";
+  import {
+    faArrowDown,
+    faArrowRight,
+    faCaretDown,
+    faCaretRight,
+    faRotate,
+    faXmark,
+  } from "@fortawesome/free-solid-svg-icons";
+  import { invalidate } from "$app/navigation";
+  import { onMount } from "svelte";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
 
+  let lastRefresh = $state(new Date());
   let showFilters = $state(true);
   let displayLogId = $state<number>();
 
   let availableTypes = $derived([...new Set(data.snipeData?.map((x) => x.type))].sort());
+  let filterPowers: string[] = $state(Object.keys(Powers));
   let filterTypes: string[] = $state((() => availableTypes)());
   let searchSystem = $state("");
   let excludeNoPreviousData = $state(true);
@@ -24,6 +35,7 @@
   let filteredEntries = $derived(
     data.snipeData?.filter(
       (x) =>
+        filterPowers.includes(x.power) &&
         filterTypes.includes(x.type) &&
         (!excludeNoPreviousData || (x.old_dump && x.old_dump !== "null")) &&
         (!searchSystem || x.system.toLowerCase().includes(searchSystem.toLowerCase())),
@@ -37,6 +49,8 @@
   // Local Storage handling
   if (browser) {
     (() => {
+      const lsPowers = localStorage.getItem("ppSnipesFilterPowers");
+      if (lsPowers) filterPowers = JSON.parse(lsPowers);
       const lsFilterTypes = localStorage.getItem("ppSnipesFilterTypes");
       if (lsFilterTypes) filterTypes = JSON.parse(lsFilterTypes);
       const lsShowFilters = localStorage.getItem("ppSnipesShowFilters");
@@ -44,6 +58,9 @@
       const lsExcludeNoPreviousData = localStorage.getItem("ppSnipesExcludeNoPreviousData");
       if (lsExcludeNoPreviousData) excludeNoPreviousData = JSON.parse(lsExcludeNoPreviousData);
     })();
+    $effect(() => {
+      localStorage.setItem("ppSnipesFilterPowers", JSON.stringify(filterPowers));
+    });
     $effect(() => {
       localStorage.setItem("ppSnipesFilterTypes", JSON.stringify(filterTypes));
     });
@@ -54,6 +71,18 @@
       localStorage.setItem("ppSnipesExcludeNoPreviousData", JSON.stringify(excludeNoPreviousData));
     });
   }
+
+  // Auto refreshing
+  function refresh() {
+    invalidate("app:pp-snipes");
+    lastRefresh = new Date();
+  }
+  onMount(() => {
+    const refreshId = setInterval(refresh, 600000);
+    return () => {
+      clearInterval(refreshId);
+    };
+  });
 </script>
 
 <svelte:head>
@@ -67,6 +96,25 @@
   <p class="text-center text-sm">
     This is an experimental tool that attempts to catch snipe spikes in Powerplay systems and provides a comparison
     view. Please note that not every snipe will be caught and there may also be false positives.
+  </p>
+  <p class="text-right text-xs text-zinc-500">
+    Last Refresh:
+    {#key lastRefresh}<Time relative live={5000} timestamp={lastRefresh} title={undefined} />{/key}
+    <button
+      type="button"
+      class="size-6"
+      onclick={(e) => {
+        const button = e.currentTarget;
+        const icon = button.querySelector("svg");
+        icon?.classList.add("animate-spin");
+        button.disabled = true;
+        refresh();
+        setTimeout(() => {
+          icon?.classList.remove("animate-spin");
+          button.disabled = false;
+        }, 1000);
+      }}><FaIcon class="inline" icon={faRotate} /></button
+    >
   </p>
   <!-- Filters -->
   <div class="mb-2">
@@ -99,7 +147,29 @@
               >
             {/if}
           </div>
+          <button
+            type="button"
+            class="link-btn"
+            onclick={() => {
+              if (filterPowers.length > 0) filterPowers = [];
+              else filterPowers = Object.keys(Powers);
+            }}>Toggle All Powers</button
+          >
         </div>
+        <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+          {#each Object.keys(Powers) as power (power)}
+            <label
+              class={[
+                "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center font-semibold hover:bg-zinc-700",
+                filterPowers.includes(power) ? "opacity-100" : "opacity-20",
+              ]}
+            >
+              <span style={`color: ${Powers[power].color}`}>{power}</span>
+              <input type="checkbox" class="hidden" name="filterPowers" bind:group={filterPowers} value={power} />
+            </label>
+          {/each}
+        </div>
+        <div class="border-1 border-zinc-500"></div>
         <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
           {#each availableTypes as type (type)}
             <label
