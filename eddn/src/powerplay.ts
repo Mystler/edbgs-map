@@ -60,7 +60,12 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     }
     // Reinforcement Snipe
     const reinfDiff = (currData?.powerStateReinforcement ?? 0) - (prevData?.powerStateReinforcement ?? 0);
-    if (reinfDiff > 25000) {
+    if (
+      reinfDiff > 25000 &&
+      (!prevData?.powerStateReinforcement ||
+        prevData.powerState !== "Stronghold" ||
+        (prevData.powerStateControlProgress ?? 0) < 1) // Ignore reinf sniping maxed Strongholds
+    ) {
       logSnipe(currData.name, "Reinforcement", currData.controllingPower, reinfDiff, prevData, currData);
       return true;
     }
