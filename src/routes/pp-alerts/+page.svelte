@@ -186,7 +186,7 @@
       }}><FaIcon class="inline" icon={faRotate} /></button
     >
   </p>
-  <div class="mb-2 flex flex-col gap-2">
+  <div class="mb-2">
     <!-- Sorting -->
     <div class="flex flex-wrap items-center gap-2">
       <div class="flex flex-col">
