@@ -18,6 +18,7 @@
   } from "@fortawesome/free-solid-svg-icons";
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
+  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -90,7 +91,8 @@
   <meta name="description" content="This log tries to catch snipes in Powerplay systems." />
 </svelte:head>
 
-<div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
+<PowerplayPageNav />
+<div class="mx-auto px-1 pb-4 xl:max-w-(--breakpoint-xl)">
   <!-- Intro section -->
   <h1 class="text-center">Snipe Detector</h1>
   <p class="text-center text-sm">

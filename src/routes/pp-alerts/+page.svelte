@@ -11,6 +11,7 @@
   import { onMount } from "svelte";
   import FaIcon from "$lib/components/FaIcon.svelte";
   import { faCaretDown, faCaretRight, faRotate, faXmark } from "@fortawesome/free-solid-svg-icons";
+  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -159,7 +160,9 @@
   <meta name="description" content="Frontier did not give us the War Room, so I made my own..." />
 </svelte:head>
 
-<div class="mx-auto px-1 py-4 xl:max-w-(--breakpoint-xl)">
+<PowerplayPageNav />
+
+<div class="mx-auto px-1 pb-4 xl:max-w-(--breakpoint-xl)">
   <!-- Intro section -->
   <h1 class="text-center">Powerplay Alerts</h1>
   <p class="text-center">Welcome to the War Room.</p>
