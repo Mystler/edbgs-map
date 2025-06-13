@@ -36,7 +36,8 @@ export async function getCache(key: string): Promise<string | null> {
   return await client.get(key);
 }
 
-export async function setTimedCache(key: string, value: string, ttl: number = 172800) {
+export async function setTimedCache(key: string, value: string, ttl: number = 1209600) {
+  // Default: 2 weeks (= 1209600, 48h = 172800)
   if (!client || isReconnecting) return;
   await client.set(key, value, "EX", ttl);
 }

@@ -164,8 +164,8 @@
   <h1 class="text-center">Powerplay Alerts</h1>
   <p class="text-center">Welcome to the War Room.</p>
   <p class="text-center text-sm">
-    This shows all systems that were detected in the last 48h with more than 10k CP of total merits (for Control
-    Systems) or above the 30% threshold (for Acquisitions).
+    This shows all systems that were recently detected with more than 10k of total CP movement (for Control Systems) or
+    above the 30% threshold (for Acquisitions).
   </p>
   <p class="text-right text-xs text-zinc-500">
     Last Refresh:

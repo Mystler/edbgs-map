@@ -36,7 +36,7 @@ export async function setTimedCache(key: string, value: string, ttl: number = 14
   await client.set(key, value, "EX", ttl);
 }
 
-export async function getAllCacheMatching(match: string): Promise<string[] | null> {
+export async function getAllCacheMatching<T>(match: string): Promise<T[] | null> {
   if (!client || isReconnecting) return null;
   const keySet = new Set<string>();
   const stream = client.scanStream({ match, count: 50 });
@@ -46,10 +46,10 @@ export async function getAllCacheMatching(match: string): Promise<string[] | nul
     }
   });
   await new Promise((resolve) => stream.once("end", resolve));
-  const results: string[] = [];
+  const results: T[] = [];
   for (const key of keySet) {
     const val = await getCache(key);
-    if (val) results.push(JSON.parse(val));
+    if (val) results.push(JSON.parse(val) as T);
   }
   return results;
 }
