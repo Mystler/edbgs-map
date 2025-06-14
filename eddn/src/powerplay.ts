@@ -78,7 +78,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       return true;
     }
     // EOC progress control snipes that weren't caught.
-    if (prevData) {
+    if (prevData && new Date(prevData.date) < getLastPPTickDate()) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
       const currProg = currData.powerStateControlProgress ?? 0;
       // Undermining drops that changed tier over EOC
@@ -110,7 +110,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
         );
         if (cp > 25000) logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
-        else if (cp < 25000)
+        else if (cp < -25000)
           logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
         return true;
       }
