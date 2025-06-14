@@ -77,14 +77,44 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       logSnipe(currData.name, "Reinforcement", currData.controllingPower, reinfDiff, prevData, currData);
       return true;
     }
-    // TODO: EOC progress control snipes that weren't caught.
-    /*if (prevData) {
-      const lastDate = new Date(prevData.date);
-      if (lastDate < getLastPPTickDate()) {
-        // EOC Control snipe?
-        const progDiff = (currData.powerStateControlProgress ?? 0) - (prevData.powerStateControlProgress ?? 0);
+    // EOC progress control snipes that weren't caught.
+    if (prevData) {
+      const prevProg = prevData?.powerStateControlProgress ?? 0;
+      const currProg = currData.powerStateControlProgress ?? 0;
+      // Undermining drops that changed tier over EOC
+      if (prevData.powerState === "Stronghold" && currData.powerState === "Fortified" && prevProg > 0) {
+        const cp = Math.floor(prevProg * 1000000 + (1 - currProg) * 650000);
+        logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
+        return true;
       }
-    }*/
+      if (prevData.powerState === "Fortified" && currData.powerState === "Exploited" && prevProg > 0) {
+        const cp = Math.floor(prevProg * 650000 + (1 - currProg) * 350000);
+        logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
+        return true;
+      }
+      // Reinforcement drops that changed tier over EOC
+      if (prevData.powerState === "Exploited" && currData.powerState === "Fortified" && prevProg < 1) {
+        const cp = Math.floor(currProg * 650000 + (1 - prevProg) * 350000);
+        logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
+        return true;
+      }
+      if (prevData.powerState === "Fortified" && currData.powerState === "Stronghold" && prevProg < 1) {
+        const cp = Math.floor(currProg * 1000000 + (1 - prevProg) * 650000);
+        logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
+        return true;
+      }
+      // Uncaught major percentage changes in same tier between cycles.
+      if (prevData.powerState === currData.powerState) {
+        const cp = Math.floor(
+          (currProg - prevProg) *
+            (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
+        );
+        if (cp > 25000) logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
+        else if (cp < 25000)
+          logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
+        return true;
+      }
+    }
   }
   return false;
 }
