@@ -66,7 +66,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
       : 1;
-    const reinfThreshold = 20000 + 80000 * Math.min(1, ageOfData); // 20k to 100k in 10h
+    const reinfThreshold = 25000 + 75000 * Math.min(1, ageOfData); // 25k to 100k in 10h
     const reinfDiff = (currData?.powerStateReinforcement ?? 0) - (prevData?.powerStateReinforcement ?? 0);
     if (
       reinfDiff > reinfThreshold &&
