@@ -24,13 +24,16 @@ export function calculateCentroid(points: SpanshSystem[]) {
 
 export function calculateGeometricMedian(points: SpanshSystem[]) {
   if (points.length === 0) throw new Error("Cannot calculate geometric median of an empty list.");
+  if (points.length === 1) return { x: points[0].x, y: points[0].y, z: points[0].z };
 
   // Initial guess: the centroid of the points
   let current = calculateCentroid(points);
   const tolerance = 1e-6;
   let converged = false;
 
-  while (!converged) {
+  const maxItFailsafe = 1000;
+  let iterations = 0;
+  while (!converged && iterations < maxItFailsafe) {
     const numerator = { x: 0, y: 0, z: 0 };
     let denominator = 0;
 
@@ -57,6 +60,7 @@ export function calculateGeometricMedian(points: SpanshSystem[]) {
       Math.abs(next.y - current.y) < tolerance &&
       Math.abs(next.z - current.z) < tolerance;
     current = next;
+    iterations++;
   }
   return { x: current.x, y: current.y, z: current.z };
 }
