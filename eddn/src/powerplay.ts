@@ -52,16 +52,20 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       );
       return true;
     }
-    // UM Snipe
+    // UM Snipe, just check for 25k drops, better catch a bit too much than too little
     const umDiff = (currData?.powerStateUndermining ?? 0) - (prevData?.powerStateUndermining ?? 0);
     if (umDiff > 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;
     }
-    // Reinforcement Snipe
+    // Reinforcement Snipe, much less likely to have interesting stuff. Use an expanding scale up to 10h diff
+    const ageOfData = prevData?.date
+      ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
+      : 1;
+    const reinfThreshold = 20000 + 80000 * Math.min(1, ageOfData); // 20k to 100k in 10h
     const reinfDiff = (currData?.powerStateReinforcement ?? 0) - (prevData?.powerStateReinforcement ?? 0);
     if (
-      reinfDiff > 25000 &&
+      reinfDiff > reinfThreshold &&
       (!prevData?.powerStateReinforcement ||
         prevData.powerState !== "Stronghold" ||
         (prevData.powerStateControlProgress ?? 0) < 1) // Ignore reinf sniping maxed Strongholds
