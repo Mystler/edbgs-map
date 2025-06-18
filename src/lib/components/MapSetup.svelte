@@ -32,6 +32,9 @@
   <p>
     <button type="button" class="link-btn" onclick={() => sessionManager.show()}>Manage Saved Sessions</button>
   </p>
+  <p>
+    <button type="button" class="link-btn" onclick={() => data.reset()}>Clear All Below</button>
+  </p>
 
   <h3>Minor Factions</h3>
   <p>
