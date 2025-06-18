@@ -27,7 +27,14 @@
   let showFilters = $state(true);
   let displayLogId = $state<number>();
 
-  let availableTypes = $derived([...new Set(data.snipeData?.map((x) => x.type))].sort());
+  const availableTypes = [
+    "Acquisition",
+    "EOC Acquisition",
+    "Reinforcement",
+    "EOC Reinforcement",
+    "Undermining",
+    "EOC Undermining",
+  ];
   let filterPowers: string[] = $state(Object.keys(Powers));
   let filterTypes: string[] = $state((() => availableTypes)());
   let searchSystem = $state("");
