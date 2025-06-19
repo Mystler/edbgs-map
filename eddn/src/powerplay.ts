@@ -105,14 +105,18 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       }
       // Uncaught major percentage changes in same tier between cycles.
       if (prevData.powerState === currData.powerState) {
+        if (currData.powerState === "Stronghold" && currProg >= 1) return false;
         const cp = Math.floor(
           (currProg - prevProg) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
         );
-        if (cp > 25000) logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
-        else if (cp < -25000)
+        if (cp > 25000) {
+          logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
+          return true;
+        } else if (cp < -25000) {
           logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
-        return true;
+          return true;
+        }
       }
     }
   }
