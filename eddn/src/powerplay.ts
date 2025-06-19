@@ -40,7 +40,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       }
     }
     return hadSnipe;
-  } else if (currData.controllingPower) {
+  } else if (currData.controllingPower && currData.powerStateControlProgress !== undefined) {
     // Last data was still in acquisition and got sniped?
     const lastCycleAcqProgress = prevData?.powerConflictProgress?.find(
       (x) => x.power === currData.controllingPower,
@@ -80,7 +80,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     // EOC progress control snipes that weren't caught.
     if (prevData && new Date(prevData.date) < getLastPPTickDate()) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
-      const currProg = currData.powerStateControlProgress ?? 0;
+      const currProg = currData.powerStateControlProgress;
       // Undermining drops that changed tier over EOC
       if (prevData.powerState === "Stronghold" && currData.powerState === "Fortified" && prevProg > 0) {
         const cp = Math.floor(prevProg * 1000000 + (1 - currProg) * 650000);
