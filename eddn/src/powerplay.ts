@@ -66,7 +66,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
       : 1;
-    const reinfThreshold = 25000 + 75000 * Math.min(1, ageOfData); // 25k to 100k in 10h
+    const reinfThreshold = 30000 + 70000 * Math.min(1, ageOfData); // 30k to 100k in 10h
     const reinfDiff = (currData?.powerStateReinforcement ?? 0) - (prevData?.powerStateReinforcement ?? 0);
     if (
       reinfDiff > reinfThreshold &&
@@ -110,7 +110,7 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
           (currProg - prevProg) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
         );
-        if (cp > 25000) {
+        if (cp > reinfThreshold) {
           logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
           return true;
         } else if (cp < -25000) {
