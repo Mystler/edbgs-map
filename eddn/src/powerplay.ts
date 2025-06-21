@@ -29,12 +29,16 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
       : 1;
-    const acqThreshold = 0.2 + 0.4 * Math.min(1, ageOfData); // 20% to 60% drops in 10h
+    const acqThreshold = 0.25 + 0.5 * Math.min(1, ageOfData); // 25% to 75% drops in 10h
+    const fullPowers = currData.powerConflictProgress.reduce((full, x) => (x.progress >= 1 ? full + 1 : full), 0);
     for (const p of currData.powerConflictProgress) {
       const prevValue = prevData?.powerConflictProgress?.find((x) => x.power === p.power)?.progress;
       const diff = p.progress - (prevValue ?? 0);
-      // Check for snipes if we know previous data, full acquisition if we don't
-      if ((prevValue && p.progress >= 0.5 && diff >= acqThreshold) || (!prevValue && p.progress >= 1)) {
+      // Check for snipes if we know previous data, full acquisition if we don't. Ignore past 100% but only if no other power is at 100 too.
+      if (
+        (prevValue && (prevValue < 1 || fullPowers >= 1) && p.progress >= 0.5 && diff >= acqThreshold) ||
+        (!prevValue && p.progress >= 1)
+      ) {
         logSnipe(currData.name, "Acquisition", p.power, Math.floor(diff * 120000), prevData, currData);
         hadSnipe = true;
       }
