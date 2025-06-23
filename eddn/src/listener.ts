@@ -23,7 +23,7 @@ async function runEDDNListener() {
       const data = eddn.message as EDDNJournalMessage;
       const date = new Date(data.timestamp);
       // Reject timestamps older than 5min
-      if (lastMessage.valueOf() - new Date(data.timestamp).valueOf() > 300000) continue;
+      if (lastMessage.valueOf() - date.valueOf() > 300000) continue;
       // Calculate latest PP tick, for re-use
       updateLastPPTickDate();
       // Fix negative overflow
@@ -63,31 +63,32 @@ async function runEDDNListener() {
         if (prevDate > getLastPPTickDate()) {
           // During the same cycle, control numbers are only allowed to go up.
           if (
-            (data.PowerplayStateReinforcement &&
-              data.PowerplayStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
-            (data.PowerplayStateUndermining && data.PowerplayStateUndermining < (prevData.powerStateUndermining ?? 0))
-          )
+            (ppData.powerStateReinforcement &&
+              ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
+            (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
+          ) {
             continue; // Reinforcement or UM went down, skip
+          }
           if (
-            data.PowerplayConflictProgress &&
-            data.PowerplayConflictProgress.toSorted((a, b) => b.ConflictProgress - a.ConflictProgress).some(
-              (x, i) => (prevData.powerConflictProgress?.[i]?.progress ?? 0) > x.ConflictProgress,
-            )
-          )
+            ppData.powerConflictProgress &&
+            ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) <
+              (prevData.powerConflictProgress?.reduce((sum, x) => sum + x.progress, 0) ?? 0)
+          ) {
             continue; // Acquisition went down, skip
+          }
         }
       }
       // Do some data analysis if a snipe may have happened and log it asynchronously.
       const snipe = checkForSnipe(prevData, ppData);
       // PP Alert filter
       if (
-        (data.PowerplayStateReinforcement && data.PowerplayStateReinforcement > 10000) ||
-        (data.PowerplayStateUndermining && data.PowerplayStateUndermining > 10000) ||
-        data.PowerplayConflictProgress?.some((x) => x.ConflictProgress >= 0.3) ||
+        (ppData.powerStateReinforcement && ppData.powerStateReinforcement > 10000) ||
+        (ppData.powerStateUndermining && ppData.powerStateUndermining > 10000) ||
+        ppData.powerConflictProgress?.some((x) => x.progress >= 0.3) ||
         snipe
       ) {
         // Cache Alert
-        setTimedCache(`edbgs-map:pp-alert:${data.SystemAddress}`, JSON.stringify(ppData));
+        setTimedCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
       }
     }
   }
