@@ -154,7 +154,13 @@
         Last Update:<br />
         <Tooltip>
           {#snippet tooltip()}
-            {date.toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric" })}
+            {date.toLocaleString(undefined, {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              hour: "numeric",
+              minute: "numeric",
+            })}
           {/snippet}
           <Time
             class={{
