@@ -109,7 +109,11 @@ export function checkForSnipe(prevData: SpanshDumpPPData | null, currData: Spans
       }
       // Uncaught major percentage changes in same tier between cycles.
       if (prevData.powerState === currData.powerState) {
-        if (currData.powerState === "Stronghold" && currProg >= 1) return false;
+        if (
+          currData.powerState === "Stronghold" &&
+          currProg + ((currData.powerStateUndermining ?? 0) - (currData.powerStateReinforcement ?? 0)) / 1000000 > 0.999
+        )
+          return false;
         const cp = Math.floor(
           (currProg - prevProg) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
