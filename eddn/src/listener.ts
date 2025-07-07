@@ -28,13 +28,13 @@ async function runEDDNListener() {
       updateLastPPTickDate();
       // Fix negative overflow
       if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
-        let scale = 120000;
+        let scale = 120000; // Should never be reached/used.
         if (data.PowerplayState === "Exploited") {
-          scale = 350000;
+          scale = 349999; // This makes math check out. Idk if the others should also be -1.
         } else if (data.PowerplayState === "Fortified") {
-          scale = 650000;
+          scale = 649999; // Guessing same as Exploited
         } else if (data.PowerplayState === "Stronghold") {
-          scale = 1000000;
+          scale = 999999; // Guessing same as Exploited
         }
         data.PowerplayStateControlProgress -= 4294967296 / scale;
       }
