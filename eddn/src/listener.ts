@@ -82,8 +82,9 @@ async function runEDDNListener() {
       const snipe = checkForSnipe(prevData, ppData);
       // PP Alert filter
       if (
-        (ppData.powerStateReinforcement && ppData.powerStateReinforcement > 10000) ||
-        (ppData.powerStateUndermining && ppData.powerStateUndermining > 10000) ||
+        (ppData.powerStateReinforcement !== undefined &&
+          ppData.powerStateUndermining !== undefined &&
+          ppData.powerStateReinforcement + ppData.powerStateUndermining > 10000) ||
         ppData.powerConflictProgress?.some((x) => x.progress >= 0.3) ||
         snipe
       ) {
