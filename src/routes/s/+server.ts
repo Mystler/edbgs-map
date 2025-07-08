@@ -1,4 +1,4 @@
-import { db } from "$lib/DB.js";
+import { db } from "$lib/server/DB.js";
 import { json } from "@sveltejs/kit";
 import { randomBytes } from "node:crypto";
 

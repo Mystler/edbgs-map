@@ -1,4 +1,4 @@
-import { dbGetAll } from "$lib/DB.js";
+import { dbGetAll } from "$lib/server/DB.js";
 import { error } from "@sveltejs/kit";
 
 export async function load({ depends }) {

@@ -1,8 +1,7 @@
 import sqlite3 from "sqlite3";
-import { DBFilePath } from "./Constants";
-import type { SpanshDumpPPData } from "./SpanshAPI";
+import type { SpanshDumpPPData } from "../SpanshAPI";
 
-export const db = new sqlite3.Database(DBFilePath);
+export const db = new sqlite3.Database("db.sqlite3");
 
 // Setup the database
 db.exec("CREATE TABLE IF NOT EXISTS shortlinks (short TEXT, long TEXT)");

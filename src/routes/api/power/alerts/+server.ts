@@ -1,6 +1,6 @@
 import { getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
-import { getAllCacheMatching } from "$lib/ValkeyCache";
+import { getAllCacheMatching } from "$lib/server/ValkeyCache";
 import { json } from "@sveltejs/kit";
 
 export async function GET() {

@@ -1,5 +1,5 @@
 import { building } from "$app/environment";
-import { run } from "$lib/EDDNListener";
+import { run } from "$lib/server/EDDNListener";
 
 process.on("SIGINT", () => {
   process.exit(0);

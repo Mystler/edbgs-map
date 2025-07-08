@@ -1,8 +1,8 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
-import { getCache, setTimedCache } from "$lib/ValkeyCache";
+import { getCache, setTimedCache } from "$lib/server/ValkeyCache";
 import { getLastPPTickDate } from "$lib/Powerplay";
-import type { SpanshDumpPPData } from "./SpanshAPI";
+import type { SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
 
 interface EDDNMessage {

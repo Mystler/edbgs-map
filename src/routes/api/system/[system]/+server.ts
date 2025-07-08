@@ -1,4 +1,4 @@
-import { getCache, setTimedCache } from "$lib/ValkeyCache";
+import { getCache, setTimedCache } from "$lib/server/ValkeyCache";
 import { fetchSystem, type SpanshSystem } from "$lib/SpanshAPI";
 import { json } from "@sveltejs/kit";
 
