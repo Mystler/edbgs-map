@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Powers } from "$lib/Constants";
-  import { calculatePPControlSegments, getLastPPTickDate } from "$lib/Helpers";
+  import { calculatePPControlSegments, getLastPPTickDate } from "$lib/Powerplay";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import {
     faCaretDown,

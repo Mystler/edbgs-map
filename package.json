@@ -46,13 +46,15 @@
   },
   "dependencies": {
     "iovalkey": "^0.3.3",
-    "sqlite3": "^5.1.7"
+    "sqlite3": "^5.1.7",
+    "zeromq": "^6.5.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "@tailwindcss/oxide",
       "esbuild",
-      "sqlite3"
+      "sqlite3",
+      "zeromq"
     ]
   }
 }

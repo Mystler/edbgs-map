@@ -12,7 +12,13 @@ VITE_USE_VALKEY=true
 
 (You can also set `VITE_VALKEY_HOST` and `VITE_VALKEY_PORT` to use non-default connection information.)
 
-This uses PNPM as the intended package manager. To use the codebase:
+To run the EDDN listener for Powerplay alerts, also put in:
+
+```
+VITE_RUN_LISTENER=true
+```
+
+This project uses PNPM as the intended package manager. To use the codebase:
 
 ```bash
 pnpm i # Install dependencies
@@ -48,16 +54,4 @@ Then, you can use:
 ```bash
 pm2 start pm2.config.cjs # To run
 pm2 restart pm2.config.cjs # To restart
-```
-
-## PP Alerts
-
-In order to collect Powerplay Alerts, switch into the `eddn` subfolder, build it, and run the eddn listener as a separate service.
-It will use the Valkey connection information of the base repository, so make sure it is enabled via the `.env.local` file described above.
-
-```bash
-cd eddn
-pnpm i
-pnpm build
-pnpm start
 ```

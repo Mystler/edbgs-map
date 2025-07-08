@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getLastPPTickDate, powerStateColor } from "$lib/Helpers";
+  import { getLastPPTickDate, powerStateColor } from "$lib/Powerplay";
   import Time from "svelte-time";
   import type { PageProps } from "./$types";
   import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";

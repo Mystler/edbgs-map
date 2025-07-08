@@ -1,8 +1,9 @@
+import { building } from "$app/environment";
 import Valkey from "iovalkey";
 
 let isReconnecting = false;
 let client: Valkey | null = null;
-if (import.meta.env.VITE_USE_VALKEY === "true") {
+if (!building && import.meta.env.VITE_USE_VALKEY === "true") {
   console.log("Looking for Valkey cache...");
   console.log("Caching will not be used if there is no Valkey server running.");
   client = new Valkey({
