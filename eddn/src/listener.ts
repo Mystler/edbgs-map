@@ -80,12 +80,10 @@ async function runEDDNListener() {
       }
       // Do some data analysis if a snipe may have happened and log it asynchronously.
       const snipe = checkForSnipe(prevData, ppData);
-      // PP Alert filter
+      // PP Alert filter, log all if any progress
       if (
-        (ppData.powerStateReinforcement !== undefined &&
-          ppData.powerStateUndermining !== undefined &&
-          ppData.powerStateReinforcement + ppData.powerStateUndermining > 10000) ||
-        ppData.powerConflictProgress?.some((x) => x.progress >= 0.3) ||
+        (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) ||
+        ppData.powerConflictProgress?.some((x) => x.progress > 0) ||
         snipe
       ) {
         // Cache Alert
