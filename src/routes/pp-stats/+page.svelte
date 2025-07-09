@@ -23,7 +23,6 @@
     See this and past cycle's stats. Note that these are based on known data and subject to inaccuracies from missing or
     outdated information.
   </p>
-  <div class="border-1 border-zinc-500"></div>
   <!-- Current Cycle View -->
   <div class="mt-2 text-center">
     {#await data.currentCycle}
@@ -31,8 +30,8 @@
         <span class="size-32 animate-spin rounded-full border-24 border-(--ed-orange) border-t-transparent"></span>
       </div>
     {:then stats}
-      <h2>Current Cycle</h2>
       <div class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
+        <h2>Current Cycle 2.{stats.cycle}</h2>
         <CycleStats {stats} />
       </div>
     {/await}

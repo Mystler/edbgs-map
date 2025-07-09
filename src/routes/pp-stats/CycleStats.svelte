@@ -12,8 +12,7 @@
   }
 </script>
 
-<h2>Cycle 2.{stats.cycle}</h2>
-<div class="mt-4 flex flex-wrap justify-center gap-10">
+<div class="mt-4 flex flex-wrap justify-center gap-x-10 gap-y-2">
   <div>
     <b>CP activity in Control Systems:</b><br />
     {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCP)}
