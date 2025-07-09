@@ -8,6 +8,7 @@ db.exec("CREATE TABLE IF NOT EXISTS shortlinks (short TEXT, long TEXT)");
 db.exec(
   "CREATE TABLE IF NOT EXISTS snipe_history (id INTEGER PRIMARY KEY, system TEXT, type TEXT, power TEXT, amount INTEGER, old_dump TEXT, new_dump TEXT)",
 );
+db.exec("CREATE TABLE IF NOT EXISTS cycle_stats (id INTEGER PRIMARY KEY, timestamp TEXT, snapshot TEXT)");
 
 /** Wrapper for the db.get function that allows async awaiting for the results. */
 export async function dbGet<T>(sql: string, ...params: unknown[]): Promise<T | undefined> {

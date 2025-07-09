@@ -35,7 +35,7 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
   currentBar = Math.max(0, Math.min(1, currentBar));
   startBar = Math.max(0, Math.min(1, startBar));
   const startProgress = startBar === 1 ? 1 : (startBar % 0.25) / 0.25;
-  return { startBar, currentBar, adjustedProgress, startProgress };
+  return { startBar, currentBar, adjustedProgress, startProgress, totalCP };
 }
 
 function totalCPToBarPercent(cp: number) {
