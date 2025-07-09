@@ -1,5 +1,4 @@
 import { Powers } from "$lib/Constants";
-import { calculatePPControlSegments } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
 
@@ -44,7 +43,13 @@ export async function getCurrentCycleStats() {
       }
       powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
       powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
-      const totalCP = calculatePPControlSegments(system).totalCP;
+
+      const segmentProgress = system.powerStateControlProgress ?? 0;
+      // We want total control CP with exploited being 0, so using different tierStart values than our bar calculations.
+      const tierStart = system.powerState === "Stronghold" ? 1000000 : system.powerState === "Fortified" ? 350000 : 0;
+      const tierRange =
+        system.powerState === "Stronghold" ? 1000000 : system.powerState === "Fortified" ? 650000 : 350000;
+      const totalCP = Math.max(0, Math.min(2000000, Math.round(tierStart + segmentProgress * tierRange)));
       powerStats[system.controllingPower].progressCP += totalCP;
       allPowerStats.progressCP += totalCP;
     }
