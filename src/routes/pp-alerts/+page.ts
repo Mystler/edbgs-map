@@ -4,9 +4,12 @@ import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ fetch, depends }) => {
   depends("app:pp-alerts");
-  const res = await fetch(`${base}/api/power/alerts`);
-  const systems: SpanshDumpPPData[] | null = await res.json();
+  const loadSystems = async () => {
+    const res = await fetch(`${base}/api/power/alerts`);
+    const systems: SpanshDumpPPData[] | null = await res.json();
+    return systems ?? [];
+  };
   return {
-    systems,
+    systems: loadSystems(),
   };
 };
