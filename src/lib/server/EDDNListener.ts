@@ -119,11 +119,14 @@ async function runEDDNListener() {
       }
       // Do some data analysis if a snipe may have happened and log it asynchronously.
       const snipe = checkForSnipe(prevData, ppData, lastPPTick);
-      // PP Alert filter, log all if any progress
+      // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
       if (
-        (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) ||
-        ppData.powerConflictProgress?.some((x) => x.progress > 0) ||
-        snipe
+        (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
+        ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
+        snipe || // Detected for snipe, probably redundant now but no big deal to keep in
+        (prevData?.powerState &&
+          prevData.powerState !== "Unoccupied" &&
+          (ppData.powerState === undefined || ppData.powerState === "Unoccupied")) // Update lost systems once
       ) {
         // Cache Alert for 2 weeks
         setTimedCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData), 1209600);
