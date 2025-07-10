@@ -124,8 +124,9 @@ async function runEDDNListener() {
         (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
         ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
         snipe || // Detected for snipe, probably redundant now but no big deal to keep in
-        (prevData?.powerState &&
+        (prevData?.powerState !== undefined &&
           prevData.powerState !== "Unoccupied" &&
+          new Date(prevData.date) < lastPPTick &&
           (ppData.powerState === undefined || ppData.powerState === "Unoccupied")) // Update lost systems once
       ) {
         // Cache Alert for 2 weeks
