@@ -1,4 +1,5 @@
 import { Powers } from "$lib/Constants";
+import { getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
 
@@ -23,6 +24,7 @@ function initStats() {
 export async function getCurrentCycleStats() {
   const cachedResult = await getAllCacheMatching<SpanshDumpPPData>("edbgs-map:pp-alert:*");
   const cycle = getCycleNumber(new Date());
+  const lastTick = getLastPPTickDate();
 
   const allPowerStats = initStats();
   const powerStats: Record<keyof typeof Powers, ReturnType<typeof initStats>> = {};
@@ -31,21 +33,19 @@ export async function getCurrentCycleStats() {
   }
 
   for (const system of cachedResult ?? []) {
-    allPowerStats.reinfCP += system.powerStateReinforcement ?? 0;
-    allPowerStats.umCP += system.powerStateUndermining ?? 0;
-
     if (system.controllingPower) {
+      // System counts
       powerStats[system.controllingPower].systems += 1;
       if (system.powerState === "Stronghold") {
         powerStats[system.controllingPower].stronghold += 1;
       } else if (system.powerState === "Fortified") {
         powerStats[system.controllingPower].fortified += 1;
       }
-      powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
-      powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
 
+      // CP in progress bars
       const segmentProgress = system.powerStateControlProgress ?? 0;
       // We want total control CP with exploited being 0, so using different tierStart values than our bar calculations.
+      // Clamp between 0 exploited and max Stronghold
       const tierStart = system.powerState === "Stronghold" ? 1000000 : system.powerState === "Fortified" ? 350000 : 0;
       const tierRange =
         system.powerState === "Stronghold" ? 1000000 : system.powerState === "Fortified" ? 650000 : 350000;
@@ -59,6 +59,17 @@ export async function getCurrentCycleStats() {
         powerStats[x.power].acquisitionCP += acqCP;
         allPowerStats.acquisitionCP += acqCP;
       }
+    }
+
+    // Ignore everything after this when the cache is not from the current cycle
+    if (new Date(system.date) < lastTick) continue;
+
+    allPowerStats.reinfCP += system.powerStateReinforcement ?? 0;
+    allPowerStats.umCP += system.powerStateUndermining ?? 0;
+
+    if (system.controllingPower) {
+      powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
+      powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
     }
   }
 
