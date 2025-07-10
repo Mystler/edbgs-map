@@ -4,17 +4,16 @@ import { getAllCacheMatching } from "$lib/server/ValkeyCache";
 import { json } from "@sveltejs/kit";
 
 export async function GET() {
-  const cachedResult = await getAllCacheMatching<SpanshDumpPPData>("edbgs-map:pp-alert:*");
   // This cycle or up to last 48h if before
   const cutoff = Math.min(new Date().valueOf() - 172_800_000, getLastPPTickDate().valueOf());
-  return json(
-    cachedResult?.filter(
-      (x) =>
-        new Date(x.date).valueOf() > cutoff &&
-        ((x.powerStateReinforcement !== undefined &&
-          x.powerStateUndermining !== undefined &&
-          x.powerStateReinforcement + x.powerStateUndermining >= 10000) || // >=10k total CP done
-          x.powerConflictProgress?.some((y) => y.progress >= 0.3)), // >=30% progress
-    ) ?? null,
+  const cachedResult = await getAllCacheMatching<SpanshDumpPPData>(
+    "edbgs-map:pp-alert:*",
+    (x) =>
+      new Date(x.date).valueOf() > cutoff &&
+      ((x.powerStateReinforcement !== undefined &&
+        x.powerStateUndermining !== undefined &&
+        x.powerStateReinforcement + x.powerStateUndermining >= 10000) || // >=10k total CP done
+        (x.powerConflictProgress !== undefined && x.powerConflictProgress.some((y) => y.progress >= 0.3))), // >=30% progress
   );
+  return json(cachedResult);
 }
