@@ -12,7 +12,7 @@ export async function load({ depends }) {
     amount: number;
     old_dump: string | null;
     new_dump: string;
-  }>("SELECT * FROM snipe_history ORDER BY id DESC LIMIT 100");
+  }>("SELECT * FROM snipe_history ORDER BY id DESC LIMIT 500");
 
   if (!q) error(404, "Could not find snipe history data!");
 
