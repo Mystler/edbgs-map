@@ -48,8 +48,8 @@
             }}
             class="flex min-h-20 items-center gap-2 rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-2 text-right hover:bg-zinc-700"
           >
-            <div class="grow-1 text-left font-semibold">Cycle 2.{cycle.stats.cycle}</div>
-            <div class="basis-32 max-lg:hidden">
+            <div class="grow-1 text-left text-xl font-bold">Cycle 2.{cycle.stats.cycle}</div>
+            <div class="basis-32">
               <Time relative live {timestamp} title={undefined} />
             </div>
           </button>
