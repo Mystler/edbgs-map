@@ -77,7 +77,7 @@
           <span>{f(ps.stronghold)}</span>
         </div>
         <div class="flex justify-between gap-1">
-          <Tooltip>
+          <Tooltip anchor="left">
             {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining of this power's space this
               cycle.<br />
               Does not include Acquisition CP since those can carry over between cycles.{/snippet}
@@ -86,21 +86,21 @@
           <span>{f(ps.reinfCP + ps.umCP)}</span>
         </div>
         <div class="flex justify-between gap-1">
-          <Tooltip>
+          <Tooltip anchor="left">
             {#snippet tooltip()}The total number of CP in Reinforcement of this power's space this cycle.{/snippet}
             <b class="underline decoration-dotted decoration-1">Reinforcement:</b>
           </Tooltip>
           <span>{f(ps.reinfCP)}</span>
         </div>
         <div class="flex justify-between gap-1">
-          <Tooltip>
+          <Tooltip anchor="left">
             {#snippet tooltip()}The total number of CP in Undermining of this power's space this cycle.{/snippet}
             <b class="underline decoration-dotted decoration-1">Undermining:</b>
           </Tooltip>
           {f(ps.umCP)}
         </div>
         <div class="flex justify-between gap-1">
-          <Tooltip>
+          <Tooltip anchor="left">
             {#snippet tooltip()}The total number of CP accumulated by this power in open Acquisition systems. By nature
               of Acquisitions, this includes work from past cycles if a system did not reach 100%.{/snippet}
             <b class="underline decoration-dotted decoration-1">Acquisition:</b>
@@ -108,7 +108,7 @@
           <span>{f(ps.acquisitionCP)}</span>
         </div>
         <div class="flex justify-between gap-1">
-          <Tooltip>
+          <Tooltip anchor="left">
             {#snippet tooltip()}The converted number of all known control systems' current effective progress into CP.
               Per system value thus ranges from 0 for the left border of Exploited to 2 million for a maxed out
               Stronghold.{/snippet}
