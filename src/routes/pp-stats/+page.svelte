@@ -4,10 +4,20 @@
   import { slide } from "$lib/types/Animations.svelte";
   import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
   import CycleStats from "./CycleStats.svelte";
+  import { invalidate } from "$app/navigation";
+  import FaIcon from "$lib/components/FaIcon.svelte";
+  import { faRotate } from "@fortawesome/free-solid-svg-icons";
 
   let { data }: PageProps = $props();
 
   let displayHistoryId = $state<number>();
+
+  let lastRefresh = $state(new Date());
+
+  function refresh() {
+    invalidate("app:pp-stats");
+    lastRefresh = new Date();
+  }
 </script>
 
 <svelte:head>
@@ -22,6 +32,25 @@
   <p class="text-center text-sm">
     See this and past cycle's stats. Note that these are based on known data and subject to inaccuracies from missing or
     outdated information.
+  </p>
+  <p class="mx-auto text-right text-xs text-zinc-500 lg:max-w-(--breakpoint-lg)">
+    Last Refresh:
+    {#key lastRefresh}<Time relative live={5000} timestamp={lastRefresh} title={undefined} />{/key}
+    <button
+      type="button"
+      class="size-6"
+      onclick={(e) => {
+        const button = e.currentTarget;
+        const icon = button.querySelector("svg");
+        icon?.classList.add("animate-spin");
+        button.disabled = true;
+        refresh();
+        setTimeout(() => {
+          icon?.classList.remove("animate-spin");
+          button.disabled = false;
+        }, 1000);
+      }}><FaIcon class="inline" icon={faRotate} /></button
+    >
   </p>
   {#await data.stats}
     <div class="flex justify-center overflow-hidden">

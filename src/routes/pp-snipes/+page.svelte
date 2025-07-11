@@ -17,7 +17,6 @@
     faXmark,
   } from "@fortawesome/free-solid-svg-icons";
   import { invalidate } from "$app/navigation";
-  import { onMount } from "svelte";
   import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
 
   let { data }: PageProps = $props();
@@ -80,17 +79,10 @@
     });
   }
 
-  // Auto refreshing
   function refresh() {
     invalidate("app:pp-snipes");
     lastRefresh = new Date();
   }
-  onMount(() => {
-    const refreshId = setInterval(refresh, 600000);
-    return () => {
-      clearInterval(refreshId);
-    };
-  });
 </script>
 
 <svelte:head>

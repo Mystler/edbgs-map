@@ -2,7 +2,8 @@ import { base } from "$app/paths";
 import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch }) => {
+export const load: PageLoad = async ({ fetch, depends }) => {
+  depends("app:pp-stats");
   const loadStats = async () => {
     const res = await fetch(`${base}/api/power/stats`);
     const stats: {

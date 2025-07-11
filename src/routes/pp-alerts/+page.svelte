@@ -2,7 +2,6 @@
   import Time from "svelte-time";
   import type { PageProps } from "./$types";
   import { invalidate } from "$app/navigation";
-  import { onMount } from "svelte";
   import FaIcon from "$lib/components/FaIcon.svelte";
   import { faRotate } from "@fortawesome/free-solid-svg-icons";
   import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
@@ -16,12 +15,6 @@
     invalidate("app:pp-alerts");
     lastRefresh = new Date();
   }
-  onMount(() => {
-    const refreshId = setInterval(refresh, 600000);
-    return () => {
-      clearInterval(refreshId);
-    };
-  });
 </script>
 
 <svelte:head>
