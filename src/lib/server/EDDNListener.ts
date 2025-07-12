@@ -1,6 +1,6 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
-import { getCache, setTimedCache } from "$lib/server/ValkeyCache";
+import { deleteCache, getCache, setTimedCache } from "$lib/server/ValkeyCache";
 import { getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
@@ -123,14 +123,18 @@ async function runEDDNListener() {
       if (
         (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
         ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
-        snipe || // Detected for snipe, probably redundant now but no big deal to keep in
-        (prevData?.powerState !== undefined &&
-          prevData.powerState !== "Unoccupied" &&
-          new Date(prevData.date) < lastPPTick &&
-          (ppData.powerState === undefined || ppData.powerState === "Unoccupied")) // Update lost systems once
+        snipe // Detected for snipe, probably redundant now but no big deal to keep in
       ) {
         // Cache Alert for 2 weeks
         setTimedCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData), 1209600);
+      } else if (
+        prevData?.powerState !== undefined &&
+        prevData.powerState !== "Unoccupied" &&
+        new Date(prevData.date) < lastPPTick &&
+        (ppData.powerState === undefined || ppData.powerState === "Unoccupied")
+      ) {
+        // Delete potentially lost systems once if no other data for this cycle
+        deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
       }
     }
   }

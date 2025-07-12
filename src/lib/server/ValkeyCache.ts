@@ -59,3 +59,8 @@ export async function getAllCacheMatching<T>(
   await Promise.all(keySet.keys().map(processKey));
   return results;
 }
+
+export async function deleteCache(key: string) {
+  if (!client || isReconnecting) return;
+  await client.del(key);
+}
