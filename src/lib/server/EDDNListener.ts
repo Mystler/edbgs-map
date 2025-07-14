@@ -1,7 +1,7 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
 import { deleteCache, getCache, setCache } from "$lib/server/ValkeyCache";
-import { getLastPPTickDate } from "$lib/Powerplay";
+import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
 
@@ -195,9 +195,11 @@ function checkForSnipe(
       );
       return true;
     }
-    // UM Snipe, just check for 25k drops, better catch a bit too much than too little
-    const umDiff = (currData?.powerStateUndermining ?? 0) - (prevData?.powerStateUndermining ?? 0);
-    if (umDiff > 25000) {
+    // UM Snipe, just check for 25k drops (beyond expected decay), better catch a bit too much than too little
+    const um = currData?.powerStateUndermining ?? 0;
+    const umDiff = um - (prevData?.powerStateUndermining ?? 0);
+    const { startProgress: currStartProgress } = calculatePPControlSegments(currData);
+    if (umDiff > 25000 && um > getDecayValue(currStartProgress, currData.powerState) + 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;
     }
@@ -219,7 +221,7 @@ function checkForSnipe(
     // EOC progress control snipes that weren't caught.
     if (prevData && new Date(prevData.date) < lastPPTick) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
-      const currProg = currData.powerStateControlProgress;
+      const currProg = currStartProgress; // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
       // Undermining drops that changed tier over EOC
       if (prevData.powerState === "Stronghold" && currData.powerState === "Fortified" && prevProg > 0) {
         const cp = Math.floor(prevProg * 1000000 + (1 - currProg) * 650000);
@@ -246,9 +248,10 @@ function checkForSnipe(
       if (prevData.powerState === currData.powerState) {
         if (
           currData.powerState === "Stronghold" &&
-          currProg + ((currData.powerStateUndermining ?? 0) - (currData.powerStateReinforcement ?? 0)) / 1000000 > 0.999
-        )
+          currProg + (um - (currData.powerStateReinforcement ?? 0)) / 1000000 > 0.999
+        ) {
           return false;
+        }
         const cp = Math.floor(
           (currProg - prevProg) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
