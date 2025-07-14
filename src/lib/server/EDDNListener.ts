@@ -1,6 +1,6 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
-import { deleteCache, getCache, setTimedCache } from "$lib/server/ValkeyCache";
+import { deleteCache, getCache, setCache } from "$lib/server/ValkeyCache";
 import { getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
@@ -125,8 +125,8 @@ async function runEDDNListener() {
         ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
         snipe // Detected for snipe, probably redundant now but no big deal to keep in
       ) {
-        // Cache Alert for 2 weeks
-        setTimedCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData), 1209600);
+        // Store system
+        setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
       } else if (
         prevData?.powerState !== undefined &&
         prevData.powerState !== "Unoccupied" &&

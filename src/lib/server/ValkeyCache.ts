@@ -32,6 +32,11 @@ export async function getCache(key: string): Promise<string | null> {
   return await client.get(key);
 }
 
+export async function setCache(key: string, value: string) {
+  if (!client || isReconnecting) return;
+  await client.set(key, value);
+}
+
 export async function setTimedCache(key: string, value: string, ttl: number = 14400) {
   if (!client || isReconnecting) return;
   await client.set(key, value, "EX", ttl);
