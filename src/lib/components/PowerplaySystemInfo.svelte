@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Powers } from "$lib/Constants";
-  import { calculatePPControlSegments, getLastPPTickDate } from "$lib/Powerplay";
+  import { calculatePPControlSegments, getDecayValue, getLastPPTickDate, totalCPToTierName } from "$lib/Powerplay";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import {
     faCaretDown,
@@ -112,6 +112,14 @@
       >
         <FaIcon icon={faCaretUp} />
       </div>
+    </div>
+    <div>
+      <b>Expected Decay from this Cycle:</b>
+      {getDecayValue(controlData.startProgress, data.powerState).toLocaleString("en-US")}
+    </div>
+    <div>
+      <b>Projected Decay with next Cycle:</b>
+      {getDecayValue(controlData.currentProgress, totalCPToTierName(controlData.totalCP)).toLocaleString("en-US")}
     </div>
     {@render ppLastUpdate(data)}
   </div>

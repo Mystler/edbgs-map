@@ -23,36 +23,39 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
   const tierRange = data.powerState === "Stronghold" ? 1000000 : data.powerState === "Fortified" ? 650000 : 350000;
   const totalCP = Math.round(tierStart + segmentProgress * tierRange);
   const cycleStartCP = totalCP - (data.powerStateReinforcement ?? 0) + (data.powerStateUndermining ?? 0);
-  let currentBar = totalCPToBarPercent(totalCP);
-  let startBar = totalCPToBarPercent(cycleStartCP);
-  const adjustedProgress =
-    segmentProgress > 1
-      ? (currentBar % 0.25) / 0.25
-      : segmentProgress < 0
-        ? -(1 - (currentBar % 0.25) / 0.25)
-        : segmentProgress;
-
-  currentBar = Math.max(0, Math.min(1, currentBar));
-  startBar = Math.max(0, Math.min(1, startBar));
+  const currentBar = totalCPToBarPercent(totalCP);
+  const startBar = totalCPToBarPercent(cycleStartCP);
+  const currentProgress = currentBar === 1 ? 1 : (currentBar % 0.25) / 0.25;
+  // Show negative progress for tier drops
+  const adjustedProgress = segmentProgress < 0 ? -(1 - currentProgress) : currentProgress;
   const startProgress = startBar === 1 ? 1 : (startBar % 0.25) / 0.25;
-  return { startBar, currentBar, adjustedProgress, startProgress };
+  return { startBar, currentBar, currentProgress, adjustedProgress, startProgress, totalCP };
 }
 
 function totalCPToBarPercent(cp: number) {
-  let bar = 0;
   if (cp >= 1350000) {
     // Stronghold
-    bar = 0.75 + ((cp - 1350000) / 1000000) * 0.25;
+    return Math.min(1, 0.75 + ((cp - 1350000) / 1000000) * 0.25);
   } else if (cp >= 700000) {
     // Fortified
-    bar = 0.5 + ((cp - 700000) / 650000) * 0.25;
+    return 0.5 + ((cp - 700000) / 650000) * 0.25;
   } else if (cp >= 350000) {
     // Exploited
-    bar = 0.25 + ((cp - 350000) / 350000) * 0.25;
-  } else {
-    bar = (cp / 350000) * 0.25;
+    return 0.25 + ((cp - 350000) / 350000) * 0.25;
   }
-  return bar;
+  return Math.max(0, (cp / 350000) * 0.25);
+}
+
+export function totalCPToTierName(cp: number) {
+  if (cp >= 1350000) {
+    // Stronghold
+    return "Stronghold";
+  } else if (cp >= 700000) {
+    return "Fortified";
+  } else if (cp >= 350000) {
+    return "Exploited";
+  }
+  return "Unoccupied";
 }
 
 export function powerStateColor(state?: string) {
@@ -68,4 +71,14 @@ export function powerStateColor(state?: string) {
     default:
       return "#ffffff";
   }
+}
+
+/**
+ * Calculate the expected Decay as UM into a control system based on its tier and segment progress percentage.
+ */
+export function getDecayValue(progress: number, state: string | undefined): number {
+  if (progress <= 0.25 || progress > 1 || !state || state === "Unoccupied") return 0;
+  const tierRange = state === "Stronghold" ? 1000000 : state === "Fortified" ? 650000 : 350000;
+  const decayMod = state === "Stronghold" ? 50 / 240 : state === "Fortified" ? 41 / 240 : 20 / 240;
+  return Math.floor(((progress - 0.25) / 0.75) * (tierRange * 0.75) * decayMod);
 }
