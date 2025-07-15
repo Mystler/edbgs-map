@@ -20,6 +20,7 @@ interface EDDNMessageHeader {
 
 interface EDDNJournalMessage {
   timestamp: string;
+  event: string;
   StarSystem: string;
   SystemAddress: number;
   ControllingPower?: string;
@@ -60,6 +61,8 @@ async function runEDDNListener() {
     if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
       // Regular journal event
       const data = eddn.message as EDDNJournalMessage;
+      // Ignore events that are not expected to contain PP data
+      if (data.event !== "FSDJump" && data.event !== "Location") continue;
       const date = new Date(data.timestamp);
       // Reject timestamps older than 5min
       if (lastMessage.valueOf() - date.valueOf() > 300000) continue;
