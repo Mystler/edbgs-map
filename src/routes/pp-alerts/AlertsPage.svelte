@@ -8,6 +8,8 @@
   import { browser } from "$app/environment";
   import FaIcon from "$lib/components/FaIcon.svelte";
   import { faCaretDown, faCaretRight, faXmark } from "@fortawesome/free-solid-svg-icons";
+  import { on } from "svelte/events";
+  import { onMount, untrack } from "svelte";
 
   interface Props {
     systems: SpanshDumpPPData[];
@@ -139,6 +141,22 @@
       localStorage.setItem("ppAlertsExcludeMaxedStrongholds", JSON.stringify(excludeMaxedStrongholds));
     });
   }
+
+  // Increase number of displayed results as we scroll
+  let displayEntriesCount = $state(50);
+  onMount(() => {
+    return on(window, "scroll", () => {
+      if (document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 500) displayEntriesCount += 10;
+    });
+  });
+
+  $effect.pre(() => {
+    if (sortedSystems) {
+      untrack(() => {
+        displayEntriesCount = 50; // Reset on filter/sorting changes
+      });
+    }
+  });
 </script>
 
 <div class="mb-2">
@@ -234,7 +252,7 @@
 {#if sortedSystems}
   <div class="flex items-start">
     <div class="flex w-full flex-col gap-2">
-      {#each sortedSystems as system (system.id64)}
+      {#each sortedSystems.slice(0, displayEntriesCount) as system (system.id64)}
         {@const lastUpdate = new Date(system.date)}
         {@const cpDiff = (system.powerStateReinforcement ?? 0) - (system.powerStateUndermining ?? 0)}
         <button
