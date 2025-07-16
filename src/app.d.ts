@@ -12,6 +12,12 @@ declare global {
   const __VERSION__: string;
   const __COMMIT__: string;
   const __COMMITDATE__: string;
+
+  type DeepPartial<T> = T extends object
+    ? {
+        [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
 }
 
 export {};

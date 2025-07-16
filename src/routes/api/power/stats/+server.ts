@@ -14,7 +14,7 @@ export async function GET() {
       return {
         id: x.id,
         date: new Date(x.timestamp),
-        stats: JSON.parse(x.snapshot) as Awaited<ReturnType<typeof getCurrentCycleStats>>,
+        stats: JSON.parse(x.snapshot) as DeepPartial<Awaited<ReturnType<typeof getCurrentCycleStats>>>,
       };
     }),
   });

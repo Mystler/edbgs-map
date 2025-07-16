@@ -114,11 +114,11 @@
       </div>
     </div>
     <div>
-      <b>Expected Decay from this Cycle:</b>
+      <b>Expected Decay From This Cycle:</b>
       {getDecayValue(controlData.startProgress, data.powerState).toLocaleString("en-US")}
     </div>
     <div>
-      <b>Projected Decay with next Cycle:</b>
+      <b>Projected Decay With Next Cycle:</b>
       {getDecayValue(controlData.currentProgress, totalCPToTierName(controlData.totalCP)).toLocaleString("en-US")}
     </div>
     {@render ppLastUpdate(data)}

@@ -11,7 +11,7 @@ export const load: PageLoad = async ({ fetch, depends }) => {
       history: {
         id: number;
         date: string;
-        stats: Awaited<ReturnType<typeof getCurrentCycleStats>>;
+        stats: DeepPartial<Awaited<ReturnType<typeof getCurrentCycleStats>>>;
       }[];
     } = await res.json();
     return stats;

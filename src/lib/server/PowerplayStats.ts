@@ -18,6 +18,7 @@ function initStats() {
     systems: 0,
     fortified: 0,
     stronghold: 0,
+    updatedThisCycle: 0,
   };
 }
 
@@ -35,10 +36,13 @@ export async function getCurrentCycleStats() {
   for (const system of cachedResult ?? []) {
     if (system.controllingPower) {
       // System counts
+      allPowerStats.systems += 1;
       powerStats[system.controllingPower].systems += 1;
       if (system.powerState === "Stronghold") {
+        allPowerStats.stronghold += 1;
         powerStats[system.controllingPower].stronghold += 1;
       } else if (system.powerState === "Fortified") {
+        allPowerStats.fortified += 1;
         powerStats[system.controllingPower].fortified += 1;
       }
 
@@ -68,6 +72,8 @@ export async function getCurrentCycleStats() {
     allPowerStats.umCP += system.powerStateUndermining ?? 0;
 
     if (system.controllingPower) {
+      allPowerStats.updatedThisCycle += 1;
+      powerStats[system.controllingPower].updatedThisCycle += 1;
       powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
       powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
     }
