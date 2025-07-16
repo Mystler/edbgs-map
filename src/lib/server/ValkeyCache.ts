@@ -9,6 +9,7 @@ if (!building && import.meta.env.VITE_USE_VALKEY === "true") {
   client = new Valkey({
     port: import.meta.env.VITE_VALKEY_PORT ?? 6379,
     host: import.meta.env.VITE_VALKEY_HOST ?? "localhost",
+    enableAutoPipelining: true,
   });
   client.on("error", (e) => {
     if (!isReconnecting) console.log(e);
@@ -55,13 +56,15 @@ export async function getAllCacheMatching<T>(
     }
   });
   await new Promise((resolve) => stream.once("end", resolve));
+  const pipe = client.pipeline();
   const results: T[] = [];
-  const processKey = async (key: string) => {
-    const val = await getCache(key);
-    const obj = val ? (JSON.parse(val) as T) : undefined;
+  for (const key of keySet.keys()) {
+    pipe.get(key);
+  }
+  for (const [, result] of (await pipe.exec()) ?? []) {
+    const obj = result ? (JSON.parse(result as string) as T) : undefined;
     if (obj && filterFunc(obj)) results.push(obj);
-  };
-  await Promise.all(keySet.keys().map(processKey));
+  }
   return results;
 }
 
