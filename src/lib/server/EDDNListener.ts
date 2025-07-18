@@ -57,7 +57,7 @@ async function runEDDNListener() {
     if (!msg) continue;
     lastMessage = new Date();
     const eddn: EDDNMessage = JSON.parse(inflateSync(msg).toString());
-    if (!eddn.header.gameversion?.startsWith("4")) continue;
+    if (!eddn.header.gameversion?.startsWith("4.1.2")) continue;
     if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
       // Regular journal event
       const data = eddn.message as EDDNJournalMessage;
