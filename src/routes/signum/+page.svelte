@@ -6,8 +6,8 @@
 
   // Preset setup
   (() => {
-    mapData.Camera.lookAt = [100, -150, -80];
-    mapData.Camera.distance = 250;
+    mapData.Camera.lookAt = [100, -213, 10];
+    mapData.Camera.distance = 500;
     mapData.addFaction({ name: "The Guard of Outer Imperial Colonies", color: "#e5ff00" });
     mapData.addFaction({ name: "House Chanter Corporation", color: "#6e6bff" });
     mapData.addFaction({ name: "Nexus Heavy Industries", color: "#ff2beb" });
@@ -19,6 +19,7 @@
     mapData.addFaction({ name: "Imperial Deathwatch", color: "#00aaff" });
     mapData.addFaction({ name: "Clans of Mandalore", color: "#c252ff" });
     mapData.addFaction({ name: "Off World Collective", color: "#fe8b62" });
+    mapData.addFaction({ name: "House of Saga", color: "#97afc8" });
     mapData.sortAll();
   })();
 </script>
