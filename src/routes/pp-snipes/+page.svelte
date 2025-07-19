@@ -18,6 +18,7 @@
   } from "@fortawesome/free-solid-svg-icons";
   import { invalidate } from "$app/navigation";
   import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
+  import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -253,7 +254,10 @@
           </button>
           {#if displayLogId === snipe.id}
             <div transition:slide class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
-              <h2>{snipe.system}</h2>
+              <h2>
+                {snipe.system}
+                <CopyToClipboardButton text={snipe.system} />
+              </h2>
               <div class="justify-between gap-2 max-sm:flex max-sm:flex-col sm:grid sm:grid-cols-[1fr_min-content_1fr]">
                 <div><PowerplaySystemInfo data={oldData} /></div>
                 <div class="mx-4 my-auto justify-items-center text-7xl text-green-500">

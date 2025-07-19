@@ -4,6 +4,7 @@
   import Dialog from "./Dialog.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import PowerplaySystemInfo from "./PowerplaySystemInfo.svelte";
+  import CopyToClipboardButton from "./CopyToClipboardButton.svelte";
 
   async function fetchPPData(): Promise<SpanshDumpPPData | null> {
     const system = HUDInfo.CurrentPPInfo;
@@ -39,7 +40,10 @@
       showImmediately={true}
     >
       <div class="text-center sm:min-w-sm">
-        <h2 class="px-6">{HUDInfo.CurrentPPInfo.name}</h2>
+        <h2 class="px-6">
+          {HUDInfo.CurrentPPInfo.name}
+          <CopyToClipboardButton text={HUDInfo.CurrentPPInfo.name} />
+        </h2>
         {#await ppData}
           <div class="flex justify-center overflow-hidden">
             <span class="size-32 animate-spin rounded-full border-24 border-(--ed-orange) border-t-transparent"></span>

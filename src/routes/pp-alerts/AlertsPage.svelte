@@ -10,6 +10,7 @@
   import { faCaretDown, faCaretRight, faXmark } from "@fortawesome/free-solid-svg-icons";
   import { on } from "svelte/events";
   import { onMount, untrack } from "svelte";
+  import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
 
   interface Props {
     systems: SpanshDumpPPData[];
@@ -345,7 +346,10 @@
         </button>
         {#if displaySystemId === system.id64}
           <div transition:slide class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
-            <h2>{system.name}</h2>
+            <h2>
+              {system.name}
+              <CopyToClipboardButton text={system.name} />
+            </h2>
             <PowerplaySystemInfo data={system} />
           </div>
         {/if}
