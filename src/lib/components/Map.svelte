@@ -98,7 +98,7 @@
       if (droplink) {
         // System match
         let match = droplink.match(
-          /<a[^>]+(?:inara\.cz\/elite\/starsystem\/|spansh\.co\.uk\/system\/\d+)[^>]*>\s*(.*)\s*<\/a>/m,
+          /<a[^>]+(?:inara\.cz\/elite\/starsystem|spansh\.co\.uk\/system\/\d+)[^>]*>\s*(.*)\s*<\/a>/m,
         );
         if (match) {
           const name = match[1].trim().replace(/<[^>]*>/g, "");
