@@ -13,6 +13,7 @@ export async function GET() {
       ((x.powerStateReinforcement !== undefined &&
         x.powerStateUndermining !== undefined &&
         x.powerStateReinforcement + x.powerStateUndermining >= 10000) || // >=10k total CP done
+        (x.powerStateControlProgress !== undefined && x.powerStateControlProgress < 0) || // Danger, negative progress that would cause tier drop
         (x.powerConflictProgress !== undefined && x.powerConflictProgress.some((y) => y.progress >= 0.3))), // >=30% progress
   );
   return json(cachedResult);
