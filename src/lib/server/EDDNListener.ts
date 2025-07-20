@@ -74,9 +74,9 @@ async function runEDDNListener() {
         if (data.PowerplayState === "Exploited") {
           scale = 349999; // This makes math check out. Idk if the others should also be -1.
         } else if (data.PowerplayState === "Fortified") {
-          scale = 649999; // Guessing same as Exploited
+          scale = 650000;
         } else if (data.PowerplayState === "Stronghold") {
-          scale = 999999; // Guessing same as Exploited
+          scale = 1000000;
         }
         data.PowerplayStateControlProgress -= 4294967296 / scale;
       }
