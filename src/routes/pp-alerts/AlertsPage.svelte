@@ -94,7 +94,7 @@
         filterStates.includes(x.powerState ?? "") &&
         (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())) &&
         (includePrevCycle || new Date(x.date) > lastTick) &&
-        (!excludeMaxedStrongholds || x.powerState !== "Stronghold" || (x.powerStateControlProgress ?? 0) < 1.0),
+        (!excludeMaxedStrongholds || x.powerState !== "Stronghold" || (x.powerStateControlProgress ?? 0) < 0.75),
     ),
   );
 
@@ -243,7 +243,7 @@
       <div class="border-1 border-zinc-500"></div>
       <div class="flex flex-wrap gap-2">
         <label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label>
-        <label><input type="checkbox" bind:checked={excludeMaxedStrongholds} /> Exclude Maxed Strongholds</label>
+        <label><input type="checkbox" bind:checked={excludeMaxedStrongholds} /> Exclude Strongholds above 75%</label>
       </div>
       <div class="border-1 border-zinc-500"></div>
     </div>
