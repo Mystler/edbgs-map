@@ -250,8 +250,8 @@ function checkForSnipe(
       // Uncaught major percentage changes in same tier between cycles.
       if (prevData.powerState === currData.powerState) {
         if (
-          currData.powerState === "Stronghold" &&
-          currProg + (um - (currData.powerStateReinforcement ?? 0)) / 1000000 > 0.999
+          (currProg > 0.25 && Math.abs(currProg - prevProg) < 0.2) || // Ignore snipes above 25% that did less than 20%
+          (currData.powerState === "Stronghold" && currProg > 0.999) // Ignore maxed Strongholds resetting
         ) {
           return false;
         }
