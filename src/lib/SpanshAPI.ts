@@ -26,6 +26,7 @@ export interface SpanshDumpPPData {
     power: keyof typeof Powers;
     progress: number;
   }[];
+  population?: number;
 }
 interface SpanshSearchResponse {
   results: {
@@ -34,7 +35,7 @@ interface SpanshSearchResponse {
   }[];
 }
 
-export function pruneSystemObject(system: SpanshSystem): SpanshSystem {
+export function pruneSystemObject(system: SpanshSystem): RequireAssignment<SpanshSystem> {
   return {
     name: system.name,
     x: system.x,
@@ -49,7 +50,7 @@ export function pruneSystemObject(system: SpanshSystem): SpanshSystem {
   };
 }
 
-export function pruneSystemDumpPPObject(system: SpanshDumpPPData): SpanshDumpPPData {
+export function pruneSystemDumpPPObject(system: SpanshDumpPPData): RequireAssignment<SpanshDumpPPData> {
   return {
     name: system.name,
     id64: system.id64,
@@ -61,6 +62,7 @@ export function pruneSystemDumpPPObject(system: SpanshDumpPPData): SpanshDumpPPD
     controllingPower: system.controllingPower,
     powers: system.powers,
     powerConflictProgress: system.powerConflictProgress,
+    population: system.population,
   };
 }
 

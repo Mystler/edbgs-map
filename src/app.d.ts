@@ -18,6 +18,8 @@ declare global {
         [P in keyof T]?: DeepPartial<T[P]>;
       }
     : T;
+
+  type RequireAssignment<T> = { [P in keyof Required<T>]: T[P] };
 }
 
 export {};

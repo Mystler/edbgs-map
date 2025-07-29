@@ -30,6 +30,7 @@ interface EDDNJournalMessage {
   PowerplayStateReinforcement?: number;
   PowerplayStateUndermining?: number;
   PowerplayConflictProgress?: { Power: string; ConflictProgress: number }[];
+  Population?: number;
 }
 
 let running = false;
@@ -94,6 +95,7 @@ async function runEDDNListener() {
         powerStateReinforcement: data.PowerplayStateReinforcement,
         powerStateUndermining: data.PowerplayStateUndermining,
         powers: data.Powers,
+        population: data.Population,
       };
       // Grab existing cache
       const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
