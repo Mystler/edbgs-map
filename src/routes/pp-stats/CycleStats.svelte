@@ -32,17 +32,26 @@
       )}%)
     </div>
   {/if}
-  {#if stats.allPowerStats?.reinfCP && stats.allPowerStats?.umCP}
+  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined}
     <div>
       <Tooltip>
-        {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining across all known Powerplay
-          control systems with data from this cycle.{/snippet}
+        {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (with decay removed) across all
+          known Powerplay control systems with data from this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP Activity in Control Systems:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay)}
+    </div>
+  {:else if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCP !== undefined}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (including decay) across all
+          known Powerplay control systems with data from this cycle.{/snippet}
+        <b class="underline decoration-dotted decoration-1">CP Activity* in Control Systems:</b>
       </Tooltip><br />
       {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCP)}
     </div>
   {/if}
-  {#if stats.allPowerStats?.reinfCP}
+  {#if stats.allPowerStats?.reinfCP !== undefined}
     <div>
       <Tooltip>
         {#snippet tooltip()}The total number of CP in Reinforcement across all known Powerplay control systems with data
@@ -52,17 +61,27 @@
       {f(stats.allPowerStats.reinfCP)}
     </div>
   {/if}
-  {#if stats.allPowerStats?.umCP}
+  {#if stats.allPowerStats?.umCP !== undefined}
     <div>
       <Tooltip>
-        {#snippet tooltip()}The total number of CP in Undermining across all known Powerplay control systems with data
-          from this cycle.{/snippet}
+        {#snippet tooltip()}The total number of CP in Undermining (including decay) across all known Powerplay control
+          systems with data from this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP of Undermining in Control Systems:</b>
       </Tooltip><br />
       {f(stats.allPowerStats.umCP)}
     </div>
   {/if}
-  {#if stats.allPowerStats?.acquisitionCP}
+  {#if stats.allPowerStats?.umCPNoDecay !== undefined}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The total number of CP in Undermining (with decay removed) across all known Powerplay
+          control systems with data from this cycle.{/snippet}
+        <b class="underline decoration-dotted decoration-1">CP of Player UM in Control Systems:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.umCPNoDecay)}
+    </div>
+  {/if}
+  {#if stats.allPowerStats?.acquisitionCP !== undefined}
     <div>
       <Tooltip>
         {#snippet tooltip()}The total number of CP accumulated in open Acquisition systems. By nature of Acquisitions,
@@ -72,7 +91,7 @@
       {f(stats.allPowerStats.acquisitionCP)}
     </div>
   {/if}
-  {#if stats.allPowerStats?.progressCP}
+  {#if stats.allPowerStats?.progressCP !== undefined}
     <div>
       <Tooltip>
         {#snippet tooltip()}The converted number of all known control systems' current effective progress into CP. Per
@@ -113,18 +132,28 @@
               <span>{f(ps.stronghold)}</span>
             </div>
           {/if}
-          {#if ps?.reinfCP && ps?.umCP}
+          {#if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
-                {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining of this power's space
-                  this cycle.<br />
+                {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (with decay removed) of
+                  this power's space this cycle.<br />
                   Does not include Acquisition CP since those can carry over between cycles.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Activity:</b>
+              </Tooltip>
+              <span>{f(ps.reinfCP + ps.umCPNoDecay)}</span>
+            </div>
+          {:else if ps?.reinfCP !== undefined && ps?.umCP !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip anchor="left">
+                {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (including decay) of
+                  this power's space this cycle.<br />
+                  Does not include Acquisition CP since those can carry over between cycles.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Activity*:</b>
               </Tooltip>
               <span>{f(ps.reinfCP + ps.umCP)}</span>
             </div>
           {/if}
-          {#if ps?.reinfCP}
+          {#if ps?.reinfCP !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
                 {#snippet tooltip()}The total number of CP in Reinforcement of this power's space this cycle.{/snippet}
@@ -133,16 +162,27 @@
               <span>{f(ps.reinfCP)}</span>
             </div>
           {/if}
-          {#if ps?.umCP}
+          {#if ps?.umCP !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
-                {#snippet tooltip()}The total number of CP in Undermining of this power's space this cycle.{/snippet}
+                {#snippet tooltip()}The total number of CP in Undermining (including decay) of this power's space this
+                  cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Undermining:</b>
               </Tooltip>
               {f(ps.umCP)}
             </div>
           {/if}
-          {#if ps?.acquisitionCP}
+          {#if ps?.umCPNoDecay !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip anchor="left">
+                {#snippet tooltip()}The total number of CP in Undermining (with decay removed) of this power's space
+                  this cycle.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Player UM:</b>
+              </Tooltip>
+              {f(ps.umCPNoDecay)}
+            </div>
+          {/if}
+          {#if ps?.acquisitionCP !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
                 {#snippet tooltip()}The total number of CP accumulated by this power in open Acquisition systems. By
@@ -152,7 +192,7 @@
               <span>{f(ps.acquisitionCP)}</span>
             </div>
           {/if}
-          {#if ps?.progressCP}
+          {#if ps?.progressCP !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
                 {#snippet tooltip()}The converted number of all known control systems' current effective progress into
@@ -163,7 +203,7 @@
               <span>{f(ps.progressCP)}</span>
             </div>
           {/if}
-          {#if ps?.systems && ps?.updatedThisCycle}
+          {#if ps?.systems && ps?.updatedThisCycle !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip anchor="left">
                 {#snippet tooltip()}The percentage of control systems that have been visited and updated at least once

@@ -1,5 +1,5 @@
 import { Powers } from "$lib/Constants";
-import { getLastPPTickDate } from "$lib/Powerplay";
+import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
 
@@ -12,6 +12,7 @@ function initStats() {
   return {
     reinfCP: 0,
     umCP: 0,
+    umCPNoDecay: 0,
     acquisitionCP: 0,
     progressCP: 0,
 
@@ -76,6 +77,12 @@ export async function getCurrentCycleStats() {
       powerStats[system.controllingPower].updatedThisCycle += 1;
       powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
       powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
+
+      const controlData = calculatePPControlSegments(system);
+      const decayUM = getDecayValue(controlData.startProgress, system.powerState);
+      const playerUM = Math.max(0, (system.powerStateUndermining ?? 0) - decayUM);
+      allPowerStats.umCPNoDecay += playerUM;
+      powerStats[system.controllingPower].umCPNoDecay += playerUM;
     }
   }
 
