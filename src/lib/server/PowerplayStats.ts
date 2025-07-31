@@ -20,6 +20,8 @@ function initStats() {
     fortified: 0,
     stronghold: 0,
     updatedThisCycle: 0,
+
+    population: 0,
   };
 }
 
@@ -46,6 +48,9 @@ export async function getCurrentCycleStats() {
         allPowerStats.fortified += 1;
         powerStats[system.controllingPower].fortified += 1;
       }
+
+      allPowerStats.population += system.population ?? 0;
+      powerStats[system.controllingPower].population += system.population ?? 0;
 
       // CP in progress bars
       const segmentProgress = system.powerStateControlProgress ?? 0;

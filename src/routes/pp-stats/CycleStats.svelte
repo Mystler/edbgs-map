@@ -101,6 +101,15 @@
       {f(stats.allPowerStats.progressCP)}
     </div>
   {/if}
+  {#if stats.allPowerStats?.population !== undefined}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The total amount of population controlled by all powers.{/snippet}
+        <b class="underline decoration-dotted decoration-1">Controlled Population:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.population)}
+    </div>
+  {/if}
 </div>
 {#if stats.powerStats}
   <div class="mt-4 grid grid-cols-[repeat(auto-fit,_minmax(225px,_1fr))] gap-2">
@@ -201,6 +210,15 @@
                 <b class="underline decoration-dotted decoration-1">System CP:</b>
               </Tooltip>
               <span>{f(ps.progressCP)}</span>
+            </div>
+          {/if}
+          {#if ps?.population !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip anchor="left">
+                {#snippet tooltip()}The total amount of population controlled by this power.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Pops:</b>
+              </Tooltip>
+              <span>{f(ps.population)}</span>
             </div>
           {/if}
           {#if ps?.systems && ps?.updatedThisCycle !== undefined}
