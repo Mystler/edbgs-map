@@ -143,7 +143,7 @@
           {/if}
           {#if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (with decay removed) of
                   this power's space this cycle.<br />
                   Does not include Acquisition CP since those can carry over between cycles.{/snippet}
@@ -153,7 +153,7 @@
             </div>
           {:else if ps?.reinfCP !== undefined && ps?.umCP !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (including decay) of
                   this power's space this cycle.<br />
                   Does not include Acquisition CP since those can carry over between cycles.{/snippet}
@@ -164,7 +164,7 @@
           {/if}
           {#if ps?.reinfCP !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP in Reinforcement of this power's space this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Reinforcement:</b>
               </Tooltip>
@@ -173,7 +173,7 @@
           {/if}
           {#if ps?.umCP !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP in Undermining (including decay) of this power's space this
                   cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Undermining:</b>
@@ -183,7 +183,7 @@
           {/if}
           {#if ps?.umCPNoDecay !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP in Undermining (with decay removed) of this power's space
                   this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Player UM:</b>
@@ -193,7 +193,7 @@
           {/if}
           {#if ps?.acquisitionCP !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total number of CP accumulated by this power in open Acquisition systems. By
                   nature of Acquisitions, this includes work from past cycles if a system did not reach 100%.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Acquisition:</b>
@@ -203,7 +203,7 @@
           {/if}
           {#if ps?.progressCP !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The converted number of all known control systems' current effective progress into
                   CP. Per system value thus ranges from 0 for the left border of Exploited to 2 million for a maxed out
                   Stronghold.{/snippet}
@@ -214,7 +214,7 @@
           {/if}
           {#if ps?.population !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The total amount of population controlled by this power.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Pops:</b>
               </Tooltip>
@@ -223,7 +223,7 @@
           {/if}
           {#if ps?.systems && ps?.updatedThisCycle !== undefined}
             <div class="flex justify-between gap-1">
-              <Tooltip anchor="left">
+              <Tooltip>
                 {#snippet tooltip()}The percentage of control systems that have been visited and updated at least once
                   this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Updated:</b>
