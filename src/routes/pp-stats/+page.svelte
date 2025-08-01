@@ -26,7 +26,7 @@
 </svelte:head>
 
 <PowerplayPageNav />
-<div class="mx-auto px-1 pb-4 xl:max-w-(--breakpoint-xl)">
+<div class="mx-auto max-w-[1600px] px-1 pb-4">
   <!-- Intro section -->
   <h1 class="text-center">Cycle Stats</h1>
   <p class="text-center text-sm">
@@ -59,7 +59,7 @@
   {:then stats}
     <!-- Current Cycle View -->
     <div class="mt-2 text-center">
-      <div class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
+      <div class="mx-auto w-full p-2 text-center">
         <h2>Current Cycle 2.{stats.currentCycle.cycle}</h2>
         <CycleStats stats={stats.currentCycle} />
       </div>
@@ -83,7 +83,7 @@
             </div>
           </button>
           {#if displayHistoryId === cycle.id}
-            <div transition:slide class="mx-auto w-full p-2 text-center lg:max-w-(--breakpoint-lg)">
+            <div transition:slide class="mx-auto w-full p-2 text-center">
               <p>
                 <i
                   >Snapshot from {timestamp.toLocaleString(undefined, {
