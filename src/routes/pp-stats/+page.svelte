@@ -33,7 +33,7 @@
     See this and past cycle's stats. Note that these are based on known data and subject to inaccuracies from missing or
     outdated information.
   </p>
-  <p class="mx-auto text-right text-xs text-zinc-500 lg:max-w-(--breakpoint-lg)">
+  <p class="mx-auto text-right text-xs text-zinc-500">
     Last Refresh:
     {#key lastRefresh}<Time relative live={5000} timestamp={lastRefresh} title={undefined} />{/key}
     <button
