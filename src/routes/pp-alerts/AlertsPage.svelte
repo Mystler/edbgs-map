@@ -30,6 +30,8 @@
   let filterStates: string[] = $state((() => availableStates)());
   let includePrevCycle = $state(false);
   let excludeMaxedStrongholds = $state(false);
+  const acquisitionFilteringModes = ["Any Present", "All Present", "Leading"] as const;
+  let acquisitonFiltering: (typeof acquisitionFilteringModes)[number] = $state("Any Present");
 
   const sortingFunctions = {
     "Total Control Points": (a, b) => {
@@ -90,7 +92,14 @@
     systems?.filter(
       (x) =>
         (filterPowers.includes(x.controllingPower ?? "") ||
-          new Set(filterPowers).intersection(new Set(x.powerConflictProgress?.map((x) => x.power) ?? [])).size > 0) &&
+          (acquisitonFiltering === "Any Present" &&
+            new Set(filterPowers).intersection(new Set(x.powerConflictProgress?.map((x) => x.power) ?? [])).size > 0) ||
+          (acquisitonFiltering === "All Present" &&
+            new Set(filterPowers).isSubsetOf(new Set(x.powerConflictProgress?.map((x) => x.power) ?? []))) ||
+          (acquisitonFiltering === "Leading" &&
+            filterPowers.includes(
+              x.powerConflictProgress?.toSorted((a, b) => b.progress - a.progress)?.at(0)?.power ?? "",
+            ))) &&
         filterStates.includes(x.powerState ?? "") &&
         (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())) &&
         (includePrevCycle || new Date(x.date) > lastTick) &&
@@ -119,6 +128,11 @@
       if (lsIncludePrevious) includePrevCycle = JSON.parse(lsIncludePrevious);
       const lsExcludeMaxed = localStorage.getItem("ppAlertsExcludeMaxedStrongholds");
       if (lsExcludeMaxed) excludeMaxedStrongholds = JSON.parse(lsExcludeMaxed);
+      const lsAcquisitonFiltering = localStorage.getItem("ppAlertsAcquisitonFiltering") as
+        | (typeof acquisitionFilteringModes)[number]
+        | null;
+      if (lsAcquisitonFiltering && acquisitionFilteringModes.includes(lsAcquisitonFiltering))
+        acquisitonFiltering = JSON.parse(lsAcquisitonFiltering);
     })();
     $effect(() => {
       localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
@@ -141,6 +155,9 @@
     $effect(() => {
       localStorage.setItem("ppAlertsExcludeMaxedStrongholds", JSON.stringify(excludeMaxedStrongholds));
     });
+    $effect(() => {
+      localStorage.setItem("ppAlertsAcquisitonFiltering", JSON.stringify(acquisitonFiltering));
+    });
   }
 
   // Increase number of displayed results as we scroll
@@ -160,7 +177,7 @@
   });
 </script>
 
-<div class="mb-2">
+<div>
   <!-- Sorting -->
   <div class="flex flex-wrap items-center gap-2">
     <div class="flex flex-col">
@@ -245,12 +262,22 @@
         <label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label>
         <label><input type="checkbox" bind:checked={excludeMaxedStrongholds} /> Exclude Strongholds above 75%</label>
       </div>
+      <div class="flex gap-2">
+        Filter Acquisition Powers:
+        {#each acquisitionFilteringModes as type (type)}
+          <label>
+            <input type="radio" name="acquisitonFilter" value={type} bind:group={acquisitonFiltering} />
+            {type}
+          </label>
+        {/each}
+      </div>
       <div class="border-1 border-zinc-500"></div>
     </div>
   {/if}
 </div>
 <!-- Systems list -->
 {#if sortedSystems}
+  <div class="my-2 text-right text-sm">{sortedSystems.length} Systems</div>
   <div class="flex items-start">
     <div class="flex w-full flex-col gap-2">
       {#each sortedSystems.slice(0, displayEntriesCount) as system (system.id64)}
