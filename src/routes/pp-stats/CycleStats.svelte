@@ -91,6 +91,15 @@
       {f(stats.allPowerStats.acquisitionCP)}
     </div>
   {/if}
+  {#if stats.allPowerStats?.expectedAcquisitions !== undefined}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The total number of new systems expected to be controlled by a power next cycle.{/snippet}
+        <b class="underline decoration-dotted decoration-1">Expected Acquisitions:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.expectedAcquisitions)}
+    </div>
+  {/if}
   {#if stats.allPowerStats?.progressCP !== undefined}
     <div>
       <Tooltip>
@@ -199,6 +208,16 @@
                 <b class="underline decoration-dotted decoration-1">Acquisition:</b>
               </Tooltip>
               <span>{f(ps.acquisitionCP)}</span>
+            </div>
+          {/if}
+          {#if ps?.expectedAcquisitions !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip>
+                {#snippet tooltip()}The current number of systems with the power leading the acquisition above 100%,
+                  thus expecting it to control the system next cycle.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Expected New:</b>
+              </Tooltip>
+              <span>{f(ps.expectedAcquisitions)}</span>
             </div>
           {/if}
           {#if ps?.progressCP !== undefined}

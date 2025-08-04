@@ -22,6 +22,7 @@ function initStats() {
     updatedThisCycle: 0,
 
     population: 0,
+    expectedAcquisitions: 0,
   };
 }
 
@@ -88,6 +89,12 @@ export async function getCurrentCycleStats() {
       const playerUM = Math.max(0, (system.powerStateUndermining ?? 0) - decayUM);
       allPowerStats.umCPNoDecay += playerUM;
       powerStats[system.controllingPower].umCPNoDecay += playerUM;
+    } else if (system.powerConflictProgress) {
+      const leader = system.powerConflictProgress.toSorted((a, b) => b.progress - a.progress).at(0);
+      if (leader && leader.progress >= 1) {
+        allPowerStats.expectedAcquisitions += 1;
+        powerStats[leader.power].expectedAcquisitions += 1;
+      }
     }
   }
 
