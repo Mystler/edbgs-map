@@ -94,7 +94,8 @@
   }
 
   input[type="range"],
-  input[type="checkbox"] {
+  input[type="checkbox"],
+  input[type="radio"] {
     @apply accent-(--ed-orange);
   }
 
