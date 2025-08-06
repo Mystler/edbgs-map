@@ -298,7 +298,17 @@
             <option>Stronghold</option>
             <option value="ExpansionCube">Expansion Cube</option>
           </select>
-          {#if s.type === "Colonization" && !sphereRefs[i]?.isColonizationLoaded()}
+          {#if ["Fortified", "Stronghold"].includes(s.type) && !sphereRefs[i]?.isAcquisitionLoaded()}
+            <button
+              type="button"
+              aria-label="Load Acquisition Targets"
+              title="Load Acquisition Targets"
+              class="link"
+              onclick={() => sphereRefs[i]?.loadAcquisitionSystems()}
+            >
+              <FaIcon icon={faDownload} />
+            </button>
+          {:else if s.type === "Colonization" && !sphereRefs[i]?.isColonizationLoaded()}
             <button
               type="button"
               aria-label="Load Colonization Targets"

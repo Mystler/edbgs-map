@@ -1,10 +1,10 @@
 <script lang="ts">
   import { SphereRanges, type SphereData } from "../types/MapData.svelte";
   import type { SpanshSystem } from "../SpanshAPI";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { onMount } from "svelte";
   import { T } from "@threlte/core";
-  import { DoubleSide } from "three";
+  import { DoubleSide, Vector3 } from "three";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { scale3d } from "$lib/types/Animations.svelte";
   import { transitions, global } from "@threlte/extras";
@@ -20,7 +20,7 @@
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(sphere.name, "Sphere");
-    let response = await fetch(`${base}/api/system/${sphere.name}`);
+    let response = await fetch(resolve(`/api/system/${sphere.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for sphere: ${sphere.name}`);
@@ -61,7 +61,7 @@
     if (!sphere.position) return;
     colonizationLoaded = true;
     const m = HUDInfo.showMessage(sphere.name, "Colonization Targets");
-    fetch(`${base}/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`)
+    fetch(resolve(`/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
       .then((x) => x.json())
       .then((x) => {
         colonizationTargets = x;
@@ -75,6 +75,37 @@
         HUDInfo.removeMessage(m);
       });
   }
+
+  let acquisitionLoaded = $state(false);
+  export const isAcquisitionLoaded = () => acquisitionLoaded;
+  let acquisitionTargets: SpanshSystem[] = $state([]);
+  export function loadAcquisitionSystems() {
+    if (!sphere.position) return;
+    acquisitionLoaded = true;
+    const m = HUDInfo.showMessage(sphere.name, "Acquisition Targets");
+    fetch(resolve(`/api/acquisition/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
+      .then((x) => x.json())
+      .then((x) => {
+        acquisitionTargets = x;
+        HUDInfo.removeMessage(m);
+        if (acquisitionTargets.length === 0) {
+          alert("No valid acquisition targets found!");
+        }
+      })
+      .catch(() => {
+        alert(`Error when fetching acquisition targets for ${sphere.name}`);
+        HUDInfo.removeMessage(m);
+      });
+  }
+  let filteredAcquisitonTargets = $derived(
+    acquisitionTargets.filter(
+      (x) =>
+        sphere.position &&
+        new Vector3(x.x, x.y, x.z).distanceTo(
+          new Vector3(sphere.position[0], sphere.position[1], sphere.position[2]),
+        ) <= (sphere.type === "Stronghold" ? 30 : 20),
+    ),
+  );
 </script>
 
 {#if systemData}
@@ -87,6 +118,11 @@
     <T.MeshBasicMaterial color={sphere.color} opacity={0.2} transparent={true} depthTest={false} side={DoubleSide} />
   </T.Mesh>
 {/if}
-{#if colonizationTargets.length > 0}
+{#if sphere.type === "Colonization" && colonizationTargets.length > 0}
   <SystemRenderGroup systems={colonizationTargets} color={sphere.color} visible={sphere.visible} />
+{/if}
+{#if ["Fortified", "Stronghold"].includes(sphere.type) && filteredAcquisitonTargets.length > 0}
+  {#key filteredAcquisitonTargets}
+    <SystemRenderGroup systems={filteredAcquisitonTargets} color="#ffffff" visible={sphere.visible} />
+  {/key}
 {/if}

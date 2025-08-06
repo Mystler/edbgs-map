@@ -162,6 +162,24 @@ export async function fetchColonizationTargets(x: number, y: number, z: number):
   return systems;
 }
 
+/**
+ * Fetch all unoccupied populated systems in 30Ly range and leave filtering down to 20Ly for fortified to the frontend.
+ */
+export async function fetchAcquisitionTargets(x: number, y: number, z: number): Promise<SpanshSystem[]> {
+  const systems = await fetchSystems({
+    filters: {
+      distance: { min: "0", max: "30" },
+      population: { comparison: "<=>", value: [1, 100000000000] },
+      power_state: { value: ["Unoccupied"] },
+    },
+    sort: [],
+    size: 500,
+    page: 0,
+    reference_coords: { x, y, z },
+  });
+  return systems;
+}
+
 interface SpanshAutocompleteResponse {
   values: string[];
 }
