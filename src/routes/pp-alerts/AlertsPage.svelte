@@ -132,7 +132,7 @@
         | (typeof acquisitionFilteringModes)[number]
         | null;
       if (lsAcquisitonFiltering && acquisitionFilteringModes.includes(lsAcquisitonFiltering))
-        acquisitonFiltering = JSON.parse(lsAcquisitonFiltering);
+        acquisitonFiltering = lsAcquisitonFiltering;
     })();
     $effect(() => {
       localStorage.setItem("ppAlertsFilterPowers", JSON.stringify(filterPowers));
@@ -156,7 +156,7 @@
       localStorage.setItem("ppAlertsExcludeMaxedStrongholds", JSON.stringify(excludeMaxedStrongholds));
     });
     $effect(() => {
-      localStorage.setItem("ppAlertsAcquisitonFiltering", JSON.stringify(acquisitonFiltering));
+      localStorage.setItem("ppAlertsAcquisitonFiltering", acquisitonFiltering);
     });
   }
 
