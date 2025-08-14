@@ -36,6 +36,9 @@ interface EDDNJournalMessage {
 let running = false;
 let sock: Subscriber | undefined;
 let lastMessage: Date | undefined;
+// This tracks the most common game version to filter for. Seed with 5 instances of a default.
+const versionTrack: string[] = Array(5).fill("4.1.3.0");
+let requiredGameVersion = "";
 
 export async function run() {
   if (running) return;
@@ -58,89 +61,91 @@ async function runEDDNListener() {
     if (!msg) continue;
     lastMessage = new Date();
     const eddn: EDDNMessage = JSON.parse(inflateSync(msg).toString());
-    if (!eddn.header.gameversion?.startsWith("4.1.3")) continue;
-    if (eddn.$schemaRef === "https://eddn.edcd.io/schemas/journal/1") {
-      // Regular journal event
-      const data = eddn.message as EDDNJournalMessage;
-      // Ignore events that are not expected to contain PP data
-      if (data.event !== "FSDJump" && data.event !== "Location") continue;
-      const date = new Date(data.timestamp);
-      // Reject timestamps older than 5min
-      if (lastMessage.valueOf() - date.valueOf() > 300000) continue;
-      // Calculate latest PP tick, for re-use
-      const lastPPTick = getLastPPTickDate();
-      // Fix negative overflow
-      if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
-        let scale = 120000; // Should never be reached/used.
-        if (data.PowerplayState === "Exploited") {
-          scale = 349999; // This makes math check out. Idk if the others should also be -1.
-        } else if (data.PowerplayState === "Fortified") {
-          scale = 650000;
-        } else if (data.PowerplayState === "Stronghold") {
-          scale = 1000000;
+    // Only listen to journal schema events
+    if (eddn.$schemaRef !== "https://eddn.edcd.io/schemas/journal/1") continue;
+    // Track and check for right game version
+    if (eddn.header.gameversion) trackVersion(eddn.header.gameversion);
+    if (eddn.header.gameversion !== requiredGameVersion) continue;
+
+    // Regular journal event
+    const data = eddn.message as EDDNJournalMessage;
+    // Ignore events that are not expected to contain PP data
+    if (data.event !== "FSDJump" && data.event !== "Location") continue;
+    // Get event timestamp of the journal entry
+    const date = new Date(data.timestamp);
+    // Calculate latest PP tick, for re-use
+    const lastPPTick = getLastPPTickDate();
+    // Fix negative overflow
+    if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
+      let scale = 120000; // Should never be reached/used.
+      if (data.PowerplayState === "Exploited") {
+        scale = 349999; // This makes math check out. Idk if the others should also be -1.
+      } else if (data.PowerplayState === "Fortified") {
+        scale = 650000;
+      } else if (data.PowerplayState === "Stronghold") {
+        scale = 1000000;
+      }
+      data.PowerplayStateControlProgress -= 4294967296 / scale;
+    }
+    // Prune data down to PP target data in Spansh Format
+    const ppData: SpanshDumpPPData = {
+      date: data.timestamp,
+      name: data.StarSystem,
+      id64: data.SystemAddress,
+      controllingPower: data.ControllingPower,
+      powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
+        return { power: x.Power, progress: x.ConflictProgress };
+      }),
+      powerState: data.PowerplayState,
+      powerStateControlProgress: data.PowerplayStateControlProgress,
+      powerStateReinforcement: data.PowerplayStateReinforcement,
+      powerStateUndermining: data.PowerplayStateUndermining,
+      powers: data.Powers,
+      population: data.Population,
+    };
+    // Grab existing cache
+    const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
+    const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
+    if (prevData) {
+      const prevDate = new Date(prevData.date);
+      // Reject outdated data
+      if (prevDate > date) continue; // Already got newer data (by timestamp)
+      if (prevDate > lastPPTick) {
+        // During the same cycle, control numbers are only allowed to go up.
+        if (
+          (ppData.powerStateReinforcement &&
+            ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
+          (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
+        ) {
+          continue; // Reinforcement or UM went down, skip
         }
-        data.PowerplayStateControlProgress -= 4294967296 / scale;
-      }
-      // Prune data down to PP target data in Spansh Format
-      const ppData: SpanshDumpPPData = {
-        date: data.timestamp,
-        name: data.StarSystem,
-        id64: data.SystemAddress,
-        controllingPower: data.ControllingPower,
-        powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
-          return { power: x.Power, progress: x.ConflictProgress };
-        }),
-        powerState: data.PowerplayState,
-        powerStateControlProgress: data.PowerplayStateControlProgress,
-        powerStateReinforcement: data.PowerplayStateReinforcement,
-        powerStateUndermining: data.PowerplayStateUndermining,
-        powers: data.Powers,
-        population: data.Population,
-      };
-      // Grab existing cache
-      const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
-      const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
-      if (prevData) {
-        const prevDate = new Date(prevData.date);
-        // Reject outdated data
-        if (prevDate > date) continue; // Already got newer data (by timestamp)
-        if (prevDate > lastPPTick) {
-          // During the same cycle, control numbers are only allowed to go up.
-          if (
-            (ppData.powerStateReinforcement &&
-              ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
-            (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
-          ) {
-            continue; // Reinforcement or UM went down, skip
-          }
-          if (
-            ppData.powerConflictProgress &&
-            ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) <
-              (prevData.powerConflictProgress?.reduce((sum, x) => sum + x.progress, 0) ?? 0)
-          ) {
-            continue; // Acquisition went down, skip
-          }
+        if (
+          ppData.powerConflictProgress &&
+          ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) <
+            (prevData.powerConflictProgress?.reduce((sum, x) => sum + x.progress, 0) ?? 0)
+        ) {
+          continue; // Acquisition went down, skip
         }
       }
-      // Do some data analysis if a snipe may have happened and log it asynchronously.
-      const snipe = checkForSnipe(prevData, ppData, lastPPTick);
-      // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
-      if (
-        (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
-        ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
-        snipe // Detected for snipe, probably redundant now but no big deal to keep in
-      ) {
-        // Store system
-        setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
-      } else if (
-        prevData?.powerState !== undefined &&
-        prevData.powerState !== "Unoccupied" &&
-        new Date(prevData.date) < lastPPTick &&
-        (ppData.powerState === undefined || ppData.powerState === "Unoccupied")
-      ) {
-        // Delete potentially lost systems once if no other data for this cycle
-        deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
-      }
+    }
+    // Do some data analysis if a snipe may have happened and log it asynchronously.
+    const snipe = checkForSnipe(prevData, ppData, lastPPTick);
+    // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
+    if (
+      (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
+      ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
+      snipe // Detected for snipe, probably redundant now but no big deal to keep in
+    ) {
+      // Store system
+      setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
+    } else if (
+      prevData?.powerState !== undefined &&
+      prevData.powerState !== "Unoccupied" &&
+      new Date(prevData.date) < lastPPTick &&
+      (ppData.powerState === undefined || ppData.powerState === "Unoccupied")
+    ) {
+      // Delete potentially lost systems once if no other data for this cycle
+      deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
     }
   }
   console.log("ZMQ runner exited! Restart initiating.");
@@ -155,6 +160,35 @@ async function runTimeoutCatcher() {
       sock?.close();
     }
   }, 300000);
+}
+
+function trackVersion(version: string) {
+  versionTrack.push(version);
+  // Track the last 200 versions for now.
+  if (versionTrack.length > 200) {
+    versionTrack.shift();
+  }
+  const mode = getModeVersion();
+  if (mode !== requiredGameVersion) {
+    console.log(`Setting expected game version to ${mode}`);
+    requiredGameVersion = mode;
+  }
+}
+
+function getModeVersion() {
+  const frequencyMap: { [index: string]: number } = {};
+  for (const version of versionTrack) {
+    frequencyMap[version] = (frequencyMap[version] || 0) + 1;
+  }
+  let mode = "";
+  let maxCount = 0;
+  for (const [version, count] of Object.entries(frequencyMap)) {
+    if (count > maxCount) {
+      maxCount = count;
+      mode = version;
+    }
+  }
+  return mode;
 }
 
 function checkForSnipe(
