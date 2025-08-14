@@ -45,8 +45,10 @@
       );
     },
     "Total Activity": (a, b) => {
-      const aDecay = getDecayValue(calculatePPControlSegments(a).startProgress, a.powerState);
-      const bDecay = getDecayValue(calculatePPControlSegments(b).startProgress, b.powerState);
+      const csa = calculatePPControlSegments(a);
+      const csb = calculatePPControlSegments(b);
+      const aDecay = getDecayValue(csa.startProgress, csa.startTier);
+      const bDecay = getDecayValue(csb.startProgress, csb.startTier);
       return (
         (a.powerConflictProgress
           ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
@@ -88,8 +90,10 @@
       return (a.powerStateUndermining ?? 0) - (b.powerStateUndermining ?? 0);
     },
     "Total Player UM": (a, b) => {
-      const aDecay = getDecayValue(calculatePPControlSegments(a).startProgress, a.powerState);
-      const bDecay = getDecayValue(calculatePPControlSegments(b).startProgress, b.powerState);
+      const csa = calculatePPControlSegments(a);
+      const csb = calculatePPControlSegments(b);
+      const aDecay = getDecayValue(csa.startProgress, csa.startTier);
+      const bDecay = getDecayValue(csb.startProgress, csb.startTier);
       return (a.powerStateUndermining ?? 0) - aDecay - ((b.powerStateUndermining ?? 0) - bDecay);
     },
     "Total Reinforcement": (a, b) => {
@@ -337,16 +341,17 @@
                 {(system.powerStateUndermining ?? 0).toLocaleString("en-US")}<br />
                 Undermining
               {:else if sortBy === "Total Player UM"}
-                {(
-                  (system.powerStateUndermining ?? 0) -
-                  getDecayValue(calculatePPControlSegments(system).startProgress, system.powerState)
-                ).toLocaleString("en-US")}<br />
+                {@const cs = calculatePPControlSegments(system)}
+                {((system.powerStateUndermining ?? 0) - getDecayValue(cs.startProgress, cs.startTier)).toLocaleString(
+                  "en-US",
+                )}<br />
                 Undermining
               {:else if sortBy === "Total Activity"}
+                {@const cs = calculatePPControlSegments(system)}
                 {(
                   (system.powerStateReinforcement ?? 0) +
                   (system.powerStateUndermining ?? 0) -
-                  getDecayValue(calculatePPControlSegments(system).startProgress, system.powerState)
+                  getDecayValue(cs.startProgress, cs.startTier)
                 ).toLocaleString("en-US")}<br />
                 Total
               {:else}

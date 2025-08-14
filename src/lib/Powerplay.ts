@@ -16,6 +16,17 @@ export function getLastPPTickDate() {
 
 /**
  * Calculate more information we need to display PP bars from the available data.
+ * Returns:
+ * - startBar: start of cycle progress marker, 0-1 float with every 0.25 being a segment/tier break
+ * - currentBar: current cycle progress marker, 0-1 float with every 0.25 being a segment/tier break
+ * - currentProgress: current progress from 0-1 within the tier that the marker is in (regardless of cycle's system tier in journal)
+ * - currentTier: current tier that the current progress marker is in
+ * - adjustedProgress: like currentProgress but 1-x if the journal progress is negative, i.e. expected tier drop
+ * - startProgress: reverse-calculates progress at start of cycle within whatever tier the marker is.
+ *      WARNING: Will offset when running into tier progress caps though.
+ * - starTier: reverse-calculated tier at start of cycle (to allow accounting for caching bugs in reported journal data)
+ *      WARNING: Will offset when running into tier progress caps though.
+ * - totalCP: CP relative to the whole bar as shown by the main menu galaxy map bug
  */
 export function calculatePPControlSegments(data: SpanshDumpPPData) {
   const segmentProgress = data.powerStateControlProgress ?? 0;
@@ -29,7 +40,9 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
   // Show negative progress for tier drops
   const adjustedProgress = segmentProgress < 0 ? -(1 - currentProgress) : currentProgress;
   const startProgress = startBar === 1 ? 1 : (startBar % 0.25) / 0.25;
-  return { startBar, currentBar, currentProgress, adjustedProgress, startProgress, totalCP };
+  const currentTier = totalCPToTierName(totalCP);
+  const startTier = totalCPToTierName(cycleStartCP);
+  return { startBar, currentBar, currentProgress, currentTier, adjustedProgress, startProgress, startTier, totalCP };
 }
 
 function totalCPToBarPercent(cp: number) {

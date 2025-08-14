@@ -237,8 +237,8 @@ function checkForSnipe(
     // UM Snipe, just check for 25k drops (beyond expected decay), better catch a bit too much than too little
     const um = currData?.powerStateUndermining ?? 0;
     const umDiff = um - (prevData?.powerStateUndermining ?? 0);
-    const { startProgress: currStartProgress } = calculatePPControlSegments(currData);
-    if (umDiff > 25000 && um > getDecayValue(currStartProgress, currData.powerState) + 25000) {
+    const { startProgress: currStartProgress, startTier: currStartTier } = calculatePPControlSegments(currData);
+    if (umDiff > 25000 && um > getDecayValue(currStartProgress, currStartTier) + 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;
     }
@@ -260,39 +260,40 @@ function checkForSnipe(
     // EOC progress control snipes that weren't caught.
     if (prevData && new Date(prevData.date) < lastPPTick) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
-      const currProg = currStartProgress; // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
+      // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
+      // Sanity check currProg as well because of the stupid game cache bug (showing last cycle's tier with >100% or <0% progress still).
       // Undermining drops that changed tier over EOC
-      if (prevData.powerState === "Stronghold" && currData.powerState === "Fortified" && prevProg > 0) {
-        const cp = Math.floor(prevProg * 1000000 + (1 - currProg) * 650000);
+      if (prevData.powerState === "Stronghold" && prevProg > 0 && currStartTier === "Fortified") {
+        const cp = Math.floor(prevProg * 1000000 + (1 - currStartProgress) * 650000);
         logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
         return true;
       }
-      if (prevData.powerState === "Fortified" && currData.powerState === "Exploited" && prevProg > 0) {
-        const cp = Math.floor(prevProg * 650000 + (1 - currProg) * 350000);
+      if (prevData.powerState === "Fortified" && prevProg > 0 && currStartTier === "Exploited") {
+        const cp = Math.floor(prevProg * 650000 + (1 - currStartProgress) * 350000);
         logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
         return true;
       }
       // Reinforcement drops that changed tier over EOC
-      if (prevData.powerState === "Exploited" && currData.powerState === "Fortified" && prevProg < 1) {
-        const cp = Math.floor(currProg * 650000 + (1 - prevProg) * 350000);
+      if (prevData.powerState === "Exploited" && prevProg < 1 && currStartTier === "Fortified") {
+        const cp = Math.floor(currStartProgress * 650000 + (1 - prevProg) * 350000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
       }
-      if (prevData.powerState === "Fortified" && currData.powerState === "Stronghold" && prevProg < 1) {
-        const cp = Math.floor(currProg * 1000000 + (1 - prevProg) * 650000);
+      if (prevData.powerState === "Fortified" && prevProg < 1 && currStartTier === "Stronghold") {
+        const cp = Math.floor(currStartProgress * 1000000 + (1 - prevProg) * 650000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
       }
       // Uncaught major percentage changes in same tier between cycles.
-      if (prevData.powerState === currData.powerState) {
+      if (prevData.powerState === currData.powerState && prevData.powerState === currStartTier) {
         if (
-          (currProg > 0.25 && Math.abs(currProg - prevProg) < 0.2) || // Ignore snipes above 25% that did less than 20%
-          (currData.powerState === "Stronghold" && currProg > 0.999) // Ignore maxed Strongholds resetting
+          (currStartProgress > 0.25 && Math.abs(currStartProgress - prevProg) < 0.2) || // Ignore snipes above 25% that did less than 20%
+          (currData.powerState === "Stronghold" && currStartProgress > 0.999) // Ignore maxed Strongholds resetting
         ) {
           return false;
         }
         const cp = Math.floor(
-          (currProg - prevProg) *
+          (currData.powerStateControlProgress - prevProg) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
         );
         if (cp > reinfThreshold) {

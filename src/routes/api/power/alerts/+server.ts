@@ -20,8 +20,8 @@ export async function GET() {
       // Calculate expected decay if in same tier (to avoid capping offsets)
       let expectedDecay = 0;
       if (x.powerStateControlProgress > 0 && x.powerStateControlProgress < 100) {
-        const { startProgress } = calculatePPControlSegments(x);
-        expectedDecay = getDecayValue(startProgress, x.powerState);
+        const { startProgress, startTier } = calculatePPControlSegments(x);
+        expectedDecay = getDecayValue(startProgress, startTier);
       }
       // Alert on >= 10k activity with decay removed
       if (x.powerStateReinforcement + (x.powerStateUndermining - expectedDecay) >= 10000) return true;
