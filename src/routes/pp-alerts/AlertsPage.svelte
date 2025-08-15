@@ -45,10 +45,10 @@
       );
     },
     "Total Activity": (a, b) => {
-      const csa = calculatePPControlSegments(a);
-      const csb = calculatePPControlSegments(b);
-      const aDecay = getDecayValue(csa.startProgress, csa.startTier);
-      const bDecay = getDecayValue(csb.startProgress, csb.startTier);
+      const { startProgress: startProgressA, startTier: startTierA } = a.cycleStart || calculatePPControlSegments(a);
+      const { startProgress: startProgressB, startTier: startTierB } = b.cycleStart || calculatePPControlSegments(b);
+      const aDecay = getDecayValue(startProgressA, startTierA);
+      const bDecay = getDecayValue(startProgressB, startTierB);
       return (
         (a.powerConflictProgress
           ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
@@ -90,10 +90,10 @@
       return (a.powerStateUndermining ?? 0) - (b.powerStateUndermining ?? 0);
     },
     "Total Player UM": (a, b) => {
-      const csa = calculatePPControlSegments(a);
-      const csb = calculatePPControlSegments(b);
-      const aDecay = getDecayValue(csa.startProgress, csa.startTier);
-      const bDecay = getDecayValue(csb.startProgress, csb.startTier);
+      const { startProgress: startProgressA, startTier: startTierA } = a.cycleStart || calculatePPControlSegments(a);
+      const { startProgress: startProgressB, startTier: startTierB } = b.cycleStart || calculatePPControlSegments(b);
+      const aDecay = getDecayValue(startProgressA, startTierA);
+      const bDecay = getDecayValue(startProgressB, startTierB);
       return (a.powerStateUndermining ?? 0) - aDecay - ((b.powerStateUndermining ?? 0) - bDecay);
     },
     "Total Reinforcement": (a, b) => {
@@ -341,17 +341,17 @@
                 {(system.powerStateUndermining ?? 0).toLocaleString("en-US")}<br />
                 Undermining
               {:else if sortBy === "Total Player UM"}
-                {@const cs = calculatePPControlSegments(system)}
-                {((system.powerStateUndermining ?? 0) - getDecayValue(cs.startProgress, cs.startTier)).toLocaleString(
+                {@const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system)}
+                {((system.powerStateUndermining ?? 0) - getDecayValue(startProgress, startTier)).toLocaleString(
                   "en-US",
                 )}<br />
                 Undermining
               {:else if sortBy === "Total Activity"}
-                {@const cs = calculatePPControlSegments(system)}
+                {@const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system)}
                 {(
                   (system.powerStateReinforcement ?? 0) +
                   (system.powerStateUndermining ?? 0) -
-                  getDecayValue(cs.startProgress, cs.startTier)
+                  getDecayValue(startProgress, startTier)
                 ).toLocaleString("en-US")}<br />
                 Total
               {:else}

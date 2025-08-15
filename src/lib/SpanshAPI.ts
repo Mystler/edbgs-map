@@ -12,6 +12,11 @@ export interface SpanshSystem {
   power?: string[];
   needs_permit?: string;
 }
+
+/**
+ * Interface replicating the structure of the relevant PP data in the Spansh System API.
+ * This is extended with an optional object for reverse calculated start-of-cycle data.
+ */
 export interface SpanshDumpPPData {
   name: string;
   id64: number;
@@ -27,6 +32,11 @@ export interface SpanshDumpPPData {
     progress: number;
   }[];
   population?: number;
+  cycleStart?: {
+    startProgress: number;
+    startBar: number;
+    startTier: string;
+  };
 }
 interface SpanshSearchResponse {
   results: {
@@ -63,6 +73,7 @@ export function pruneSystemDumpPPObject(system: SpanshDumpPPData): RequireAssign
     powers: system.powers,
     powerConflictProgress: system.powerConflictProgress,
     population: system.population,
+    cycleStart: system.cycleStart,
   };
 }
 

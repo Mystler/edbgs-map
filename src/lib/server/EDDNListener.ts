@@ -106,8 +106,8 @@ async function runEDDNListener() {
     // Grab existing cache
     const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
     const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
-    if (prevData) {
-      const prevDate = new Date(prevData.date);
+    const prevDate = prevData ? new Date(prevData.date) : null;
+    if (prevData && prevDate) {
       // Reject outdated data
       if (prevDate > date) continue; // Already got newer data (by timestamp)
       if (prevDate > lastPPTick) {
@@ -126,6 +126,16 @@ async function runEDDNListener() {
         ) {
           continue; // Acquisition went down, skip
         }
+      }
+    }
+    if (ppData.powerStateControlProgress !== undefined) {
+      if (!prevData || (prevDate && prevDate < lastPPTick) || !prevData.cycleStart) {
+        // If this is the first time we get the system this cycle (or at all) also store calculated cycle start data (to avoid the reverse-calculation offset when capping)
+        const { startProgress, startBar, startTier } = calculatePPControlSegments(ppData);
+        ppData.cycleStart = { startProgress, startBar, startTier };
+      } else if (prevData.cycleStart) {
+        // Otherwise, carry forward stored data.
+        ppData.cycleStart = prevData.cycleStart;
       }
     }
     // Do some data analysis if a snipe may have happened and log it asynchronously.
@@ -237,7 +247,8 @@ function checkForSnipe(
     // UM Snipe, just check for 25k drops (beyond expected decay), better catch a bit too much than too little
     const um = currData?.powerStateUndermining ?? 0;
     const umDiff = um - (prevData?.powerStateUndermining ?? 0);
-    const { startProgress: currStartProgress, startTier: currStartTier } = calculatePPControlSegments(currData);
+    const { startProgress: currStartProgress, startTier: currStartTier } =
+      currData.cycleStart || calculatePPControlSegments(currData);
     if (umDiff > 25000 && um > getDecayValue(currStartProgress, currStartTier) + 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;

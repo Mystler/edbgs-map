@@ -24,6 +24,9 @@
 {#if data?.controllingPower}
   <!-- PP Control System Display -->
   {@const controlData = calculatePPControlSegments(data)}
+  {@const startProgress = data.cycleStart?.startProgress || controlData.startProgress}
+  {@const startBar = data.cycleStart?.startBar || controlData.startBar}
+  {@const startTier = data.cycleStart?.startTier || controlData.startTier}
   {@const cpDiff = (data.powerStateReinforcement ?? 0) - (data.powerStateUndermining ?? 0)}
   <h3 style={`color: ${Powers[data.controllingPower].color}`}>
     {data.controllingPower}
@@ -50,13 +53,11 @@
     </div>
     <div>
       <b>Cycle Start:</b>
-      {(controlData.startProgress * 100).toFixed(2)}%
+      {(startProgress * 100).toFixed(2)}%
       {#if ((data.powerStateControlProgress ?? 0) > 1 && controlData.adjustedProgress >= 0.25 && data.powerState !== "Stronghold") || ((data.powerStateControlProgress ?? 0) < 0 && controlData.adjustedProgress <= -0.25 && data.powerState !== "Exploited")}
         <br />
         <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
-        <i class="text-xs text-yellow-500">
-          Tier cap has been reached. Reverse calculation of cycle start value will be wrong and moving!
-        </i>
+        <i class="text-xs text-yellow-500"> Tier cap has been reached.</i>
       {/if}
     </div>
     <div>
@@ -78,23 +79,23 @@
         <div class="bg-[#519d52]"></div>
         <div class="bg-[#985cb6]"></div>
       </div>
-      {#if controlData.currentBar > controlData.startBar}
+      {#if controlData.currentBar > startBar}
         <div
           class="progress-positive-a absolute top-0 h-4 grow-0"
-          style={`left: ${controlData.startBar * 100}%; right: ${(1 - controlData.currentBar) * 100}%;`}
+          style={`left: ${startBar * 100}%; right: ${(1 - controlData.currentBar) * 100}%;`}
         ></div>
         <div
           class="progress-positive-b absolute top-4 h-4 grow-0"
-          style={`left: ${controlData.startBar * 100}%; right: ${(1 - controlData.currentBar) * 100}%;`}
+          style={`left: ${startBar * 100}%; right: ${(1 - controlData.currentBar) * 100}%;`}
         ></div>
-      {:else if controlData.currentBar < controlData.startBar}
+      {:else if controlData.currentBar < startBar}
         <div
           class="progress-negative-a absolute top-0 h-4 grow-0"
-          style={`left: ${controlData.currentBar * 100}%; right: ${(1 - controlData.startBar) * 100}%;`}
+          style={`left: ${controlData.currentBar * 100}%; right: ${(1 - startBar) * 100}%;`}
         ></div>
         <div
           class="progress-negative-b absolute top-4 h-4 grow-0"
-          style={`left: ${controlData.currentBar * 100}%; right: ${(1 - controlData.startBar) * 100}%;`}
+          style={`left: ${controlData.currentBar * 100}%; right: ${(1 - startBar) * 100}%;`}
         ></div>
       {/if}
       <div class="absolute top-0 left-1/4 h-8 grow-0 -translate-x-1/2 border-r-2 border-dashed border-white"></div>
@@ -102,7 +103,7 @@
       <div class="absolute top-0 left-3/4 h-8 grow-0 -translate-x-1/2 border-r-2 border-dashed border-white"></div>
       <div
         class="absolute top-0 -translate-1/2 overflow-visible text-3xl text-white/60"
-        style={`left: ${controlData.startBar * 100}%`}
+        style={`left: ${startBar * 100}%`}
       >
         <FaIcon icon={faCaretDown} />
       </div>
@@ -115,7 +116,7 @@
     </div>
     <div>
       <b>Expected Decay From This Cycle:</b>
-      {getDecayValue(controlData.startProgress, controlData.startTier).toLocaleString("en-US")}
+      {getDecayValue(startProgress, startTier).toLocaleString("en-US")}
     </div>
     <div>
       <b>Projected Decay With Next Cycle:</b>

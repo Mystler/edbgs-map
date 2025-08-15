@@ -84,8 +84,8 @@ export async function getCurrentCycleStats() {
       powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
       powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
 
-      const controlData = calculatePPControlSegments(system);
-      const decayUM = getDecayValue(controlData.startProgress, controlData.startTier);
+      const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system);
+      const decayUM = getDecayValue(startProgress, startTier);
       const playerUM = Math.max(0, (system.powerStateUndermining ?? 0) - decayUM);
       allPowerStats.umCPNoDecay += playerUM;
       powerStats[system.controllingPower].umCPNoDecay += playerUM;
