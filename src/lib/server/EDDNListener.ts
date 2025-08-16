@@ -233,7 +233,8 @@ function checkForSnipe(
     const lastCycleAcqProgress = prevData?.powerConflictProgress?.find(
       (x) => x.power === currData.controllingPower,
     )?.progress;
-    if (lastCycleAcqProgress && lastCycleAcqProgress < 0.8) {
+    if (lastCycleAcqProgress && lastCycleAcqProgress < 0.8 && currData.powerStateControlProgress >= 0) {
+      // Added progress >= 0 check to account for caching bug reporting lost system as exploited with negative progress for some.
       logSnipe(
         currData.name,
         "EOC Acquisition",
