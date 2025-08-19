@@ -41,6 +41,8 @@ const versionTrack: string[] = Array(5).fill("4.2.0.0");
 let requiredGameVersion = "";
 
 function trackVersion(version: string) {
+  // Ignore all legacy.
+  if (!version.startsWith("4.")) return;
   versionTrack.push(version);
   // Track the last 200 versions for now.
   if (versionTrack.length > 200) {
