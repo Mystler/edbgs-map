@@ -37,8 +37,37 @@ let running = false;
 let sock: Subscriber | undefined;
 let lastMessage: Date | undefined;
 // This tracks the most common game version to filter for. Seed with 5 instances of a default.
-const versionTrack: string[] = Array(5).fill("4.1.3.0");
+const versionTrack: string[] = Array(5).fill("4.2.0.0");
 let requiredGameVersion = "";
+
+function trackVersion(version: string) {
+  versionTrack.push(version);
+  // Track the last 200 versions for now.
+  if (versionTrack.length > 200) {
+    versionTrack.shift();
+  }
+  const mode = getModeVersion();
+  if (mode !== requiredGameVersion) {
+    console.log(`Setting expected game version to ${mode}`);
+    requiredGameVersion = mode;
+  }
+}
+
+function getModeVersion() {
+  const frequencyMap: { [index: string]: number } = {};
+  for (const version of versionTrack) {
+    frequencyMap[version] = (frequencyMap[version] || 0) + 1;
+  }
+  let mode = "";
+  let maxCount = 0;
+  for (const [version, count] of Object.entries(frequencyMap)) {
+    if (count > maxCount) {
+      maxCount = count;
+      mode = version;
+    }
+  }
+  return mode;
+}
 
 export async function run() {
   if (running) return;
@@ -48,6 +77,17 @@ export async function run() {
     lastMessage = new Date();
     await runEDDNListener();
   }
+}
+
+// Kill the socket if we haven't received any data in 5 minutes.
+async function runTimeoutCatcher() {
+  setInterval(async () => {
+    const now = new Date();
+    if (now.valueOf() - (lastMessage?.valueOf() ?? 0) > 300000) {
+      console.log("No EDDN messages received in 5 minutes. Attempt restart!");
+      sock?.close();
+    }
+  }, 300000);
 }
 
 async function runEDDNListener() {
@@ -159,46 +199,6 @@ async function runEDDNListener() {
     }
   }
   console.log("ZMQ runner exited! Restart initiating.");
-}
-
-// Kill the socket if we haven't received any data in 5 minutes.
-async function runTimeoutCatcher() {
-  setInterval(async () => {
-    const now = new Date();
-    if (now.valueOf() - (lastMessage?.valueOf() ?? 0) > 300000) {
-      console.log("No EDDN messages received in 5 minutes. Attempt restart!");
-      sock?.close();
-    }
-  }, 300000);
-}
-
-function trackVersion(version: string) {
-  versionTrack.push(version);
-  // Track the last 200 versions for now.
-  if (versionTrack.length > 200) {
-    versionTrack.shift();
-  }
-  const mode = getModeVersion();
-  if (mode !== requiredGameVersion) {
-    console.log(`Setting expected game version to ${mode}`);
-    requiredGameVersion = mode;
-  }
-}
-
-function getModeVersion() {
-  const frequencyMap: { [index: string]: number } = {};
-  for (const version of versionTrack) {
-    frequencyMap[version] = (frequencyMap[version] || 0) + 1;
-  }
-  let mode = "";
-  let maxCount = 0;
-  for (const [version, count] of Object.entries(frequencyMap)) {
-    if (count > maxCount) {
-      maxCount = count;
-      mode = version;
-    }
-  }
-  return mode;
 }
 
 function checkForSnipe(
