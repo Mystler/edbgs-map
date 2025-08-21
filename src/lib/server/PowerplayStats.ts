@@ -3,7 +3,7 @@ import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$l
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
 
-const pp2Start = new Date("2024-10-31T07:00:00Z");
+const pp2Start = new Date("2024-10-31T07:05:00Z");
 function getCycleNumber(date: Date) {
   return Math.floor((date.valueOf() - pp2Start.valueOf()) / 604_800_000) + 1;
 }
