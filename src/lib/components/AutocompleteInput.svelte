@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   type AutoCompleteType = "faction" | "system";
@@ -25,7 +25,7 @@
       return;
     }
     timeout = setTimeout(async () => {
-      const response = await fetch(`${base}/api/${dataType}/${encodeURIComponent(string)}/autocomplete`);
+      const response = await fetch(resolve(`/api/${dataType}/${encodeURIComponent(string)}/autocomplete`));
       if (response.ok) {
         options = await response.json();
       }

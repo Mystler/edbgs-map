@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { SystemData } from "../types/MapData.svelte";
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { Billboard, Text } from "@threlte/extras";
   import type { SpanshSystem } from "../SpanshAPI";
   import { onMount } from "svelte";
@@ -20,7 +20,7 @@
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(system.name, "System");
-    let response = await fetch(`${base}/api/system/${system.name}`);
+    let response = await fetch(resolve(`/api/system/${system.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for system: ${system.name}`);

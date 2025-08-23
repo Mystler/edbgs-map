@@ -11,7 +11,7 @@
   import { slide, fade } from "$lib/types/Animations.svelte";
   import Measurement, { CurrentMeasurement } from "./Measurement.svelte";
   import { HUDInfo, ClickMode } from "$lib/types/HUDInfo.svelte";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import AutocompleteInput from "./AutocompleteInput.svelte";
   import { page } from "$app/state";
   import { createShortlink } from "$lib/CustomURL";
@@ -190,7 +190,7 @@
         <button type="button" class="link" onclick={() => sessionManager.show()}>Sessions</button>
         <button type="button" class="link" onclick={() => createShortlink(data)}>Share</button>
         {#if page.route.id === "/"}
-          <a data-sveltekit-reload href={`${base}/`}>Back</a>
+          <a data-sveltekit-reload href={resolve(`/`)}>Back</a>
         {/if}
       </div>
       <button type="button" class="link-btn" onclick={() => controlsDialog.show()}>Help</button>

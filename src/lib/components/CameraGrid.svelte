@@ -4,7 +4,7 @@
   import { DefaultMapFont } from "../Constants";
   import type { CameraData } from "$lib/types/MapData.svelte";
   import { type SpanshSystem } from "$lib/SpanshAPI";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { CurrentCamera, FlyToTarget } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { DoubleSide, Group, type Matrix4, MOUSE, Vector3 } from "three";
@@ -52,7 +52,7 @@
   }
 
   async function fetchData(): Promise<SpanshSystem | null> {
-    let response = await fetch(`${base}/api/system/${cameraSetup.lookAtSystem}`);
+    let response = await fetch(resolve(`/api/system/${cameraSetup.lookAtSystem}`));
     if (!response.ok) {
       alert(`Error while fetching data from Spansh.co.uk for camera system: ${cameraSetup.lookAtSystem}`);
       return null;

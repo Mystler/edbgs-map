@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import type { SpanshDumpPPData, SpanshSystem } from "$lib/SpanshAPI";
   import Dialog from "./Dialog.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -12,7 +12,7 @@
     let id64 = system.id64;
     let response;
     if (!id64) {
-      response = await fetch(`${base}/api/system/${system.name}`);
+      response = await fetch(resolve(`/api/system/${system.name}`));
       if (!response.ok) {
         alert(`Error while fetching data for system: ${system.name}`);
         return null;
@@ -20,7 +20,7 @@
       const idquery = (await response.json()) as SpanshSystem | null;
       id64 = idquery?.id64;
     }
-    response = await fetch(`${base}/api/power/system/${id64}`);
+    response = await fetch(resolve(`/api/power/system/${id64}`));
     if (!response.ok) {
       alert(`Error while fetching powerplay data for system: ${system.name}`);
       return null;

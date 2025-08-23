@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PowerData } from "../types/MapData.svelte";
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import type { SpanshSystem } from "../SpanshAPI";
   import { onMount } from "svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -13,7 +13,7 @@
 
   async function fetchData(): Promise<SpanshSystem[]> {
     const m = HUDInfo.showMessage(power.name, "Power");
-    let response = await fetch(`${base}/api/power/${power.name}`);
+    let response = await fetch(resolve(`/api/power/${power.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for power: ${power.name}`);

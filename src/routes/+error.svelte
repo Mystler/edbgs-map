@@ -1,5 +1,5 @@
 <script>
-  import { base } from "$app/paths";
+  import { resolve } from "$app/paths";
   import { page } from "$app/state";
 </script>
 
@@ -13,6 +13,6 @@
     {page.error?.message}
   </p>
   <p>
-    <a href={base}>Go to Custom Map Setup</a>
+    <a href={resolve("/")}>Go to Custom Map Setup</a>
   </p>
 </div>
