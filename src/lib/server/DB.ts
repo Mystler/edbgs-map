@@ -4,7 +4,7 @@ import type { SpanshDumpPPData } from "../SpanshAPI";
 export const db = new sqlite3.Database("db.sqlite3");
 
 // Setup the database
-db.exec("CREATE TABLE IF NOT EXISTS shortlinks (short TEXT, long TEXT)");
+db.exec("CREATE TABLE IF NOT EXISTS shortlinks (short TEXT PRIMARY KEY, long TEXT)");
 db.exec(
   "CREATE TABLE IF NOT EXISTS snipe_history (id INTEGER PRIMARY KEY, system TEXT, type TEXT, power TEXT, amount INTEGER, old_dump TEXT, new_dump TEXT)",
 );
