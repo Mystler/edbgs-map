@@ -31,7 +31,10 @@
   <h3 style={`color: ${Powers[data.controllingPower].color}`}>
     {data.controllingPower}
   </h3>
-  <h4>{data.powerState}</h4>
+  <h4>{data.cycleStart?.startTier || data.powerState}</h4>
+  {#if data.cycleStart?.startTier && data.cycleStart.startTier !== data.powerState}
+    <p class="text-sm italic">(received {data.powerState} in source data)</p>
+  {/if}
   <div class="flex flex-col items-center gap-2">
     <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 font-medium">
       <div class="flex items-center justify-end gap-2">

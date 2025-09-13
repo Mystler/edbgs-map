@@ -130,10 +130,12 @@
             filterPowers.includes(
               x.powerConflictProgress?.toSorted((a, b) => b.progress - a.progress)?.at(0)?.power ?? "",
             ))) &&
-        filterStates.includes(x.powerState ?? "") &&
+        filterStates.includes(x.cycleStart?.startTier || (x.powerState ?? "")) &&
         (!searchSystem || x.name.toLowerCase().includes(searchSystem.toLowerCase())) &&
         (includePrevCycle || new Date(x.date) > lastTick) &&
-        (!excludeMaxedStrongholds || x.powerState !== "Stronghold" || (x.powerStateControlProgress ?? 0) < 0.75),
+        (!excludeMaxedStrongholds ||
+          (x.cycleStart?.startTier !== "Stronghold" && x.powerState !== "Stronghold") ||
+          (x.powerStateControlProgress ?? 0) < 0.75),
     ),
   );
 
@@ -403,8 +405,11 @@
           >
             {system.controllingPower}
           </div>
-          <div class="basis-32 max-sm:hidden" style={`color: ${powerStateColor(system.powerState)}`}>
-            {system.powerState}
+          <div
+            class="basis-32 max-sm:hidden"
+            style={`color: ${powerStateColor(system.cycleStart?.startTier || system.powerState)}`}
+          >
+            {system.cycleStart?.startTier || system.powerState}
           </div>
           <div class="basis-32 max-lg:hidden">
             <Time
