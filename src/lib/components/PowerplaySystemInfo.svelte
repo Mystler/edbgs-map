@@ -1,6 +1,11 @@
 <script lang="ts">
   import { Powers } from "$lib/Constants";
-  import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
+  import {
+    calculatePPControlSegments,
+    getCorrectedSegmentProgress,
+    getDecayValue,
+    getLastPPTickDate,
+  } from "$lib/Powerplay";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import {
     faCaretDown,
@@ -28,6 +33,7 @@
   {@const startBar = data.cycleStart?.startBar || controlData.startBar}
   {@const startTier = data.cycleStart?.startTier || controlData.startTier}
   {@const cpDiff = (data.powerStateReinforcement ?? 0) - (data.powerStateUndermining ?? 0)}
+  {@const correctedSegmentProgress = getCorrectedSegmentProgress(controlData.totalCP, startTier)}
   <h3 style={`color: ${Powers[data.controllingPower].color}`}>
     {data.controllingPower}
   </h3>
@@ -57,7 +63,7 @@
     <div>
       <b>Cycle Start:</b>
       {(startProgress * 100).toFixed(2)}%
-      {#if ((data.powerStateControlProgress ?? 0) > 1 && controlData.adjustedProgress >= 0.25 && data.powerState !== "Stronghold") || ((data.powerStateControlProgress ?? 0) < 0 && controlData.adjustedProgress <= -0.25 && data.powerState !== "Exploited")}
+      {#if (correctedSegmentProgress > 1 && controlData.adjustedProgress >= 0.25 && data.powerState !== "Stronghold") || (correctedSegmentProgress < 0 && controlData.adjustedProgress <= -0.25 && data.powerState !== "Exploited")}
         <br />
         <FaIcon icon={faTriangleExclamation} class="inline text-yellow-500" />
         <i class="text-xs text-yellow-500"> Tier cap has been reached.</i>
@@ -65,8 +71,8 @@
     </div>
     <div>
       <b>Current Progress:</b>
-      {((data.powerStateControlProgress ?? 0) * 100).toFixed(2)}%
-      {#if ((data.powerStateControlProgress ?? 0) > 1 && data.powerState !== "Stronghold") || ((data.powerStateControlProgress ?? 0) < 0 && data.powerState !== "Exploited")}
+      {(correctedSegmentProgress * 100).toFixed(2)}%
+      {#if (correctedSegmentProgress > 1 && data.powerState !== "Stronghold") || (correctedSegmentProgress < 0 && data.powerState !== "Exploited")}
         ({(controlData.adjustedProgress * 100).toFixed(2)}%)
       {/if}
       {#if cpDiff > 0}

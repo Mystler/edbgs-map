@@ -1,5 +1,11 @@
 <script lang="ts">
-  import { calculatePPControlSegments, getDecayValue, getLastPPTickDate, powerStateColor } from "$lib/Powerplay";
+  import {
+    calculatePPControlSegments,
+    getCorrectedSegmentProgress,
+    getDecayValue,
+    getLastPPTickDate,
+    powerStateColor,
+  } from "$lib/Powerplay";
   import Time from "svelte-time";
   import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
   import { slide } from "$lib/types/Animations.svelte";
@@ -88,12 +94,23 @@
       );
     },
     "Segment Control Progress": (a, b) => {
-      return (
-        (a.powerStateControlProgress ?? 0) +
-        (a.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0) -
-        (b.powerStateControlProgress ?? 0) -
-        (b.powerConflictProgress?.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0)
-      );
+      let pA = 0;
+      if (a.powerStateControlProgress) {
+        const cd = calculatePPControlSegments(a);
+        const { startTier } = a.cycleStart || cd;
+        pA = getCorrectedSegmentProgress(cd.totalCP, startTier);
+      } else if (a.powerConflictProgress) {
+        pA = a.powerConflictProgress.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0;
+      }
+      let pB = 0;
+      if (b.powerStateControlProgress) {
+        const cd = calculatePPControlSegments(b);
+        const { startTier } = b.cycleStart || cd;
+        pB = getCorrectedSegmentProgress(cd.totalCP, startTier);
+      } else if (b.powerConflictProgress) {
+        pB = b.powerConflictProgress.toSorted((x, y) => y.progress - x.progress).at(0)?.progress ?? 0;
+      }
+      return pA - pB;
     },
     "Total Undermining": (a, b) => {
       return (a.powerStateUndermining ?? 0) - (b.powerStateUndermining ?? 0);
@@ -340,11 +357,14 @@
           ></div>
           <div class="grow-1 text-left font-semibold">{system.name}</div>
           {#if system.powerStateControlProgress}
+            {@const controlData = calculatePPControlSegments(system)}
+            {@const { startProgress, startTier } = system.cycleStart || controlData}
+            {@const correctedSegmentProgress = getCorrectedSegmentProgress(controlData.totalCP, startTier)}
             <div class="flex flex-col">
               <span class={["font-semibold", cpDiff > 0 && "text-[#00a5ff]", cpDiff < 0 && "text-[#ff3632]"]}>
                 {cpDiff > 0 ? "+" : ""}{cpDiff.toLocaleString("en-US")}
               </span>
-              <span class="text-xs">({((system.powerStateControlProgress ?? 0) * 100).toFixed(2)}%)</span>
+              <span class="text-xs">({(correctedSegmentProgress * 100).toFixed(2)}%)</span>
             </div>
             <div class="basis-32 max-sm:hidden">
               <!-- Control system specific -->
@@ -355,13 +375,11 @@
                 {(system.powerStateUndermining ?? 0).toLocaleString("en-US")}<br />
                 Undermining
               {:else if sortBy === "Total Player UM"}
-                {@const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system)}
                 {((system.powerStateUndermining ?? 0) - getDecayValue(startProgress, startTier)).toLocaleString(
                   "en-US",
                 )}<br />
                 Undermining
               {:else if sortBy === "Total Activity"}
-                {@const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system)}
                 {(
                   (system.powerStateReinforcement ?? 0) +
                   (system.powerStateUndermining ?? 0) -

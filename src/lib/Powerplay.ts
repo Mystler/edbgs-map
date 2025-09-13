@@ -45,6 +45,12 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
   return { startBar, currentBar, currentProgress, currentTier, adjustedProgress, startProgress, startTier, totalCP };
 }
 
+export function getCorrectedSegmentProgress(totalCP: number, startTier: string) {
+  const tierStart = startTier === "Stronghold" ? 1350000 : startTier === "Fortified" ? 700000 : 350000;
+  const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
+  return (totalCP - tierStart) / tierRange;
+}
+
 function totalCPToBarPercent(cp: number) {
   if (cp >= 1350000) {
     // Stronghold
