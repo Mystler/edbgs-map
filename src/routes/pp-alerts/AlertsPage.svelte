@@ -33,6 +33,15 @@
   const acquisitionFilteringModes = ["Any Present", "All Present", "Leading"] as const;
   let acquisitonFiltering: (typeof acquisitionFilteringModes)[number] = $state("Any Present");
 
+  function resetFilters() {
+    searchSystem = "";
+    filterPowers = Object.keys(Powers);
+    filterStates = availableStates;
+    includePrevCycle = false;
+    excludeMaxedStrongholds = false;
+    acquisitonFiltering = "Any Present";
+  }
+
   const sortingFunctions = {
     "Total Control Points": (a, b) => {
       return (
@@ -298,7 +307,10 @@
 </div>
 <!-- Systems list -->
 {#if sortedSystems}
-  <div class="my-2 text-right text-sm">{sortedSystems.length} Systems</div>
+  <div class="m-2 flex justify-between text-sm">
+    <div><button type="button" class="link-btn" onclick={resetFilters}>Reset All Filters</button></div>
+    <div class="text-right">{sortedSystems.length} Systems</div>
+  </div>
   <div class="flex items-start">
     <div class="flex w-full flex-col gap-2">
       {#each sortedSystems.slice(0, displayEntriesCount) as system (system.id64)}
