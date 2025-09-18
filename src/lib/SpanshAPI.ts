@@ -141,7 +141,8 @@ async function fetchSystems(payload: unknown): Promise<SpanshSystem[]> {
 
 export async function fetchFactionSystems(name: string): Promise<SpanshSystem[]> {
   return await fetchSystems({
-    filters: { minor_faction_presences: { value: [name] } },
+    //{ minor_faction_presences: { value: [name] } },
+    filters: { minor_faction_presences: [{ comparison: "<=>", name: { value: [name] } }] },
     sort: [],
     size: 500,
     page: 0,
