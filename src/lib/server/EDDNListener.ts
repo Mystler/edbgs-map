@@ -209,9 +209,15 @@ function checkForSnipe(
   currData: SpanshDumpPPData,
   lastPPTick = getLastPPTickDate(),
 ): boolean {
-  if (currData.powerConflictProgress) {
-    // Aquisition now
-    // (For now, ignore that a system having been controlled before may have been a snipe since it could have dropped via nearby fort-drop.)
+  if (currData.powerState === "Unoccupied" && prevData?.powerState === "Fortified" && prevData.controllingPower) {
+    // Snipes from fort to unoccupied due to lacking nearby forts.
+    // We ignore Exploited->Unoccupied drops for now because without deep analysis, we cannot know if it dropped due to fort drop and was actually sniped itself.
+    // Other types of snipes that leave the power in control further down.
+    const prevProg = prevData?.powerStateControlProgress ?? 0;
+    const cp = Math.max(0, Math.floor(prevProg * 650000));
+    logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
+  } else if (currData.powerConflictProgress) {
+    // Aquisition in-progress snipes
     let hadSnipe = false;
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
