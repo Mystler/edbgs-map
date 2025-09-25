@@ -4,8 +4,8 @@ import { getAllCacheMatching } from "$lib/server/ValkeyCache";
 import { json } from "@sveltejs/kit";
 
 export async function GET() {
-  // This cycle or up to last 48h if before
-  const cutoff = Math.min(new Date().valueOf() - 172_800_000, getLastPPTickDate().valueOf());
+  // This and last cycle
+  const cutoff = getLastPPTickDate().valueOf() - 604_800_000;
   const cachedResult = await getAllCacheMatching<SpanshDumpPPData>("edbgs-map:pp-alert:*", (x) => {
     // Ignore systems older than cutoff
     if (new Date(x.date).valueOf() < cutoff) return false;
