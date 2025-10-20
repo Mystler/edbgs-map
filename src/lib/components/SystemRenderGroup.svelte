@@ -17,7 +17,7 @@
     SphereGeometry,
     MeshBasicMaterial,
   } from "three";
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { CurrentCamera, FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { getContext, untrack } from "svelte";
   import { InstancedMesh2 } from "@three.ez/instanced-mesh";
@@ -27,6 +27,7 @@
   import { Spring } from "svelte/motion";
   import StarShape from "../shapes/StarShape";
   import TriangleShape from "../shapes/TriangleShape";
+  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
 
   interface Props {
     systems: SpanshSystem[];
@@ -310,6 +311,14 @@
       }
     });
   });
+
+  // Global system tracking
+  for (const system of systems) {
+    LoadedSystems.set(system.name, system);
+    if (FlyToSystemOnceLoaded.value === system.name) {
+      FlyToSystem(system.name);
+    }
+  }
 </script>
 
 <!-- Render instanced meshes -->
