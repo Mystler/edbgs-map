@@ -1,8 +1,7 @@
 <script lang="ts">
   import { T } from "@threlte/core";
-  import { InstancedMesh } from "@threlte/extras";
+  import { useCursor, useInteractivity } from "@threlte/extras";
   import { type SpanshSystem } from "../SpanshAPI";
-  import SystemInstance from "./SystemInstance.svelte";
   import {
     CircleGeometry,
     DoubleSide,
@@ -13,12 +12,21 @@
     ShaderMaterial,
     Color,
     Uniform,
+    BufferGeometry,
+    ShapeGeometry,
+    SphereGeometry,
+    MeshBasicMaterial,
   } from "three";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import TriangleShape from "./Shapes/TriangleShape.svelte";
-  import StarShape from "./Shapes/StarShape.svelte";
-  import { untrack } from "svelte";
+  import { getContext, untrack } from "svelte";
+  import { InstancedMesh2 } from "@three.ez/instanced-mesh";
+  import { Powers } from "$lib/Constants";
+  import { CurrentMeasurement } from "./Measurement.svelte";
+  import type { MapData } from "$lib/types/MapData.svelte";
+  import { Spring } from "svelte/motion";
+  import StarShape from "../shapes/StarShape";
+  import TriangleShape from "../shapes/TriangleShape";
 
   interface Props {
     systems: SpanshSystem[];
@@ -28,35 +36,6 @@
     starType?: "circle" | "triangle" | "star";
   }
   let { systems, color, visible = true, zOffset = 0, starType = "circle" }: Props = $props();
-
-  const systemsMaterial = new ShaderMaterial({
-    uniforms: {
-      color: { value: new Color(color).convertLinearToSRGB() },
-    },
-    vertexShader: `
-      uniform vec3 color;
-      varying vec3 f_color;
-      void main() {
-        vec3 up = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
-        vec3 right = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
-        vec3 billboarded = right * position.x + up * position.y;
-        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(billboarded, 1.0);
-        f_color = color;
-      }
-    `,
-    fragmentShader: `
-      varying vec3 f_color;
-      void main() {
-        gl_FragColor = vec4(f_color, 1.0);
-      }
-    `,
-  });
-  let hitSize = $derived(starType === "star" ? 1.5 : starType === "triangle" ? 1 : 0.5);
-
-  $effect.pre(() => {
-    const uColor = systemsMaterial.uniforms.color as Uniform<Color>;
-    uColor.value.set(new Color(color).convertLinearToSRGB());
-  });
 
   const gcMaxCamDistance = 50;
   const gcMaxLength = 15;
@@ -178,53 +157,164 @@
       CurrentCamera.Controls?.removeEventListener("change", onCameraChange);
     };
   });
-  let vMesh = $state() as ThreeInstancedMesh;
-  let rMesh = $state() as ThreeInstancedMesh;
+
+  // Create visual Mesh
+  const systemsMaterial = new ShaderMaterial({
+    uniforms: {
+      color: { value: new Color(color).convertLinearToSRGB() },
+    },
+    vertexShader: `
+      attribute uint instanceIndex;
+      uniform highp sampler2D matricesTexture;
+
+      mat4 getInstancedMatrix() {
+        int size = textureSize( matricesTexture, 0 ).x;
+        int j = int( instanceIndex ) * 4;
+        int x = j % size;
+        int y = j / size;
+        vec4 v1 = texelFetch( matricesTexture, ivec2( x, y ), 0 );
+        vec4 v2 = texelFetch( matricesTexture, ivec2( x + 1, y ), 0 );
+        vec4 v3 = texelFetch( matricesTexture, ivec2( x + 2, y ), 0 );
+        vec4 v4 = texelFetch( matricesTexture, ivec2( x + 3, y ), 0 );
+        return mat4( v1, v2, v3, v4 );
+      }
+
+      uniform vec3 color;
+      varying vec3 f_color;
+      void main() {
+        mat4 instanceMatrix = getInstancedMatrix();
+        vec3 up = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+        vec3 right = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+        vec3 billboarded = right * position.x + up * position.y;
+        gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4(billboarded, 1.0);
+        f_color = color;
+      }
+    `,
+    fragmentShader: `
+      varying vec3 f_color;
+      void main() {
+        gl_FragColor = vec4(f_color, 1.0);
+      }
+    `,
+    polygonOffset: zOffset ? true : false,
+    polygonOffsetFactor: -zOffset * 4,
+    polygonOffsetUnits: -zOffset * 4,
+  });
+
+  $effect.pre(() => {
+    const uColor = systemsMaterial.uniforms.color as Uniform<Color>;
+    uColor.value.set(new Color(color).convertLinearToSRGB());
+  });
+  let vGeometry: BufferGeometry;
+  if (starType === "star") {
+    vGeometry = new ShapeGeometry(StarShape, 1);
+  } else if (starType === "triangle") {
+    vGeometry = new ShapeGeometry(TriangleShape, 1);
+  } else {
+    vGeometry = new CircleGeometry(0.5);
+  }
+  let vMesh = $state(new InstancedMesh2(vGeometry, systemsMaterial));
+  vMesh.addInstances(systems.length, (x, i) => {
+    x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+  });
+  vMesh.computeBVH();
+
+  // Create hidden mesh for raycasting onto spheres.
+  const hitSize = starType === "star" ? 1.5 : starType === "triangle" ? 1 : 0.5;
+  const rGeometry = (() => new SphereGeometry(hitSize, 16, 16))();
+  const rMesh = new InstancedMesh2(
+    rGeometry,
+    new MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false }),
+  );
+  rMesh.addInstances(systems.length, (x, i) => {
+    x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+  });
+  rMesh.computeBVH();
+
+  // Pointer event handling for our instances
+  const systemScalers = systems.map(
+    () =>
+      new Spring(1, {
+        stiffness: 0.15,
+        damping: 0.25,
+      }),
+  );
+  const mapData: MapData = getContext("mapData");
+  const interactivity = useInteractivity();
+  const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
+  interface IM2InteractivityEvent {
+    instanceId: number;
+  }
+  interactivity.addInteractiveObject(rMesh, {
+    onpointerenter: (e) => {
+      const ev = e as IM2InteractivityEvent;
+      if (ev.instanceId === undefined) return;
+      cursorEnter();
+      systemScalers[ev.instanceId].target = 2;
+      const system = systems[ev.instanceId];
+      HUDInfo.CurrentSystemInfo = system;
+    },
+    onpointerleave: (e) => {
+      const ev = e as IM2InteractivityEvent;
+      if (ev.instanceId === undefined) return;
+      cursorLeave();
+      systemScalers[ev.instanceId].target = 1;
+      HUDInfo.CurrentSystemInfo = undefined;
+    },
+    onclick: (e) => {
+      const ev = e as IM2InteractivityEvent;
+      if (ev.instanceId === undefined) return;
+      const system = systems[ev.instanceId];
+      if (HUDInfo.ClickMode === "inara") {
+        window.open(`https://inara.cz/elite/starsystem/?search=${encodeURIComponent(system.name)}`, "_blank");
+      } else if (HUDInfo.ClickMode === "edsm") {
+        window.open(`https://www.edsm.net/en/system/id//name?systemName=${encodeURIComponent(system.name)}`, "_blank");
+      } else if (HUDInfo.ClickMode === "spansh") {
+        if (system.id64) window.open(`https://spansh.co.uk/system/${encodeURIComponent(system.id64)}`, "_blank");
+        else window.open(`https://spansh.co.uk/search/${encodeURIComponent(system.name)}`, "_blank");
+      } else if (HUDInfo.ClickMode === "measure") {
+        CurrentMeasurement.addSystem(system.name, system.x, system.y, system.z);
+      } else if (HUDInfo.ClickMode === "range") {
+        const i = mapData.Spheres.findIndex((sphere) => sphere.name === system.name);
+        if (i >= 0) {
+          mapData.Spheres.splice(i, 1);
+        } else {
+          const type =
+            system.power_state === "Stronghold"
+              ? "Stronghold"
+              : system.power_state === "Fortified"
+                ? "Fortified"
+                : "Colonization";
+          mapData.addSphere({
+            name: system.name,
+            color: type === "Stronghold" || type === "Fortified" ? Powers[system.controlling_power!].color : "#ffffff",
+            position: [system.x, system.y, system.z],
+            type,
+          });
+        }
+      } else if (HUDInfo.ClickMode === "powerplay") {
+        HUDInfo.CurrentPPInfo = system;
+      }
+    },
+  });
+
+  const systemScaleDummy = new Object3D();
+  $effect(() => {
+    systemScalers.forEach((spring, i) => {
+      if (spring.current !== spring.target) {
+        systemScaleDummy.scale.set(spring.current, spring.current, spring.current);
+        systemScaleDummy.position.set(systems[i].x, systems[i].y, -systems[i].z);
+        systemScaleDummy.updateMatrix();
+        vMesh.setMatrixAt(i, systemScaleDummy.matrix);
+        rMesh.setMatrixAt(i, systemScaleDummy.matrix);
+      }
+    });
+  });
 </script>
 
-<!-- Render systems themselves -->
-<InstancedMesh id="visual" bind:ref={vMesh} limit={systems.length} range={systems.length} {visible} update={false}>
-  {#if starType === "circle"}
-    <T.CircleGeometry args={[0.5]} />
-  {:else if starType === "triangle"}
-    <TriangleShape />
-  {:else if starType === "star"}
-    <StarShape />
-  {/if}
-  <T
-    is={systemsMaterial}
-    {color}
-    polygonOffset={zOffset ? true : false}
-    polygonOffsetFactor={-zOffset * 4}
-    polygonOffsetUnits={-zOffset * 4}
-  />
-
-  <InstancedMesh
-    id="raycast"
-    bind:ref={rMesh}
-    limit={systems.length}
-    range={systems.length}
-    visible={false}
-    update={false}
-  >
-    <T.SphereGeometry args={[hitSize, 16, 16]} />
-    <T.MeshBasicMaterial />
-
-    {#each systems as system, i (system.name)}
-      <SystemInstance
-        {system}
-        {zOffset}
-        {visible}
-        update={(mat) => {
-          // Reusing the same matrix for both meshes since they should be equal.
-          vMesh.setMatrixAt(i, mat);
-          vMesh.instanceMatrix.needsUpdate = true;
-          rMesh.setMatrixAt(i, mat); // Do not need to set needsUpdate for this since we don't draw it.
-        }}
-      />
-    {/each}
-  </InstancedMesh>
-</InstancedMesh>
+<!-- Render instanced meshes -->
+<T is={vMesh} {visible} update={false} />
+<T is={rMesh} {visible} update={false} />
 
 <!-- Render grid connectors -->
 <T is={gcLineMesh} visible={HUDInfo.ShowGrid && visible} />

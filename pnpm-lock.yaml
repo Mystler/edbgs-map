@@ -39,6 +39,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.14(vite@7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.1))
+      '@three.ez/instanced-mesh':
+        specifier: ^0.3.9
+        version: 0.3.9(three@0.180.0)
       '@threlte/core':
         specifier: ^8.1.5
         version: 8.1.5(svelte@5.39.12)(three@0.180.0)
@@ -651,6 +654,11 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
+  '@three.ez/instanced-mesh@0.3.9':
+    resolution: {integrity: sha512-tSAsIEz9qeSvHTHSm1isd9UJ8KiaakDCqLrUE8O51FTbWzqQhi/ezNOPFpGTE+JIAekfi7+912FczCOS9WExrg==}
+    peerDependencies:
+      three: '>=0.159.0'
+
   '@threejs-kit/instanced-sprite-mesh@2.5.1':
     resolution: {integrity: sha512-pmt1ALRhbHhCJQTj2FuthH6PeLIeaM4hOuS2JO3kWSwlnvx/9xuUkjFR3JOi/myMqsH7pSsLIROSaBxDfttjeA==}
     peerDependencies:
@@ -843,6 +851,9 @@ packages:
 
   buffer@5.7.1:
     resolution: {integrity: sha512-EHcyIPBQ4BSGlvjB16k5KgAJ27CIsHY/2JBmCRReo48y9rQ3MaUzWX3KVlBa4U7MyX02HdVj0K7C3WaB3ju7FQ==}
+
+  bvh.js@0.0.13:
+    resolution: {integrity: sha512-7jVxKGyyATOwEoqFvghXoStJXkkmqf7JIXYEG44eMtMXQoeCwZL2n1z5/kZogFKvCaN7XweS2TKnqdyDrd0DJA==}
 
   cacache@15.3.0:
     resolution: {integrity: sha512-VVdYzXEn+cnbXpFgWs5hTT7OScegHVmLhJIR8Ufqk3iFD6A6j5iSX1KuBTfNEv4tdJWE2PzA6IVFtcLC7fN9wQ==}
@@ -2534,6 +2545,11 @@ snapshots:
       tailwindcss: 4.1.14
       vite: 7.1.9(@types/node@24.7.2)(jiti@2.6.1)(lightningcss@1.30.1)
 
+  '@three.ez/instanced-mesh@0.3.9(three@0.180.0)':
+    dependencies:
+      bvh.js: 0.0.13
+      three: 0.180.0
+
   '@threejs-kit/instanced-sprite-mesh@2.5.1(@types/three@0.180.0)(three@0.180.0)':
     dependencies:
       diet-sprite: 0.0.1
@@ -2781,6 +2797,8 @@ snapshots:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+
+  bvh.js@0.0.13: {}
 
   cacache@15.3.0:
     dependencies:

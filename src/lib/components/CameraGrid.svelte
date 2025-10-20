@@ -9,7 +9,7 @@
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { DoubleSide, Group, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-  import ArrowShape from "./Shapes/ArrowShape.svelte";
+  import ArrowShape from "../shapes/ArrowShape";
 
   const { enabled: interactivityEnabled } = useInteractivity();
 
@@ -299,7 +299,7 @@
   </T.Mesh>
 
   <InstancedMesh>
-    <ArrowShape />
+    <T.ShapeGeometry args={[ArrowShape, 1]} />
     <T.MeshBasicMaterial color="#00aaaa" side={DoubleSide} />
 
     {#if HUDInfo.PanMode === "grid" && (isPanning || isKeyPanning) && panPlane === "vertical"}

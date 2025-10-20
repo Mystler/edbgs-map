@@ -29,6 +29,7 @@
   import { LoadedSystems } from "$lib/types/LoadedData.svelte";
   import { FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
   import { type SpanshDumpPPData } from "$lib/SpanshAPI";
+  import SystemMouseover from "./SystemMouseover.svelte";
 
   interface Props {
     data: MapData;
@@ -157,7 +158,7 @@
   {/if}
   <div class="pointer-events-none absolute bottom-10 w-full text-center text-3xl">
     {#if HUDInfo.CurrentSystemInfo}
-      <div transition:fade>{@render HUDInfo.CurrentSystemInfo()}</div>
+      <div transition:fade><SystemMouseover system={HUDInfo.CurrentSystemInfo} /></div>
     {/if}
     {#if HUDInfo.TimedMessage}
       <div transition:fade>{HUDInfo.TimedMessage}</div>
