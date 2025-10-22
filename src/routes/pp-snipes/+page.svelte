@@ -19,6 +19,8 @@
   import { invalidate } from "$app/navigation";
   import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
   import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
+  import { onMount, untrack } from "svelte";
+  import { on } from "svelte/events";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -84,6 +86,22 @@
     invalidate("app:pp-snipes");
     lastRefresh = new Date();
   }
+
+  // Increase number of displayed results as we scroll
+  let displayEntriesCount = $state(50);
+  onMount(() => {
+    return on(window, "scroll", () => {
+      if (document.documentElement.scrollHeight - window.scrollY - window.innerHeight < 500) displayEntriesCount += 10;
+    });
+  });
+
+  $effect.pre(() => {
+    if (filteredEntries) {
+      untrack(() => {
+        displayEntriesCount = 50; // Reset on filter/sorting changes
+      });
+    }
+  });
 </script>
 
 <svelte:head>
@@ -199,7 +217,7 @@
   {#if filteredEntries}
     <div class="flex items-start">
       <div class="flex w-full flex-col gap-2">
-        {#each filteredEntries as snipe (snipe.id)}
+        {#each filteredEntries.slice(0, displayEntriesCount) as snipe (snipe.id)}
           {@const oldData = snipe.old_dump ? (JSON.parse(snipe.old_dump) as SpanshDumpPPData) : null}
           {@const newData = JSON.parse(snipe.new_dump) as SpanshDumpPPData}
           {@const lastUpdate = new Date(newData.date)}
