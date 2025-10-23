@@ -66,10 +66,12 @@
       const bDecay = getDecayValue(startProgressB, startTierB);
       return (
         (a.powerConflictProgress
-          ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
+          ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0)) -
+            Math.floor(a.powerConflictCycleStart?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0)
           : (a.powerStateReinforcement ?? 0) + (a.powerStateUndermining ?? 0) - aDecay) -
         (b.powerConflictProgress
-          ? Math.floor(b.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0))
+          ? Math.floor(b.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0)) -
+            Math.floor(b.powerConflictCycleStart?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0)
           : (b.powerStateReinforcement ?? 0) + (b.powerStateUndermining ?? 0) - bDecay)
       );
     },
@@ -385,7 +387,7 @@
                   (system.powerStateUndermining ?? 0) -
                   getDecayValue(startProgress, startTier)
                 ).toLocaleString("en-US")}<br />
-                Total
+                Activity
               {:else}
                 {((system.powerStateReinforcement ?? 0) + (system.powerStateUndermining ?? 0)).toLocaleString(
                   "en-US",
@@ -409,6 +411,16 @@
                     120000,
                 ).toLocaleString("en-US")}<br />
                 1st Place
+              {:else if sortBy === "Total Activity"}
+                {(
+                  Math.floor(
+                    system.powerConflictProgress?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
+                  ) -
+                  Math.floor(
+                    system.powerConflictCycleStart?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
+                  )
+                ).toLocaleString("en-US")}<br />
+                Activity
               {:else}
                 {Math.floor(
                   system.powerConflictProgress?.reduce((sum, entry) => sum + entry.progress * 120000, 0) ?? 0,
