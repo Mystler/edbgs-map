@@ -171,6 +171,7 @@ async function runEDDNListener() {
         }
       }
     }
+    // Store cycle start data for control systems
     if (ppData.powerStateControlProgress !== undefined) {
       if (!prevData || (prevDate && prevDate < lastPPTick) || !prevData.cycleStart) {
         // If this is the first time we get the system this cycle (or at all) also store calculated cycle start data (to avoid the reverse-calculation offset when capping)
@@ -179,6 +180,24 @@ async function runEDDNListener() {
       } else if (prevData.cycleStart) {
         // Otherwise, carry forward stored data.
         ppData.cycleStart = prevData.cycleStart;
+      }
+    }
+    // Store cycle start data for acquisition systems
+    if (ppData.powerConflictProgress !== undefined) {
+      if (!prevData || prevData.powerState !== "Unoccupied") {
+        // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
+        ppData.powerConflictCycleStart = [];
+      } else {
+        if (prevDate && prevDate < lastPPTick) {
+          // New Cycle data coming in, store old
+          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
+        } else if (prevData.powerConflictCycleStart !== undefined) {
+          // Same cycle, carry over stored info
+          ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
+        } else {
+          // Missing store state. Start a new one mid cycle.
+          ppData.powerConflictCycleStart = ppData.powerConflictProgress;
+        }
       }
     }
     // Do some data analysis if a snipe may have happened and log it asynchronously.

@@ -37,6 +37,10 @@ export interface SpanshDumpPPData {
     startBar: number;
     startTier: string;
   };
+  powerConflictCycleStart?: {
+    power: keyof typeof Powers;
+    progress: number;
+  }[];
 }
 interface SpanshSearchResponse {
   results: {
@@ -74,6 +78,7 @@ export function pruneSystemDumpPPObject(system: SpanshDumpPPData): RequireAssign
     powerConflictProgress: system.powerConflictProgress,
     population: system.population,
     cycleStart: system.cycleStart,
+    powerConflictCycleStart: system.powerConflictCycleStart,
   };
 }
 
