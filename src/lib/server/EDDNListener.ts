@@ -196,7 +196,7 @@ async function runEDDNListener() {
           ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
         } else {
           // Missing store state. Start a new one mid cycle.
-          ppData.powerConflictCycleStart = ppData.powerConflictProgress;
+          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
         }
       }
     }
