@@ -14,6 +14,7 @@ function initStats() {
     umCP: 0,
     umCPNoDecay: 0,
     acquisitionCP: 0,
+    cycleAcquisitionCP: 0,
     progressCP: 0,
 
     systems: 0,
@@ -69,6 +70,15 @@ export async function getCurrentCycleStats() {
         const acqCP = Math.floor(x.progress * 120000);
         powerStats[x.power].acquisitionCP += acqCP;
         allPowerStats.acquisitionCP += acqCP;
+
+        if (system.powerConflictCycleStart !== undefined && new Date(system.date) > lastTick) {
+          // Sum current Cycle Acq CP, but only if data is actually from the current cycle.
+          const cycleAcqCP = Math.floor(
+            (x.progress - (system.powerConflictCycleStart.find((x) => x.power === x.power)?.progress ?? 0)) * 120000,
+          );
+          powerStats[x.power].cycleAcquisitionCP += cycleAcqCP;
+          allPowerStats.cycleAcquisitionCP += cycleAcqCP;
+        }
       }
     }
 

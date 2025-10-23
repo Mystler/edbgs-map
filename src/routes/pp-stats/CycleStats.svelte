@@ -91,6 +91,15 @@
       {f(stats.allPowerStats.acquisitionCP)}
     </div>
   {/if}
+  {#if stats.allPowerStats?.cycleAcquisitionCP !== undefined}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The calculated number of CP that powers were known to do in Acquisitions this cycle.{/snippet}
+        <b class="underline decoration-dotted decoration-1">CP of Acquisition in Cycle:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.cycleAcquisitionCP)}
+    </div>
+  {/if}
   {#if stats.allPowerStats?.expectedAcquisitions !== undefined}
     <div>
       <Tooltip>
@@ -208,6 +217,16 @@
                 <b class="underline decoration-dotted decoration-1">Acquisition:</b>
               </Tooltip>
               <span>{f(ps.acquisitionCP)}</span>
+            </div>
+          {/if}
+          {#if ps?.cycleAcquisitionCP !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip>
+                {#snippet tooltip()}The calculated number of CP that this power was known to spend in Acquisitions this
+                  cycle.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Acq in Cycle:</b>
+              </Tooltip>
+              <span>{f(ps.cycleAcquisitionCP)}</span>
             </div>
           {/if}
           {#if ps?.expectedAcquisitions !== undefined}
