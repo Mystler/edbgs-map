@@ -153,9 +153,27 @@
         {(acqPower.progress * 100).toFixed(2)}% ({Math.floor(acqPower.progress * 120000).toLocaleString("en-US")})
       </div>
       <div
-        class="h-8"
+        class="relative h-8"
         style={`background: linear-gradient(90deg, ${powerColor}, ${powerColor} ${normalizedProgress}%, var(--color-zinc-700) ${normalizedProgress}%`}
-      ></div>
+      >
+        {#if data.powerConflictCycleStart !== undefined}
+          {@const acqStart = data.powerConflictCycleStart.find((x) => x.power === acqPower.power)}
+          {#if acqStart && acqStart.progress > 0}
+            <div class="absolute top-0 overflow-visible" style={`left: ${(acqStart.progress / normalize) * 100}%`}>
+              <Tooltip>
+                {#snippet tooltip()}
+                  {(acqStart.progress * 100).toFixed(2)}% ({Math.floor(acqStart.progress * 120000).toLocaleString(
+                    "en-US",
+                  )})
+                {/snippet}
+                <div class="-translate-1/2">
+                  <FaIcon icon={faCaretDown} class="text-3xl text-white/60" />
+                </div>
+              </Tooltip>
+            </div>
+          {/if}
+        {/if}
+      </div>
     {/each}
   </div>
   {@render ppLastUpdate(data)}
