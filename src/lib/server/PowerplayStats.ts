@@ -74,7 +74,7 @@ export async function getCurrentCycleStats() {
         if (system.powerConflictCycleStart !== undefined && new Date(system.date) > lastTick) {
           // Sum current Cycle Acq CP, but only if data is actually from the current cycle.
           const cycleAcqCP = Math.floor(
-            (x.progress - (system.powerConflictCycleStart.find((x) => x.power === x.power)?.progress ?? 0)) * 120000,
+            (x.progress - (system.powerConflictCycleStart.find((y) => y.power === x.power)?.progress ?? 0)) * 120000,
           );
           powerStats[x.power].cycleAcquisitionCP += cycleAcqCP;
           allPowerStats.cycleAcquisitionCP += cycleAcqCP;
