@@ -163,8 +163,20 @@
               {#snippet tooltip()}
                 {(acqStart * 100).toFixed(2)}% ({Math.floor(acqStart * 120000).toLocaleString("en-US")})
               {/snippet}
-              <div class="-translate-1/2">
-                <FaIcon icon={faCaretDown} class="text-3xl text-white/60" />
+              <div class="-translate-1/2 text-3xl text-white/60">
+                <FaIcon icon={faCaretDown} />
+              </div>
+            </Tooltip>
+          </div>
+          <div class="absolute top-full overflow-visible" style={`left: ${normalizedProgress}%`}>
+            <Tooltip>
+              {#snippet tooltip()}
+                +{((acqPower.progress - acqStart) * 100).toFixed(2)}% (+{Math.floor(
+                  (acqPower.progress - acqStart) * 120000,
+                ).toLocaleString("en-US")}) this Cycle
+              {/snippet}
+              <div class="-translate-1/2 text-3xl text-white">
+                <FaIcon icon={faCaretUp} />
               </div>
             </Tooltip>
           </div>
