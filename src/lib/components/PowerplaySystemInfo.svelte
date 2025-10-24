@@ -153,7 +153,7 @@
         {(acqPower.progress * 100).toFixed(2)}% ({Math.floor(acqPower.progress * 120000).toLocaleString("en-US")})
       </div>
       <div
-        class="relative h-8"
+        class="relative h-8 select-none"
         style={`background: linear-gradient(90deg, ${powerColor}, ${powerColor} ${normalizedProgress}%, var(--color-zinc-700) ${normalizedProgress}%`}
       >
         {#if data.powerConflictCycleStart !== undefined}
@@ -168,14 +168,14 @@
               </div>
             </Tooltip>
           </div>
-          <div class="absolute top-full overflow-visible" style={`left: ${normalizedProgress}%`}>
+          <div class="absolute top-full overflow-visible" style={`right: ${100 - normalizedProgress}%`}>
             <Tooltip>
               {#snippet tooltip()}
                 +{((acqPower.progress - acqStart) * 100).toFixed(2)}% (+{Math.floor(
                   (acqPower.progress - acqStart) * 120000,
                 ).toLocaleString("en-US")}) this Cycle
               {/snippet}
-              <div class="-translate-1/2 text-3xl text-white">
+              <div class="translate-x-1/2 -translate-y-1/2 text-3xl text-white">
                 <FaIcon icon={faCaretUp} />
               </div>
             </Tooltip>
