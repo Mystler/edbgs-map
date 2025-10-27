@@ -169,6 +169,20 @@ async function runEDDNListener() {
         ) {
           continue; // Acquisition went down, skip
         }
+        if (
+          ppData.powerStateReinforcement === 0 &&
+          ppData.powerStateUndermining === 0 &&
+          prevData.powerConflictProgress?.some((x) => x.progress > 0)
+        ) {
+          continue; // We already picked up moving acquisition in prev data, so the 0 CP control now must be cache bug data. Skip.
+        }
+        if (
+          ppData.powerConflictProgress &&
+          ((prevData.powerStateReinforcement ?? 0) > 0 || (prevData.powerStateUndermining ?? 0) > 0) &&
+          !ppData.powerConflictProgress.some((x) => x.progress > 0)
+        ) {
+          continue; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
+        }
       }
     }
     // Store cycle start data for control systems
