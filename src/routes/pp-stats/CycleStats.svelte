@@ -32,11 +32,21 @@
       )}%)
     </div>
   {/if}
-  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined}
+  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined && stats.allPowerStats?.cycleAcquisitionCP}
+    <div>
+      <Tooltip>
+        {#snippet tooltip()}The total number of CP done by players in Reinforcement, Acquisition, and Undermining (with
+          decay removed) across all known Powerplay systems with data from this cycle.{/snippet}
+        <b class="underline decoration-dotted decoration-1">CP Activity:</b>
+      </Tooltip><br />
+      {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay + stats.allPowerStats.cycleAcquisitionCP)}
+    </div>
+  {:else if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined}
     <div>
       <Tooltip>
         {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (with decay removed) across all
-          known Powerplay control systems with data from this cycle.{/snippet}
+          known Powerplay control systems with data from this cycle.<br /><br />This is an older version of the activity
+          score from before in cycle Acquisition was being tracked.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP Activity in Control Systems:</b>
       </Tooltip><br />
       {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay)}
@@ -45,7 +55,8 @@
     <div>
       <Tooltip>
         {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (including decay) across all
-          known Powerplay control systems with data from this cycle.{/snippet}
+          known Powerplay control systems with data from this cycle..<br /><br />This is an older version of the
+          activity score from before decay existed or in cycle Acquisition was being tracked.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP Activity* in Control Systems:</b>
       </Tooltip><br />
       {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCP)}
@@ -130,7 +141,7 @@
   {/if}
 </div>
 {#if stats.powerStats}
-  <div class="mt-4 grid grid-cols-[repeat(auto-fit,_minmax(225px,_1fr))] gap-2">
+  <div class="mt-4 grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-2">
     {#each Object.entries(stats.powerStats) as [power, ps] (power)}
       <div class="rounded-xl border-2 bg-zinc-800 p-1.5" style={`border-color: ${Powers[power].color}`}>
         <h4 style={`color: ${Powers[power].color}`}>{power}</h4>
@@ -159,12 +170,21 @@
               <span>{f(ps.stronghold)}</span>
             </div>
           {/if}
-          {#if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined}
+          {#if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined && ps?.cycleAcquisitionCP !== undefined}
+            <div class="flex justify-between gap-1">
+              <Tooltip>
+                {#snippet tooltip()}The total number of CP by players in Reinforcement, Acquisition, and Undermining
+                  (with decay removed) of this power's space this cycle.{/snippet}
+                <b class="underline decoration-dotted decoration-1">Activity:</b>
+              </Tooltip>
+              <span>{f(ps.reinfCP + ps.umCPNoDecay + ps.cycleAcquisitionCP)}</span>
+            </div>
+          {:else if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined}
             <div class="flex justify-between gap-1">
               <Tooltip>
                 {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (with decay removed) of
                   this power's space this cycle.<br />
-                  Does not include Acquisition CP since those can carry over between cycles.{/snippet}
+                  This stat is from before in cyle Acquisition was tracked and thus does not include Acquisition CP.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Activity:</b>
               </Tooltip>
               <span>{f(ps.reinfCP + ps.umCPNoDecay)}</span>
@@ -174,7 +194,8 @@
               <Tooltip>
                 {#snippet tooltip()}The total number of CP in both Reinforcement and Undermining (including decay) of
                   this power's space this cycle.<br />
-                  Does not include Acquisition CP since those can carry over between cycles.{/snippet}
+                  Does not include Acquisition CP since those can carry over between cycles. This is an old version of this
+                  stat.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Activity*:</b>
               </Tooltip>
               <span>{f(ps.reinfCP + ps.umCP)}</span>
