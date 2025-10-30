@@ -4,7 +4,9 @@ import { getCurrentCycleStats } from "./PowerplayStats";
 
 export async function scheduleStatSnapshot() {
   const snapshotTime = getLastPPTickDate();
+  const hour = snapshotTime.getUTCHours();
   snapshotTime.setDate(snapshotTime.getDate() + 7);
+  snapshotTime.setUTCHours(hour);
   snapshotTime.setMinutes(snapshotTime.getMinutes() - 5);
   console.log(`Scheduling new PP stats snapshot for ${snapshotTime.toISOString()}`);
   // Take snapshot 5 minutes before EOC
