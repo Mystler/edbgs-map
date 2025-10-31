@@ -5,6 +5,7 @@
     getCorrectedSegmentProgress,
     getDecayValue,
     getLastPPTickDate,
+    getPPTickWindowDate,
   } from "$lib/Powerplay";
   import type { SpanshDumpPPData } from "$lib/SpanshAPI";
   import {
@@ -193,6 +194,7 @@
   {#if ppInfo && ppInfo.date}
     {@const date = new Date(ppInfo.date)}
     {@const lastTick = getLastPPTickDate()}
+    {@const tickWindow = getPPTickWindowDate(lastTick)}
     <p>
       <i>
         Last Update:<br />
@@ -209,6 +211,7 @@
           <Time
             class={{
               "text-red-500": date && date < lastTick,
+              "text-yellow-300": date && date >= lastTick && date < tickWindow,
               underline: true,
               "decoration-dashed": true,
               "decoration-1": true,
