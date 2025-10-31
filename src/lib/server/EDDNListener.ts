@@ -163,7 +163,7 @@ async function runEDDNListener() {
         if (
           startBar !== prevData.cycleStart.startBar &&
           adjustedProgress > -0.25 &&
-          (ppData.powerStateControlProgress <= 1 || adjustedProgress <= 0.25)
+          (ppData.powerStateControlProgress <= 1 || adjustedProgress < 0.25)
         ) {
           // Reverse calculated start values changed without tier cap reached, so update cycle start data and trust this information as newer.
           ppData.cycleStart = { startProgress, startBar, startTier };
