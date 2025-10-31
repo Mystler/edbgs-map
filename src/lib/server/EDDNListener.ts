@@ -1,7 +1,7 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
 import { deleteCache, getCache, setCache } from "$lib/server/ValkeyCache";
-import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
+import { calculatePPControlSegments, getDecayValue, getLastPPTickDate, getPPTickWindowDate } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
 
@@ -118,6 +118,7 @@ async function runEDDNListener() {
     const date = new Date(data.timestamp);
     // Calculate latest PP tick, for re-use
     const lastPPTick = getLastPPTickDate();
+    const tickWindow = getPPTickWindowDate(lastPPTick);
     // Fix negative overflow
     if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
       let scale = 120000; // Should never be reached/used.
@@ -150,6 +151,48 @@ async function runEDDNListener() {
     const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
     const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
     const prevDate = prevData ? new Date(prevData.date) : null;
+    // Store cycle start data for control systems
+    if (ppData.powerStateControlProgress !== undefined) {
+      if (!prevData || (prevDate && prevDate < lastPPTick) || !prevData.cycleStart) {
+        // If this is the first time we get the system this cycle (or at all) also store calculated cycle start data (to avoid the reverse-calculation offset when capping)
+        const { startProgress, startBar, startTier } = calculatePPControlSegments(ppData);
+        ppData.cycleStart = { startProgress, startBar, startTier };
+      } else if (prevDate && prevDate < tickWindow) {
+        // Last update was in tick window so might potentially still be last cycle data.
+        const { startProgress, startBar, startTier, adjustedProgress } = calculatePPControlSegments(ppData);
+        if (
+          startBar !== prevData.cycleStart.startBar &&
+          adjustedProgress > -0.25 &&
+          (ppData.powerStateControlProgress <= 1 || adjustedProgress <= 0.25)
+        ) {
+          // Reverse calculated start values changed without tier cap reached, so update cycle start data and trust this information as newer.
+          ppData.cycleStart = { startProgress, startBar, startTier };
+        } else {
+          ppData.cycleStart = prevData.cycleStart; // Use stored data otherwise.
+        }
+      } else if (prevData.cycleStart) {
+        // Otherwise, carry forward stored data.
+        ppData.cycleStart = prevData.cycleStart;
+      }
+    }
+    // Store cycle start data for acquisition systems
+    if (ppData.powerConflictProgress !== undefined) {
+      if (!prevData || prevData.powerState !== "Unoccupied") {
+        // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
+        ppData.powerConflictCycleStart = [];
+      } else {
+        if (prevDate && prevDate < lastPPTick) {
+          // New Cycle data coming in, store old
+          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
+        } else if (prevData.powerConflictCycleStart !== undefined) {
+          // Same cycle, carry over stored info
+          ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
+        } else {
+          // Missing store state. Start a new one mid cycle.
+          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
+        }
+      }
+    }
     if (prevData && prevDate) {
       // Reject outdated data
       if (prevDate > date) continue; // Already got newer data (by timestamp)
@@ -160,7 +203,14 @@ async function runEDDNListener() {
             ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
           (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
         ) {
-          continue; // Reinforcement or UM went down, skip
+          // Unless cycle start value changed.
+          if (
+            !ppData.cycleStart?.startBar ||
+            !prevData.cycleStart?.startBar ||
+            ppData.cycleStart.startBar === prevData.cycleStart.startBar
+          ) {
+            continue; // Reinforcement or UM went down, skip
+          }
         }
         if (
           ppData.powerConflictProgress &&
@@ -185,37 +235,9 @@ async function runEDDNListener() {
         }
       }
     }
-    // Store cycle start data for control systems
-    if (ppData.powerStateControlProgress !== undefined) {
-      if (!prevData || (prevDate && prevDate < lastPPTick) || !prevData.cycleStart) {
-        // If this is the first time we get the system this cycle (or at all) also store calculated cycle start data (to avoid the reverse-calculation offset when capping)
-        const { startProgress, startBar, startTier } = calculatePPControlSegments(ppData);
-        ppData.cycleStart = { startProgress, startBar, startTier };
-      } else if (prevData.cycleStart) {
-        // Otherwise, carry forward stored data.
-        ppData.cycleStart = prevData.cycleStart;
-      }
-    }
-    // Store cycle start data for acquisition systems
-    if (ppData.powerConflictProgress !== undefined) {
-      if (!prevData || prevData.powerState !== "Unoccupied") {
-        // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
-        ppData.powerConflictCycleStart = [];
-      } else {
-        if (prevDate && prevDate < lastPPTick) {
-          // New Cycle data coming in, store old
-          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
-        } else if (prevData.powerConflictCycleStart !== undefined) {
-          // Same cycle, carry over stored info
-          ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
-        } else {
-          // Missing store state. Start a new one mid cycle.
-          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
-        }
-      }
-    }
     // Do some data analysis if a snipe may have happened and log it asynchronously.
-    const snipe = checkForSnipe(prevData, ppData, lastPPTick);
+    // HACK: May need to refine this but since the Oct 30 change for online ticking, let's log all major changes up to end of "tick window" as snipes.
+    const snipe = checkForSnipe(prevData, ppData, tickWindow); // was using lastPPTick
     // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
     if (
       (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
@@ -227,7 +249,7 @@ async function runEDDNListener() {
     } else if (
       prevData?.powerState !== undefined &&
       prevData.powerState !== "Unoccupied" &&
-      new Date(prevData.date) < lastPPTick &&
+      new Date(prevData.date) < tickWindow &&
       (ppData.powerState === undefined || ppData.powerState === "Unoccupied")
     ) {
       // Delete potentially lost systems once if no other data for this cycle
