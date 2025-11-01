@@ -286,7 +286,7 @@ function checkForSnipe(
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
       : 1;
-    const acqThreshold = 0.25 + 0.5 * Math.min(1, ageOfData); // 25% to 75% drops in 10h
+    const acqThreshold = 0.3 + 0.7 * Math.min(1, ageOfData); // 30% to 100% drops in 10h
     const fullPowers = currData.powerConflictProgress.reduce((full, x) => (x.progress >= 1 ? full + 1 : full), 0);
     for (const p of currData.powerConflictProgress) {
       const prevValue = prevData?.powerConflictProgress?.find((x) => x.power === p.power)?.progress;
@@ -334,7 +334,7 @@ function checkForSnipe(
     const ageOfData = prevData?.date
       ? (new Date(currData.date).valueOf() - new Date(prevData.date).valueOf()) / 36000000
       : 1;
-    const reinfThreshold = 30000 + 70000 * Math.min(1, ageOfData); // 30k to 100k in 10h
+    const reinfThreshold = 50000 + 100000 * Math.min(1, ageOfData); // 50k to 150k in 10h
     const reinfDiff = (currData?.powerStateReinforcement ?? 0) - (prevData?.powerStateReinforcement ?? 0);
     if (
       reinfDiff > reinfThreshold &&
