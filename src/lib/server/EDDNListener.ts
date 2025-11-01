@@ -1,8 +1,14 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
 import { deleteCache, getCache, setCache } from "$lib/server/ValkeyCache";
-import { calculatePPControlSegments, getDecayValue, getLastPPTickDate, getPPTickWindowDate } from "$lib/Powerplay";
-import type { SpanshDumpPPData } from "../SpanshAPI";
+import {
+  calculatePPControlSegments,
+  getCorrectedSegmentProgress,
+  getDecayValue,
+  getLastPPTickDate,
+  getPPTickWindowDate,
+} from "$lib/Powerplay";
+import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
 
 interface EDDNMessage {
@@ -151,27 +157,28 @@ async function runEDDNListener() {
     const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
     const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
     const prevDate = prevData ? new Date(prevData.date) : null;
-    // Store cycle start data for control systems
+    // If we have a new cycle by clock, store latest state of previously calculated cycle start data as previous cycle data.
+    if (prevData?.powerStateControlProgress !== undefined && prevDate && prevDate < lastPPTick) {
+      ppData.lastCycleStart = prevData.cycleStart;
+    } else if (prevData?.powerState === "Unoccupied" && prevDate && prevDate < lastPPTick) {
+      // Reset last cycle start if last cycle was known to be in acquisition
+      ppData.lastCycleStart = undefined;
+    } else {
+      // Otherwise, carry over existing previous cycle data.
+      ppData.lastCycleStart = prevData?.lastCycleStart;
+    }
+    // Store this cycle's start data for control systems
     if (ppData.powerStateControlProgress !== undefined) {
-      if (!prevData || (prevDate && prevDate < lastPPTick) || !prevData.cycleStart) {
-        // If this is the first time we get the system this cycle (or at all) also store calculated cycle start data (to avoid the reverse-calculation offset when capping)
-        const { startProgress, startBar, startTier } = calculatePPControlSegments(ppData);
+      const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
+      if (
+        startBar !== ppData?.lastCycleStart?.startBar &&
+        adjustedProgress > -0.25 &&
+        (adjustedProgress < 0.25 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
+      ) {
+        // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
         ppData.cycleStart = { startProgress, startBar, startTier };
-      } else if (prevDate && prevDate < tickWindow) {
-        // Last update was in tick window so might potentially still be last cycle data.
-        const { startProgress, startBar, startTier, adjustedProgress } = calculatePPControlSegments(ppData);
-        if (
-          startBar !== prevData.cycleStart.startBar &&
-          adjustedProgress > -0.25 &&
-          (ppData.powerStateControlProgress <= 1 || adjustedProgress < 0.25)
-        ) {
-          // Reverse calculated start values changed without tier cap reached, so update cycle start data and trust this information as newer.
-          ppData.cycleStart = { startProgress, startBar, startTier };
-        } else {
-          ppData.cycleStart = prevData.cycleStart; // Use stored data otherwise.
-        }
-      } else if (prevData.cycleStart) {
-        // Otherwise, carry forward stored data.
+      } else if (prevData?.cycleStart) {
+        // Use stored data otherwise.
         ppData.cycleStart = prevData.cycleStart;
       }
     }
@@ -203,11 +210,11 @@ async function runEDDNListener() {
             ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
           (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
         ) {
-          // Unless cycle start value changed.
+          // Unless cycle start value changed (compared to either last known or last cycle's last known).
           if (
             !ppData.cycleStart?.startBar ||
-            !prevData.cycleStart?.startBar ||
-            ppData.cycleStart.startBar === prevData.cycleStart.startBar
+            ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
+            ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar
           ) {
             continue; // Reinforcement or UM went down, skip
           }
@@ -233,11 +240,13 @@ async function runEDDNListener() {
         ) {
           continue; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
         }
+        if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement) {
+          continue; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
+        }
       }
     }
     // Do some data analysis if a snipe may have happened and log it asynchronously.
-    // HACK: May need to refine this but since the Oct 30 change for online ticking, let's log all major changes up to end of "tick window" as snipes.
-    const snipe = checkForSnipe(prevData, ppData, tickWindow); // was using lastPPTick
+    const snipe = checkForSnipe(prevData, ppData, lastPPTick);
     // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
     if (
       (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
@@ -312,8 +321,11 @@ function checkForSnipe(
     // UM Snipe, just check for 25k drops (beyond expected decay), better catch a bit too much than too little
     const um = currData?.powerStateUndermining ?? 0;
     const umDiff = um - (prevData?.powerStateUndermining ?? 0);
-    const { startProgress: currStartProgress, startTier: currStartTier } =
-      currData.cycleStart || calculatePPControlSegments(currData);
+    const {
+      startProgress: currStartProgress,
+      startTier: currStartTier,
+      startBar: currStartBar,
+    } = currData.cycleStart || calculatePPControlSegments(currData);
     if (umDiff > 25000 && um > getDecayValue(currStartProgress, currStartTier) + 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;
@@ -334,34 +346,39 @@ function checkForSnipe(
       return true;
     }
     // EOC progress control snipes that weren't caught.
-    if (prevData && new Date(prevData.date) < lastPPTick) {
+    if (
+      (prevData && new Date(prevData.date) < lastPPTick) ||
+      (currData.lastCycleStart &&
+        currStartBar !== currData.lastCycleStart.startBar &&
+        currStartBar !== prevData?.lastCycleStart?.startBar)
+    ) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
       // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
       // Sanity check currProg as well because of the stupid game cache bug (showing last cycle's tier with >100% or <0% progress still).
       // Undermining drops that changed tier over EOC
-      if (prevData.powerState === "Stronghold" && prevProg > 0 && currStartTier === "Fortified") {
+      if (prevData?.powerState === "Stronghold" && prevProg > 0 && currStartTier === "Fortified") {
         const cp = Math.floor(prevProg * 1000000 + (1 - currStartProgress) * 650000);
         logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
         return true;
       }
-      if (prevData.powerState === "Fortified" && prevProg > 0 && currStartTier === "Exploited") {
+      if (prevData?.powerState === "Fortified" && prevProg > 0 && currStartTier === "Exploited") {
         const cp = Math.floor(prevProg * 650000 + (1 - currStartProgress) * 350000);
         logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
         return true;
       }
       // Reinforcement drops that changed tier over EOC
-      if (prevData.powerState === "Exploited" && prevProg < 1 && currStartTier === "Fortified") {
+      if (prevData?.powerState === "Exploited" && prevProg < 1 && currStartTier === "Fortified") {
         const cp = Math.floor(currStartProgress * 650000 + (1 - prevProg) * 350000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
       }
-      if (prevData.powerState === "Fortified" && prevProg < 1 && currStartTier === "Stronghold") {
+      if (prevData?.powerState === "Fortified" && prevProg < 1 && currStartTier === "Stronghold") {
         const cp = Math.floor(currStartProgress * 1000000 + (1 - prevProg) * 650000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
       }
       // Uncaught major percentage changes in same tier between cycles.
-      if (prevData.powerState === currData.powerState && prevData.powerState === currStartTier) {
+      if (prevData?.powerState === currData.powerState && prevData?.powerState === currStartTier) {
         if (
           (currStartProgress > 0.25 && Math.abs(currStartProgress - prevProg) < 0.2) || // Ignore snipes above 25% that did less than 20%
           (currData.powerState === "Stronghold" && currStartProgress > 0.999) // Ignore maxed Strongholds resetting
