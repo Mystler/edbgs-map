@@ -211,8 +211,9 @@ async function runEDDNListener() {
           // Unless cycle start value changed (compared to either last known or last cycle's last known).
           if (
             !ppData.cycleStart?.startBar ||
-            ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
-            ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar
+            ((ppData.cycleStart.startBar < 1 || (prevData.powerStateControlProgress ?? 0) < 1) && // Special exception for maxed SHs
+              (ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
+                ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar))
           ) {
             continue; // Reinforcement or UM went down, skip
           }

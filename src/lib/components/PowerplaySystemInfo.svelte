@@ -210,7 +210,11 @@
             class={{
               "text-red-500": date && date < lastTick,
               "text-yellow-300":
-                date && date >= lastTick && ppInfo.lastCycleStart?.startBar === ppInfo.cycleStart?.startBar,
+                date &&
+                date >= lastTick &&
+                ppInfo.powerState !== "Unoccupied" &&
+                (ppInfo.cycleStart?.startBar ?? 0) < 1 &&
+                ppInfo.lastCycleStart?.startBar === ppInfo.cycleStart?.startBar,
               underline: true,
               "decoration-dashed": true,
               "decoration-1": true,

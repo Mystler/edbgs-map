@@ -263,7 +263,10 @@
                 class={{
                   "text-red-500": lastUpdate < lastTick,
                   "text-yellow-300":
-                    lastUpdate >= lastTick && newData.lastCycleStart?.startBar === newData.cycleStart?.startBar,
+                    lastUpdate >= lastTick &&
+                    newData.powerState !== "Unoccupied" &&
+                    (newData.cycleStart?.startBar ?? 0) < 1 &&
+                    newData.lastCycleStart?.startBar === newData.cycleStart?.startBar,
                 }}
                 relative
                 live

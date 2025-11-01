@@ -446,7 +446,10 @@
               class={{
                 "text-red-500": lastUpdate < lastTick,
                 "text-yellow-300":
-                  lastUpdate >= lastTick && system.lastCycleStart?.startBar === system.cycleStart?.startBar,
+                  lastUpdate >= lastTick &&
+                  system.powerState !== "Unoccupied" &&
+                  (system.cycleStart?.startBar ?? 0) < 1 &&
+                  system.lastCycleStart?.startBar === system.cycleStart?.startBar,
               }}
               relative
               live
