@@ -293,7 +293,7 @@ function checkForSnipe(
       const diff = p.progress - (prevValue ?? 0);
       // Check for snipes if we know previous data, full acquisition if we don't. Ignore past 100% but only if no other power is at 100 too.
       if (
-        (prevValue && (prevValue < 1 || fullPowers >= 1) && p.progress >= 0.5 && diff >= acqThreshold) ||
+        (prevValue && (prevValue < 1 || fullPowers > 1) && p.progress >= 0.5 && diff >= acqThreshold) ||
         (!prevValue && p.progress >= 1)
       ) {
         logSnipe(currData.name, "Acquisition", p.power, Math.floor(diff * 120000), prevData, currData);
