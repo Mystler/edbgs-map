@@ -15,14 +15,6 @@ export function getLastPPTickDate() {
 }
 
 /**
- * This calculates an arbitrary PP tick window. This is not a technical date but we use it to define how long we consider the PP tick
- * to take and display dates in that time span in yellow for potentially not being accurate yet.
- */
-export function getPPTickWindowDate(tickDate: Date = getLastPPTickDate()) {
-  return new Date(tickDate.valueOf() + 14_400_000); // 4h after canonical tick time
-}
-
-/**
  * Calculate more information we need to display PP bars from the available data.
  * Returns:
  * - startBar: start of cycle progress marker, 0-1 float with every 0.25 being a segment/tier break

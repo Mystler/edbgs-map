@@ -6,7 +6,6 @@ import {
   getCorrectedSegmentProgress,
   getDecayValue,
   getLastPPTickDate,
-  getPPTickWindowDate,
 } from "$lib/Powerplay";
 import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
@@ -124,7 +123,6 @@ async function runEDDNListener() {
     const date = new Date(data.timestamp);
     // Calculate latest PP tick, for re-use
     const lastPPTick = getLastPPTickDate();
-    const tickWindow = getPPTickWindowDate(lastPPTick);
     // Fix negative overflow
     if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
       let scale = 120000; // Should never be reached/used.
@@ -256,10 +254,11 @@ async function runEDDNListener() {
       // Store system
       setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
     } else if (
-      prevData?.powerState !== undefined &&
-      prevData.powerState !== "Unoccupied" &&
-      new Date(prevData.date) < tickWindow &&
-      (ppData.powerState === undefined || ppData.powerState === "Unoccupied")
+      (ppData.powerState === undefined || ppData.powerState === "Unoccupied") &&
+      (ppData.lastCycleStart ||
+        (prevData?.powerState !== undefined &&
+          prevData.powerState !== "Unoccupied" &&
+          new Date(prevData.date) < lastPPTick))
     ) {
       // Delete potentially lost systems once if no other data for this cycle
       deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);

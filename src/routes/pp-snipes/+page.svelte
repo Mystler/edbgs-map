@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getLastPPTickDate, getPPTickWindowDate, powerStateColor } from "$lib/Powerplay";
+  import { getLastPPTickDate, powerStateColor } from "$lib/Powerplay";
   import Time from "svelte-time";
   import type { PageProps } from "./$types";
   import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
@@ -24,7 +24,6 @@
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
-  const tickWindow = getPPTickWindowDate(lastTick);
 
   let lastRefresh = $state(new Date());
   let showFilters = $state(true);
@@ -263,7 +262,8 @@
               <Time
                 class={{
                   "text-red-500": lastUpdate < lastTick,
-                  "text-yellow-300": lastUpdate >= lastTick && lastUpdate < tickWindow,
+                  "text-yellow-300":
+                    lastUpdate >= lastTick && newData.lastCycleStart?.startBar === newData.cycleStart?.startBar,
                 }}
                 relative
                 live

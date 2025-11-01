@@ -4,7 +4,6 @@
     getCorrectedSegmentProgress,
     getDecayValue,
     getLastPPTickDate,
-    getPPTickWindowDate,
     powerStateColor,
   } from "$lib/Powerplay";
   import Time from "svelte-time";
@@ -24,7 +23,6 @@
   }
   let { systems }: Props = $props();
   const lastTick = getLastPPTickDate();
-  const tickWindow = getPPTickWindowDate(lastTick);
 
   let showFilters = $state(true);
   let displaySystemId = $state<number>();
@@ -447,7 +445,8 @@
             <Time
               class={{
                 "text-red-500": lastUpdate < lastTick,
-                "text-yellow-300": lastUpdate >= lastTick && lastUpdate < tickWindow,
+                "text-yellow-300":
+                  lastUpdate >= lastTick && system.lastCycleStart?.startBar === system.cycleStart?.startBar,
               }}
               relative
               live
