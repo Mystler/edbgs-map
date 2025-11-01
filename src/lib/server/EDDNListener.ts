@@ -238,7 +238,7 @@ async function runEDDNListener() {
         ) {
           continue; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
         }
-        if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement) {
+        if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement !== undefined) {
           continue; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
         }
       }
