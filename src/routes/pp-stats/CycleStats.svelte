@@ -1,13 +1,9 @@
 <script lang="ts">
+  import Chart from "$lib/components/Chart.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
   import { Powers } from "$lib/Constants";
   import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
-
-  type DeepPartial<T> = T extends object
-    ? {
-        [P in keyof T]?: DeepPartial<T[P]>;
-      }
-    : T;
+  import { slide } from "$lib/types/Animations.svelte";
 
   interface Props {
     stats: DeepPartial<Awaited<ReturnType<typeof getCurrentCycleStats>>>;
@@ -17,6 +13,15 @@
   function f(number: number) {
     return number.toLocaleString("en-GB");
   }
+
+  type ChartType = "Activity" | "Population";
+  let displayChart = $state<ChartType | undefined>(
+    stats.allPowerStats?.reinfCP !== undefined &&
+      stats.allPowerStats?.umCPNoDecay !== undefined &&
+      stats.allPowerStats.cycleAcquisitionCP !== undefined
+      ? "Activity"
+      : undefined,
+  );
 </script>
 
 <div class="mt-4 flex flex-wrap justify-center gap-x-10 gap-y-2">
@@ -294,4 +299,71 @@
       </div>
     {/each}
   </div>
+{/if}
+
+<!-- Chart nav -->
+{#snippet chartButton(type: ChartType)}
+  <button
+    class="link-btn"
+    onclick={() => {
+      displayChart = displayChart !== type ? type : undefined;
+    }}>{type}</button
+  >
+{/snippet}
+<div class="mt-4 flex justify-center gap-4">
+  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined && stats.allPowerStats.cycleAcquisitionCP !== undefined}
+    {@render chartButton("Activity")}
+  {/if}
+  {#if Object.values(stats.powerStats ?? []).some((x) => x?.population !== undefined)}
+    {@render chartButton("Population")}
+  {/if}
+</div>
+
+<!-- Chart render -->
+{#if displayChart}
+  {#key displayChart}
+    <div class="mt-4" transition:slide|global>
+      <h3>{displayChart}</h3>
+      <div class="relative m-auto mt-4 h-120 max-w-(--breakpoint-lg)">
+        {#if displayChart === "Activity"}
+          {@const chartData = (
+            [
+              ["Reinforcement", "#00a5ff", stats.allPowerStats?.reinfCP ?? 0],
+              ["Undermining", "#ff3632", stats.allPowerStats?.umCPNoDecay ?? 0],
+              ["Acquisition", "#aaaaaa", stats.allPowerStats?.cycleAcquisitionCP ?? 0],
+            ] as const
+          ).toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="pie"
+            legend={true}
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Population"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.population ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {/if}
+      </div>
+    </div>
+  {/key}
 {/if}

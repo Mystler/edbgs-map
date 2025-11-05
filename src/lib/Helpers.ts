@@ -64,3 +64,12 @@ export function calculateGeometricMedian(points: SpanshSystem[]) {
   }
   return { x: current.x, y: current.y, z: current.z };
 }
+
+export function formatBigNumber(n: number) {
+  const suffix = ["", "k", "m", "b", "t"];
+  const exp = Math.floor(Math.log(n) / Math.log(1000));
+  if (exp < 0 || !suffix[exp]) return n.toLocaleString("en-GB");
+  const num = n / Math.pow(1000, exp);
+  const decimals = 4 - num.toFixed(0).length;
+  return num.toFixed(decimals) + suffix[exp];
+}
