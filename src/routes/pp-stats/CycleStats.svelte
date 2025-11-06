@@ -5,6 +5,13 @@
   import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
   import { slide } from "$lib/types/Animations.svelte";
 
+  // For some reason typescript wants the definition here and doesn't see the one in app.d.ts
+  type DeepPartial<T> = T extends object
+    ? {
+        [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
+
   interface Props {
     stats: DeepPartial<Awaited<ReturnType<typeof getCurrentCycleStats>>>;
   }
@@ -14,7 +21,13 @@
     return number.toLocaleString("en-GB");
   }
 
-  type ChartType = "Activity" | "Population";
+  type ChartType =
+    | "Activity"
+    | "Reinforcement"
+    | "Undermining"
+    | "Acquisition"
+    | "Expected Acquisitions"
+    | "Population";
   let displayChart = $state<ChartType | undefined>(
     stats.allPowerStats?.reinfCP !== undefined &&
       stats.allPowerStats?.umCPNoDecay !== undefined &&
@@ -24,6 +37,7 @@
   );
 </script>
 
+<!-- General stats -->
 <div class="mt-4 flex flex-wrap justify-center gap-x-10 gap-y-2">
   {#if stats.allPowerStats?.systems && stats.allPowerStats?.updatedThisCycle}
     <div>
@@ -145,6 +159,151 @@
     </div>
   {/if}
 </div>
+
+<!-- Chart nav -->
+{#snippet chartButton(type: ChartType)}
+  <button
+    class="link-btn"
+    onclick={() => {
+      displayChart = displayChart !== type ? type : undefined;
+    }}>{type}</button
+  >
+{/snippet}
+<div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2">
+  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined && stats.allPowerStats.cycleAcquisitionCP !== undefined}
+    {@render chartButton("Activity")}
+  {/if}
+  {#if stats.allPowerStats?.reinfCP !== undefined}
+    {@render chartButton("Reinforcement")}
+  {/if}
+  {#if stats.allPowerStats?.umCPNoDecay !== undefined}
+    {@render chartButton("Undermining")}
+  {/if}
+  {#if stats.allPowerStats?.cycleAcquisitionCP !== undefined}
+    {@render chartButton("Acquisition")}
+  {/if}
+  {#if stats.allPowerStats?.expectedAcquisitions !== undefined}
+    {@render chartButton("Expected Acquisitions")}
+  {/if}
+  {#if Object.values(stats.powerStats ?? []).some((x) => x?.population !== undefined)}
+    {@render chartButton("Population")}
+  {/if}
+</div>
+
+<!-- Chart render -->
+{#if displayChart}
+  {#key displayChart}
+    <div class="mt-4" transition:slide|global>
+      <h3>{displayChart}</h3>
+      <div class="relative m-auto mt-4 h-120 max-w-(--breakpoint-lg)">
+        {#if displayChart === "Activity"}
+          {@const chartData = (
+            [
+              ["Reinforcement", "#00a5ff", stats.allPowerStats?.reinfCP ?? 0],
+              ["Undermining", "#ff3632", stats.allPowerStats?.umCPNoDecay ?? 0],
+              ["Acquisition", "#aaaaaa", stats.allPowerStats?.cycleAcquisitionCP ?? 0],
+            ] as const
+          ).toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="pie"
+            legend={true}
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Reinforcement"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.reinfCP ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Undermining"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.umCPNoDecay ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Acquisition"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.cycleAcquisitionCP ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Expected Acquisitions"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.expectedAcquisitions ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {:else if displayChart === "Population"}
+          {@const chartData = Object.entries(stats.powerStats ?? [])
+            .map((x) => [x[0], Powers[x[0]].color, x[1]?.population ?? 0] as const)
+            .toSorted((a, b) => b[2] - a[2])}
+          <Chart
+            type="bar"
+            data={{
+              labels: chartData.map((x) => x[0]),
+              datasets: [
+                {
+                  data: chartData.map((x) => x[2]),
+                  backgroundColor: chartData.map((x) => x[1]),
+                },
+              ],
+            }}
+          />
+        {/if}
+      </div>
+    </div>
+  {/key}
+{/if}
+
+<!-- Power Stat Cards -->
 {#if stats.powerStats}
   <div class="mt-4 grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-2">
     {#each Object.entries(stats.powerStats) as [power, ps] (power)}
@@ -299,71 +458,4 @@
       </div>
     {/each}
   </div>
-{/if}
-
-<!-- Chart nav -->
-{#snippet chartButton(type: ChartType)}
-  <button
-    class="link-btn"
-    onclick={() => {
-      displayChart = displayChart !== type ? type : undefined;
-    }}>{type}</button
-  >
-{/snippet}
-<div class="mt-4 flex justify-center gap-4">
-  {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined && stats.allPowerStats.cycleAcquisitionCP !== undefined}
-    {@render chartButton("Activity")}
-  {/if}
-  {#if Object.values(stats.powerStats ?? []).some((x) => x?.population !== undefined)}
-    {@render chartButton("Population")}
-  {/if}
-</div>
-
-<!-- Chart render -->
-{#if displayChart}
-  {#key displayChart}
-    <div class="mt-4" transition:slide|global>
-      <h3>{displayChart}</h3>
-      <div class="relative m-auto mt-4 h-120 max-w-(--breakpoint-lg)">
-        {#if displayChart === "Activity"}
-          {@const chartData = (
-            [
-              ["Reinforcement", "#00a5ff", stats.allPowerStats?.reinfCP ?? 0],
-              ["Undermining", "#ff3632", stats.allPowerStats?.umCPNoDecay ?? 0],
-              ["Acquisition", "#aaaaaa", stats.allPowerStats?.cycleAcquisitionCP ?? 0],
-            ] as const
-          ).toSorted((a, b) => b[2] - a[2])}
-          <Chart
-            type="pie"
-            legend={true}
-            data={{
-              labels: chartData.map((x) => x[0]),
-              datasets: [
-                {
-                  data: chartData.map((x) => x[2]),
-                  backgroundColor: chartData.map((x) => x[1]),
-                },
-              ],
-            }}
-          />
-        {:else if displayChart === "Population"}
-          {@const chartData = Object.entries(stats.powerStats ?? [])
-            .map((x) => [x[0], Powers[x[0]].color, x[1]?.population ?? 0] as const)
-            .toSorted((a, b) => b[2] - a[2])}
-          <Chart
-            type="bar"
-            data={{
-              labels: chartData.map((x) => x[0]),
-              datasets: [
-                {
-                  data: chartData.map((x) => x[2]),
-                  backgroundColor: chartData.map((x) => x[1]),
-                },
-              ],
-            }}
-          />
-        {/if}
-      </div>
-    </div>
-  {/key}
 {/if}
