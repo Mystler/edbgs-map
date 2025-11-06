@@ -66,6 +66,7 @@ export function calculateGeometricMedian(points: SpanshSystem[]) {
 }
 
 export function formatBigNumber(n: number) {
+  if (n < 100_000) return n.toLocaleString("en-GB");
   const suffix = ["", "k", "m", "b", "t"];
   const exp = Math.floor(Math.log(n) / Math.log(1000));
   if (exp < 0 || !suffix[exp]) return n.toLocaleString("en-GB");
