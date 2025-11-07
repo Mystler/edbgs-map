@@ -194,7 +194,7 @@
 {#if displayChart}
   {#key displayChart}
     <div class="mt-4" transition:slide|global>
-      <h3>{displayChart}</h3>
+      <h3>{displayChart} in Cycle 2.{stats.cycle}</h3>
       <div class="relative m-auto mt-4 h-120 max-w-(--breakpoint-lg)">
         {#if displayChart === "Activity"}
           {@const chartData = (
