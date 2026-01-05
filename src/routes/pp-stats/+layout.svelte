@@ -32,7 +32,7 @@
 </svelte:head>
 
 <PowerplayPageNav />
-<div class="mx-auto max-w-[1600px] px-1 pb-4">
+<div class="mx-auto max-w-400 px-1 pb-4">
   <!-- Intro section -->
   <h1 class="text-center">Cycle Stats</h1>
   <p class="text-center text-sm">
@@ -48,7 +48,9 @@
       >
         <option value="">Live Data</option>
         {#each history as cycle (cycle.id)}
-          <option value={cycle.id}>Cycle 2.{cycle.cycle}</option>
+          <option value={cycle.id} selected={page.params.id ? parseInt(page.params.id) === cycle.id : false}
+            >Cycle 2.{cycle.cycle}</option
+          >
         {/each}
       </select>
     </div>
