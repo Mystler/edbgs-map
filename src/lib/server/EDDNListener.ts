@@ -43,7 +43,7 @@ let sock: Subscriber | undefined;
 let lastMessage: Date | undefined;
 // This tracks the most common game version to filter for. Seed with 5 instances of a default.
 let requiredGameVersion = "";
-const versionTrack: string[] = Array(4).fill("4.2.2.0");
+const versionTrack: string[] = Array(4).fill("4.3.0.1");
 trackVersion(versionTrack[0]);
 
 function trackVersion(version: string) {
