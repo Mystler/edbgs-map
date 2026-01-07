@@ -350,7 +350,8 @@ function checkForSnipe(
       (prevData && new Date(prevData.date) < lastPPTick) ||
       (currData.lastCycleStart &&
         currStartBar !== currData.lastCycleStart.startBar &&
-        currStartBar !== prevData?.lastCycleStart?.startBar)
+        currStartBar !== prevData?.lastCycleStart?.startBar &&
+        currStartBar !== prevData?.cycleStart?.startBar)
     ) {
       const prevProg = prevData?.powerStateControlProgress ?? 0;
       // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
