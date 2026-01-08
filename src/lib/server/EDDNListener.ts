@@ -273,10 +273,10 @@ function checkForSnipe(
   currData: SpanshDumpPPData,
   lastPPTick = getLastPPTickDate(),
 ): boolean {
-  if (currData.powerState === "Unoccupied" && prevData?.powerState === "Fortified" && prevData.controllingPower) {
-    // Snipes from fort to unoccupied due to lacking nearby forts.
-    // We ignore Exploited->Unoccupied drops for now because without deep analysis, we cannot know if it dropped due to fort drop and was actually sniped itself.
-    // Other types of snipes that leave the power in control further down.
+  if (currData.powerState === "Unoccupied" /*&& prevData?.powerState === "Fortified"*/ && prevData?.controllingPower) {
+    // Snipes from control to unoccupied.
+    // Note that without deep analysis, we cannot know if an exploited system dropped due to nearby fort drop or was actually sniped itself.
+    // Other types of snipes that leave the power in control are handled further down.
     const prevProg = prevData?.powerStateControlProgress ?? 0;
     const cp = Math.max(0, Math.floor(prevProg * 650000));
     logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
