@@ -55,6 +55,7 @@
 <svelte:window
   onkeydown={(e) => {
     if (e.target instanceof HTMLInputElement) return;
+    if (e.ctrlKey || e.altKey || e.metaKey || e.repeat) return;
     const number = parseInt(e.key);
     if (e.key === "g") HUDInfo.ShowGrid = !HUDInfo.ShowGrid;
     else if (e.key === "p") perfMon = !perfMon;
