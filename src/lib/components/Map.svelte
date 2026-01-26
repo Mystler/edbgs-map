@@ -128,14 +128,14 @@
         {/if}
         <CameraGrid bind:cameraSetup={data.Camera} />
 
-        {#each data.Factions as f (f.name)}
+        {#each data.Factions as f, i (i)}
           <FactionGroup faction={f} />
         {/each}
-        {#each data.Systems as s, i (s.name)}
-          <SystemGroup bind:system={data.Systems[i]} />
+        {#each data.Systems as s, i (i)}
+          <SystemGroup system={s} />
         {/each}
-        {#each data.Spheres as s, i (s.name)}
-          <Sphere bind:sphere={data.Spheres[i]} bind:this={sphereRefs[i]} />
+        {#each data.Spheres as s, i (i)}
+          <Sphere sphere={s} bind:this={sphereRefs[i]} />
         {/each}
         {#each data.Powers as p, i (i)}
           <PowerGroup power={p} />
@@ -226,7 +226,7 @@
       </div>
       <hr />
       <h4>Minor Factions</h4>
-      {#each data.Factions as f, i (f.name)}
+      {#each data.Factions as f, i (i)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mfsc-${i}`} class="grow">{f.displayName}</label>
           <div class="flex flex-col items-center">
@@ -256,7 +256,7 @@
       </form>
       <hr />
       <h4>Individual Systems</h4>
-      {#each data.Systems as s, i (s.name)}
+      {#each data.Systems as s, i (i)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mssc-${i}`} class="grow">{s.displayName}</label>
           <div class="flex flex-col items-center">
@@ -286,7 +286,7 @@
       </form>
       <hr />
       <h4>Ranges</h4>
-      {#each data.Spheres as s, i (s.name)}
+      {#each data.Spheres as s, i (i)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>
           <div class="flex flex-col items-center">

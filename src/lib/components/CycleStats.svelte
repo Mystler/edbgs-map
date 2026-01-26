@@ -28,7 +28,7 @@
     | "Acquisition"
     | "Expected Acquisitions"
     | "Population";
-  let displayChart = $state<ChartType | undefined>(
+  let displayChart = $derived<ChartType | undefined>(
     stats.allPowerStats?.reinfCP !== undefined &&
       stats.allPowerStats?.umCPNoDecay !== undefined &&
       stats.allPowerStats.cycleAcquisitionCP !== undefined

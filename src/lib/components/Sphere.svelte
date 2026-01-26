@@ -4,19 +4,17 @@
   import { resolve } from "$app/paths";
   import { onMount } from "svelte";
   import { T } from "@threlte/core";
-  import { DoubleSide, Vector3 } from "three";
+  import { DoubleSide, type Mesh, Vector3 } from "three";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { scale3d } from "$lib/types/Animations.svelte";
-  import { transitions, global } from "@threlte/extras";
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
   import { LoadedSystems } from "$lib/types/LoadedData.svelte";
+  import { quintOut } from "svelte/easing";
+  import type { TransitionConfig } from "svelte/transition";
 
   interface Props {
     sphere: SphereData;
   }
   let { sphere = $bindable() }: Props = $props();
-
-  transitions();
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(sphere.name, "Sphere");
@@ -32,6 +30,18 @@
   }
 
   let systemData: SpanshSystem | undefined = $state();
+
+  let sphereMesh: Mesh | undefined;
+
+  function scaleSphere(_node: Element): TransitionConfig {
+    return {
+      duration: 400,
+      easing: quintOut,
+      tick: (t) => {
+        sphereMesh?.scale.setScalar(t);
+      },
+    };
+  }
 
   onMount(() => {
     // If a position was supplied, then don't fetch system from Spansh and create it manually
@@ -109,14 +119,30 @@
 </script>
 
 {#if systemData}
-  <T.Mesh position={[systemData.x, systemData.y, -systemData.z]} visible={sphere.visible} transition={global(scale3d)}>
-    {#if sphere.type === "ExpansionCube"}
-      <T.BoxGeometry args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]} />
-    {:else}
-      <T.SphereGeometry args={[SphereRanges[sphere.type], 32, 32]} />
-    {/if}
-    <T.MeshBasicMaterial color={sphere.color} opacity={0.2} transparent={true} depthTest={false} side={DoubleSide} />
-  </T.Mesh>
+  <div class="hidden" transition:scaleSphere|global>
+    {#key sphere.type}
+      <T.Mesh
+        position={[systemData.x, systemData.y, -systemData.z]}
+        visible={sphere.visible}
+        oncreate={(ref) => {
+          sphereMesh = ref;
+        }}
+      >
+        {#if sphere.type === "ExpansionCube"}
+          <T.BoxGeometry args={[SphereRanges[sphere.type], SphereRanges[sphere.type], SphereRanges[sphere.type]]} />
+        {:else}
+          <T.SphereGeometry args={[SphereRanges[sphere.type], 32, 32]} />
+        {/if}
+        <T.MeshBasicMaterial
+          color={sphere.color}
+          opacity={0.2}
+          transparent={true}
+          depthTest={false}
+          side={DoubleSide}
+        />
+      </T.Mesh>
+    {/key}
+  </div>
 {/if}
 {#if sphere.type === "Colonization" && colonizationTargets.length > 0}
   <SystemRenderGroup systems={colonizationTargets} color={sphere.color} visible={sphere.visible} />
