@@ -3,8 +3,8 @@
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
   import { resolve } from "$app/paths";
   import type { SpanshSystem } from "../SpanshAPI";
-  import { onMount } from "svelte";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { untrack } from "svelte";
 
   interface Props {
     power: PowerData;
@@ -28,12 +28,16 @@
   let fortifieds: SpanshSystem[] = $state([]);
   let strongholds: SpanshSystem[] = $state([]);
 
-  onMount(() => {
-    fetchData().then((data) => {
-      exploiteds = data.filter((x) => x.power_state === "Exploited");
-      fortifieds = data.filter((x) => x.power_state === "Fortified");
-      strongholds = data.filter((x) => x.power_state === "Stronghold");
-    });
+  $effect(() => {
+    if (power.name) {
+      untrack(() => {
+        fetchData().then((data) => {
+          exploiteds = data.filter((x) => x.power_state === "Exploited");
+          fortifieds = data.filter((x) => x.power_state === "Fortified");
+          strongholds = data.filter((x) => x.power_state === "Stronghold");
+        });
+      });
+    }
   });
 </script>
 

@@ -132,10 +132,21 @@
           <FactionGroup faction={f} />
         {/each}
         {#each data.Systems as s, i (i)}
-          <SystemGroup system={s} />
+          <SystemGroup
+            system={s}
+            updatePosition={(position) => {
+              s.position = position;
+            }}
+          />
         {/each}
         {#each data.Spheres as s, i (i)}
-          <Sphere sphere={s} bind:this={sphereRefs[i]} />
+          <Sphere
+            sphere={s}
+            bind:this={sphereRefs[i]}
+            updatePosition={(position) => {
+              s.position = position;
+            }}
+          />
         {/each}
         {#each data.Powers as p, i (i)}
           <PowerGroup power={p} />

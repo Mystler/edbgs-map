@@ -112,9 +112,9 @@
   const gcCircle = new CircleGeometry(0.33);
   gcCircle.rotateX(-Math.PI / 2);
   gcCircle.translate(0, 1, 0);
-  const gcLineMesh = new ThreeInstancedMesh(gcLine, gcMaterial, systems.length);
+  const gcLineMesh = new ThreeInstancedMesh(gcLine, gcMaterial, (() => systems.length)());
   gcLineMesh.count = 0;
-  const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gcMaterial, systems.length);
+  const gcCircleMesh = new ThreeInstancedMesh(gcCircle, gcMaterial, (() => systems.length)());
   gcCircleMesh.count = 0;
   const gcLineDummy = new Object3D();
   const gcCircleDummy = new Object3D();
@@ -162,7 +162,7 @@
   // Create visual Mesh
   const systemsMaterial = new ShaderMaterial({
     uniforms: {
-      color: { value: new Color(color).convertLinearToSRGB() },
+      color: { value: new Color((() => color)()).convertLinearToSRGB() },
     },
     vertexShader: `
       attribute uint instanceIndex;
@@ -197,48 +197,61 @@
         gl_FragColor = vec4(f_color, 1.0);
       }
     `,
-    polygonOffset: zOffset ? true : false,
-    polygonOffsetFactor: -zOffset * 4,
-    polygonOffsetUnits: -zOffset * 4,
   });
 
+  $effect.pre(() => {
+    systemsMaterial.polygonOffset = zOffset ? true : false;
+    systemsMaterial.polygonOffsetFactor = -zOffset * 4;
+    systemsMaterial.polygonOffsetUnits = -zOffset * 4;
+  });
   $effect.pre(() => {
     const uColor = systemsMaterial.uniforms.color as Uniform<Color>;
     uColor.value.set(new Color(color).convertLinearToSRGB());
   });
-  let vGeometry: BufferGeometry;
-  if (starType === "star") {
-    vGeometry = new ShapeGeometry(StarShape, 1);
-  } else if (starType === "triangle") {
-    vGeometry = new ShapeGeometry(TriangleShape, 1);
-  } else {
-    vGeometry = new CircleGeometry(0.5);
-  }
-  let vMesh = $state(new InstancedMesh2(vGeometry, systemsMaterial));
-  vMesh.addInstances(systems.length, (x, i) => {
-    x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+
+  // Create visual instanced mesh
+  let vMesh = $derived.by(() => {
+    let geo: BufferGeometry;
+    if (starType === "star") {
+      geo = new ShapeGeometry(StarShape, 1);
+    } else if (starType === "triangle") {
+      geo = new ShapeGeometry(TriangleShape, 1);
+    } else {
+      geo = new CircleGeometry(0.5);
+    }
+    return new InstancedMesh2(geo, systemsMaterial);
   });
-  vMesh.computeBVH();
+  $effect.pre(() => {
+    vMesh.clearInstances();
+    vMesh.addInstances(systems.length, (x, i) => {
+      x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+    });
+    vMesh.computeBVH();
+  });
 
   // Create hidden mesh for raycasting onto spheres.
-  const hitSize = starType === "star" ? 1.5 : starType === "triangle" ? 1 : 0.5;
-  const rGeometry = (() => new SphereGeometry(hitSize, 16, 16))();
-  const rMesh = new InstancedMesh2(
-    rGeometry,
-    new MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false }),
-  );
-  rMesh.addInstances(systems.length, (x, i) => {
-    x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+  const hitSize = $derived(starType === "star" ? 1.5 : starType === "triangle" ? 1 : 0.5);
+  let rMesh = $derived.by(() => {
+    const geo = new SphereGeometry(hitSize, 16, 16);
+    return new InstancedMesh2(geo, new MeshBasicMaterial({ transparent: true, opacity: 0, depthTest: false }));
   });
-  rMesh.computeBVH();
+  $effect.pre(() => {
+    rMesh.clearInstances();
+    rMesh.addInstances(systems.length, (x, i) => {
+      x.position = new Vector3(systems[i].x, systems[i].y, -systems[i].z);
+    });
+    rMesh.computeBVH();
+  });
 
   // Pointer event handling for our instances
-  const systemScalers = systems.map(
-    () =>
-      new Spring(1, {
-        stiffness: 0.15,
-        damping: 0.25,
-      }),
+  let systemScalers = $derived(
+    systems.map(
+      () =>
+        new Spring(1, {
+          stiffness: 0.15,
+          damping: 0.25,
+        }),
+    ),
   );
   const mapData: MapData = getContext("mapData");
   const interactivity = useInteractivity();
@@ -246,57 +259,67 @@
   interface IM2InteractivityEvent {
     instanceId: number;
   }
-  interactivity.addInteractiveObject(rMesh, {
-    onpointerenter: (e) => {
-      const ev = e as IM2InteractivityEvent;
-      if (ev.instanceId === undefined) return;
-      cursorEnter();
-      systemScalers[ev.instanceId].target = 2;
-      const system = systems[ev.instanceId];
-      HUDInfo.CurrentSystemInfo = system;
-    },
-    onpointerleave: (e) => {
-      const ev = e as IM2InteractivityEvent;
-      if (ev.instanceId === undefined) return;
-      cursorLeave();
-      systemScalers[ev.instanceId].target = 1;
-      HUDInfo.CurrentSystemInfo = undefined;
-    },
-    onclick: (e) => {
-      const ev = e as IM2InteractivityEvent;
-      if (ev.instanceId === undefined) return;
-      const system = systems[ev.instanceId];
-      if (HUDInfo.ClickMode === "inara") {
-        window.open(`https://inara.cz/elite/starsystem/?search=${encodeURIComponent(system.name)}`, "_blank");
-      } else if (HUDInfo.ClickMode === "edsm") {
-        window.open(`https://www.edsm.net/en/system/id//name?systemName=${encodeURIComponent(system.name)}`, "_blank");
-      } else if (HUDInfo.ClickMode === "spansh") {
-        if (system.id64) window.open(`https://spansh.co.uk/system/${encodeURIComponent(system.id64)}`, "_blank");
-        else window.open(`https://spansh.co.uk/search/${encodeURIComponent(system.name)}`, "_blank");
-      } else if (HUDInfo.ClickMode === "measure") {
-        CurrentMeasurement.addSystem(system.name, system.x, system.y, system.z);
-      } else if (HUDInfo.ClickMode === "range") {
-        const i = mapData.Spheres.findIndex((sphere) => sphere.name === system.name);
-        if (i >= 0) {
-          mapData.Spheres.splice(i, 1);
-        } else {
-          const type =
-            system.power_state === "Stronghold"
-              ? "Stronghold"
-              : system.power_state === "Fortified"
-                ? "Fortified"
-                : "Colonization";
-          mapData.addSphere({
-            name: system.name,
-            color: type === "Stronghold" || type === "Fortified" ? Powers[system.controlling_power!].color : "#ffffff",
-            position: [system.x, system.y, system.z],
-            type,
-          });
+  $effect.pre(() => {
+    interactivity.addInteractiveObject(rMesh, {
+      onpointerenter: (e) => {
+        const ev = e as IM2InteractivityEvent;
+        if (ev.instanceId === undefined) return;
+        cursorEnter();
+        systemScalers[ev.instanceId].target = 2;
+        const system = systems[ev.instanceId];
+        HUDInfo.CurrentSystemInfo = system;
+      },
+      onpointerleave: (e) => {
+        const ev = e as IM2InteractivityEvent;
+        if (ev.instanceId === undefined) return;
+        cursorLeave();
+        systemScalers[ev.instanceId].target = 1;
+        HUDInfo.CurrentSystemInfo = undefined;
+      },
+      onclick: (e) => {
+        const ev = e as IM2InteractivityEvent;
+        if (ev.instanceId === undefined) return;
+        const system = systems[ev.instanceId];
+        if (HUDInfo.ClickMode === "inara") {
+          window.open(`https://inara.cz/elite/starsystem/?search=${encodeURIComponent(system.name)}`, "_blank");
+        } else if (HUDInfo.ClickMode === "edsm") {
+          window.open(
+            `https://www.edsm.net/en/system/id//name?systemName=${encodeURIComponent(system.name)}`,
+            "_blank",
+          );
+        } else if (HUDInfo.ClickMode === "spansh") {
+          if (system.id64) window.open(`https://spansh.co.uk/system/${encodeURIComponent(system.id64)}`, "_blank");
+          else window.open(`https://spansh.co.uk/search/${encodeURIComponent(system.name)}`, "_blank");
+        } else if (HUDInfo.ClickMode === "measure") {
+          CurrentMeasurement.addSystem(system.name, system.x, system.y, system.z);
+        } else if (HUDInfo.ClickMode === "range") {
+          const i = mapData.Spheres.findIndex((sphere) => sphere.name === system.name);
+          if (i >= 0) {
+            mapData.Spheres.splice(i, 1);
+          } else {
+            const type =
+              system.power_state === "Stronghold"
+                ? "Stronghold"
+                : system.power_state === "Fortified"
+                  ? "Fortified"
+                  : "Colonization";
+            mapData.addSphere({
+              name: system.name,
+              color:
+                type === "Stronghold" || type === "Fortified" ? Powers[system.controlling_power!].color : "#ffffff",
+              position: [system.x, system.y, system.z],
+              type,
+            });
+          }
+        } else if (HUDInfo.ClickMode === "powerplay") {
+          HUDInfo.CurrentPPInfo = system;
         }
-      } else if (HUDInfo.ClickMode === "powerplay") {
-        HUDInfo.CurrentPPInfo = system;
-      }
-    },
+      },
+    });
+
+    return () => {
+      if (rMesh) interactivity.removeInteractiveObject(rMesh);
+    };
   });
 
   const systemScaleDummy = new Object3D();
@@ -313,12 +336,16 @@
   });
 
   // Global system tracking
-  for (const system of systems) {
-    LoadedSystems.set(system.name, system);
-    if (FlyToSystemOnceLoaded.value === system.name) {
-      FlyToSystem(system.name);
+  $effect.pre(() => {
+    for (const system of systems) {
+      untrack(() => {
+        LoadedSystems.set(system.name, system);
+        if (FlyToSystemOnceLoaded.value === system.name) {
+          FlyToSystem(system.name);
+        }
+      });
     }
-  }
+  });
 </script>
 
 <!-- Render instanced meshes -->

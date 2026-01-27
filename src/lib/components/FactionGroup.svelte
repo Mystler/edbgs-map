@@ -4,11 +4,11 @@
   import { resolve } from "$app/paths";
   import { Billboard, Text } from "@threlte/extras";
   import type { SpanshSystem } from "../SpanshAPI";
-  import { onMount } from "svelte";
   import { DefaultMapFont } from "../Constants";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
   import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
   import { calculateGeometricMedian } from "$lib/Helpers";
+  import { untrack } from "svelte";
 
   interface Props {
     faction: FactionData;
@@ -35,14 +35,18 @@
   let textPosition: [x: number, y: number, z: number] = $state([0, 0, 0]);
   let systems: SpanshSystem[] = $state([]);
 
-  onMount(() => {
-    fetchData().then((data) => {
-      systems = data;
+  $effect(() => {
+    if (faction.name) {
+      untrack(() => {
+        fetchData().then((data) => {
+          systems = data;
 
-      if (systems.length === 0) return;
-      const median = calculateGeometricMedian(systems);
-      textPosition = [median.x, median.y + 2, -median.z];
-    });
+          if (systems.length === 0) return;
+          const median = calculateGeometricMedian(systems);
+          textPosition = [median.x, median.y + 2, -median.z];
+        });
+      });
+    }
   });
 </script>
 

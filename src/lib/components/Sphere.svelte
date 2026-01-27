@@ -2,7 +2,7 @@
   import { SphereRanges, type SphereData } from "../types/MapData.svelte";
   import type { SpanshSystem } from "../SpanshAPI";
   import { resolve } from "$app/paths";
-  import { onMount } from "svelte";
+  import { untrack } from "svelte";
   import { T } from "@threlte/core";
   import { DoubleSide, type Mesh, Vector3 } from "three";
   import { HUDInfo } from "$lib/types/HUDInfo.svelte";
@@ -13,8 +13,9 @@
 
   interface Props {
     sphere: SphereData;
+    updatePosition: (position: [x: number, y: number, z: number]) => void;
   }
-  let { sphere = $bindable() }: Props = $props();
+  let { sphere, updatePosition }: Props = $props();
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(sphere.name, "Sphere");
@@ -33,7 +34,7 @@
 
   let sphereMesh: Mesh | undefined;
 
-  function scaleSphere(_node: Element): TransitionConfig {
+  function scaleMesh(_node: Element): TransitionConfig {
     return {
       duration: 400,
       easing: quintOut,
@@ -43,22 +44,28 @@
     };
   }
 
-  onMount(() => {
-    // If a position was supplied, then don't fetch system from Spansh and create it manually
-    if (sphere.name && sphere.position) {
-      systemData = {
-        name: sphere.name,
-        x: sphere.position[0],
-        y: sphere.position[1],
-        z: sphere.position[2],
-      };
-      LoadedSystems.set(sphere.name, systemData);
-    } else {
-      fetchData().then((data) => {
-        if (data) {
-          systemData = data;
-          sphere.position = [data.x, data.y, data.z];
-          LoadedSystems.set(sphere.name, data);
+  $effect(() => {
+    if (sphere.name) {
+      untrack(() => {
+        // If a position was supplied, then don't fetch system from Spansh and create it manually
+        if (sphere.position) {
+          systemData = {
+            name: sphere.name,
+            x: sphere.position[0],
+            y: sphere.position[1],
+            z: sphere.position[2],
+          };
+          LoadedSystems.set(sphere.name, systemData);
+          resetSecondaries();
+        } else {
+          fetchData().then((data) => {
+            if (data) {
+              systemData = data;
+              updatePosition([data.x, data.y, data.z]);
+              LoadedSystems.set(sphere.name, data);
+              resetSecondaries();
+            }
+          });
         }
       });
     }
@@ -116,10 +123,17 @@
         ) <= (sphere.type === "Stronghold" ? 30 : 20),
     ),
   );
+
+  function resetSecondaries() {
+    acquisitionLoaded = false;
+    acquisitionTargets = [];
+    colonizationLoaded = false;
+    colonizationTargets = [];
+  }
 </script>
 
 {#if systemData}
-  <div class="hidden" transition:scaleSphere|global>
+  <div class="hidden" transition:scaleMesh|global>
     {#key sphere.type}
       <T.Mesh
         position={[systemData.x, systemData.y, -systemData.z]}
