@@ -54,8 +54,9 @@
       having to use the inputs.
     </li>
     <li>
-      When displaying Colonization ranges, there is a little download icon that you can click to import all potential
-      colonization target systems within that sphere.
+      When displaying Colonization ranges, there is a little download icon in the sidebar that you can click to import
+      all potential colonization target systems within that sphere. The same is true for Acquisition targets on
+      Fortified and Stronghold systems.
     </li>
     <li>
       You can also load the systems a faction is present in but not the controller of. To do so, add a space and "(NC)"
