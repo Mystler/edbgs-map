@@ -106,6 +106,7 @@ export class MapData {
     fortifiedVisible = true,
     strongholdVisible = true,
   }: Partial<PowerData> = {}) {
+    if (name && this.Powers.some((x) => x.name === name)) return;
     this.Powers.push({ name, color, exploitedVisible, fortifiedVisible, strongholdVisible });
   }
 
@@ -114,6 +115,37 @@ export class MapData {
     this.Systems.sort((a, b) => a.displayName.localeCompare(b.displayName));
     this.Spheres.sort((a, b) => a.name.localeCompare(b.name));
     this.Powers.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /**
+   * Adding new elements using the addX methods will already prevent duplicates. This is a manual dedupe for when addX was used
+   * to initialize empty elements that could have been modified to be duplicates.
+   */
+  dedupe() {
+    let seen: string[] = [];
+    this.Factions = this.Factions.filter((x) => {
+      if (seen.includes(x.name)) return false;
+      seen.push(x.name);
+      return true;
+    });
+    seen = [];
+    this.Systems = this.Systems.filter((x) => {
+      if (seen.includes(x.name)) return false;
+      seen.push(x.name);
+      return true;
+    });
+    seen = [];
+    this.Spheres = this.Spheres.filter((x) => {
+      if (seen.includes(x.name)) return false;
+      seen.push(x.name);
+      return true;
+    });
+    seen = [];
+    this.Powers = this.Powers.filter((x) => {
+      if (seen.includes(x.name)) return false;
+      seen.push(x.name);
+      return true;
+    });
   }
 
   /**

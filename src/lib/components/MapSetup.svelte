@@ -20,6 +20,7 @@
     data.Powers = data.Powers.filter((x) => x.name.trim() !== "");
     for (const x of data.Factions) if (!x.displayName) x.displayName = x.name;
     for (const x of data.Systems) if (!x.displayName) x.displayName = x.name;
+    data.dedupe();
     data.sortAll();
     onConfirmRender();
     e.preventDefault();

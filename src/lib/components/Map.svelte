@@ -128,10 +128,10 @@
         {/if}
         <CameraGrid bind:cameraSetup={data.Camera} />
 
-        {#each data.Factions as f, i (i)}
+        {#each data.Factions as f (f.name)}
           <FactionGroup faction={f} />
         {/each}
-        {#each data.Systems as s, i (i)}
+        {#each data.Systems as s (s.name)}
           <SystemGroup
             system={s}
             updatePosition={(position) => {
@@ -139,7 +139,7 @@
             }}
           />
         {/each}
-        {#each data.Spheres as s, i (i)}
+        {#each data.Spheres as s, i (s.name)}
           <Sphere
             sphere={s}
             bind:this={sphereRefs[i]}
@@ -148,7 +148,7 @@
             }}
           />
         {/each}
-        {#each data.Powers as p, i (i)}
+        {#each data.Powers as p (p.name)}
           <PowerGroup power={p} />
         {/each}
 
