@@ -17,6 +17,7 @@
   import { on } from "svelte/events";
   import { onMount, untrack } from "svelte";
   import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
+  import Select from "$lib/components/Select.svelte";
 
   interface Props {
     systems: SpanshDumpPPData[];
@@ -237,18 +238,18 @@
         <input type="checkbox" class="align-middle" title="Descending" bind:checked={descending} /> Desc
       </label>
     </div>
-    <select class="px-2 max-sm:grow-1" bind:value={sortBy}>
+    <Select class="px-2 max-sm:grow" bind:value={sortBy}>
       {#each Object.keys(sortingFunctions) as sort (sort)}
         <option>{sort}</option>
       {/each}
-    </select>
+    </Select>
   </div>
   <div class="flex items-center gap-2">
     <button type="button" class="flex items-center gap-1" onclick={() => (showFilters = !showFilters)}>
       <b>Filters</b>
       <FaIcon class="text-xl" icon={showFilters ? faCaretDown : faCaretRight} />
     </button>
-    <div class="h-0 grow-1 border-1 border-zinc-500"></div>
+    <div class="h-0 grow border border-zinc-500"></div>
   </div>
   {#if showFilters}
     <!-- Filters -->
@@ -257,7 +258,7 @@
         <div class="relative">
           <input
             type="text"
-            class="w-78 p-1 pr-4 max-sm:grow-1"
+            class="w-78 p-1 pr-4 max-sm:grow"
             placeholder="Search System..."
             bind:value={searchSystem}
           />
@@ -281,7 +282,7 @@
           }}>Toggle All Powers</button
         >
       </div>
-      <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
         {#each Object.keys(Powers) as power (power)}
           <label
             class={[
@@ -294,12 +295,12 @@
           </label>
         {/each}
       </div>
-      <div class="border-1 border-zinc-500"></div>
-      <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+      <div class="border border-zinc-500"></div>
+      <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
         {#each availableStates as state (state)}
           <label
             class={[
-              "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,_var(--text-base))] font-semibold hover:bg-zinc-700",
+              "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,var(--text-base))] font-semibold hover:bg-zinc-700",
               filterStates.includes(state) ? "opacity-100" : "opacity-20",
             ]}
           >
@@ -308,7 +309,7 @@
           </label>
         {/each}
       </div>
-      <div class="border-1 border-zinc-500"></div>
+      <div class="border border-zinc-500"></div>
       <div class="flex flex-wrap gap-2">
         <label><input type="checkbox" bind:checked={includePrevCycle} /> Include Previous Cycle</label>
         <label><input type="checkbox" bind:checked={excludeMaxedStrongholds} /> Exclude Strongholds above 75%</label>
@@ -322,7 +323,7 @@
           </label>
         {/each}
       </div>
-      <div class="border-1 border-zinc-500"></div>
+      <div class="border border-zinc-500"></div>
     </div>
   {/if}
 </div>
@@ -357,7 +358,7 @@
             class="w-4 flex-none self-stretch"
             style={`background-color: ${system.controllingPower ? Powers[system.controllingPower].color : "transparent"}`}
           ></div>
-          <div class="grow-1 text-left font-semibold">{system.name}</div>
+          <div class="grow text-left font-semibold">{system.name}</div>
           {#if system.powerStateControlProgress}
             {@const controlData = calculatePPControlSegments(system)}
             {@const { startProgress, startTier } = system.cycleStart || controlData}

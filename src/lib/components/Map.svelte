@@ -30,6 +30,7 @@
   import { FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
   import { type SpanshDumpPPData } from "$lib/SpanshAPI";
   import SystemMouseover from "./SystemMouseover.svelte";
+  import Select from "./Select.svelte";
 
   interface Props {
     data: MapData;
@@ -221,18 +222,18 @@
         </div>
         <div class="flex items-center gap-2">
           <span>Panning Mode</span>
-          <select class="grow p-1" bind:value={HUDInfo.PanMode}>
+          <Select class="grow p-1" bind:value={HUDInfo.PanMode}>
             <option value="screen">Screen Space</option>
             <option value="grid">Elite Dangerous</option>
-          </select>
+          </Select>
         </div>
         <div class="flex items-center gap-2">
           <span>On System Click</span>
-          <select class="grow p-1" bind:value={HUDInfo.ClickMode}>
+          <Select class="grow p-1" bind:value={HUDInfo.ClickMode}>
             {#each Object.entries(ClickMode) as [mode, title] (mode)}
               <option value={mode}>{title}</option>
             {/each}
-          </select>
+          </Select>
         </div>
       </div>
       <hr />
@@ -305,12 +306,12 @@
             <label for={`mspsc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
           </div>
           <input class="flex-none" type="color" bind:value={s.color} title="Color" />
-          <select bind:value={s.type} class="p-1">
+          <Select bind:value={s.type} class="p-1">
             <option>Colonization</option>
             <option>Fortified</option>
             <option>Stronghold</option>
             <option value="ExpansionCube">Expansion Cube</option>
-          </select>
+          </Select>
           {#if ["Fortified", "Stronghold"].includes(s.type) && !sphereRefs[i]?.isAcquisitionLoaded()}
             <button
               type="button"
@@ -369,11 +370,11 @@
         </div>
       {/each}
       <form class="flex items-center gap-1">
-        <select class="grow p-1" bind:value={addPower}>
+        <Select class="grow p-1" bind:value={addPower}>
           {#each Object.keys(Powers) as power (power)}
-            <option>{power}</option>
+            <option value={power}><span style:color={Powers[power].color}>{power}</span></option>
           {/each}
-        </select>
+        </Select>
         <input
           type="submit"
           class="px-2 py-1"

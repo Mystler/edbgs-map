@@ -8,6 +8,7 @@
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import { resolve } from "$app/paths";
+  import Select from "$lib/components/Select.svelte";
 
   let { data, children }: LayoutProps = $props();
 
@@ -41,7 +42,7 @@
   </p>
   {#await data.history then history}
     <div class="text-center">
-      <select
+      <Select
         onchange={(e) => {
           goto(resolve(`/pp-stats/${e.currentTarget.value}`));
         }}
@@ -52,7 +53,7 @@
             >Cycle 2.{cycle.cycle}</option
           >
         {/each}
-      </select>
+      </Select>
     </div>
   {/await}
   <p class="mx-auto text-right text-xs text-zinc-500">

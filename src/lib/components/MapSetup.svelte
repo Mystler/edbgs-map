@@ -3,6 +3,7 @@
   import { slide } from "$lib/types/Animations.svelte";
   import { type MapData } from "../types/MapData.svelte";
   import AutocompleteInput from "./AutocompleteInput.svelte";
+  import Select from "./Select.svelte";
   import SessionManager from "./SessionManager.svelte";
 
   interface Props {
@@ -189,12 +190,12 @@
               <td><div transition:slide><input type="color" bind:value={sphere.color} /></div></td>
               <td>
                 <div transition:slide>
-                  <select bind:value={sphere.type}>
+                  <Select bind:value={sphere.type} class="w-48">
                     <option>Colonization</option>
                     <option>Fortified</option>
                     <option>Stronghold</option>
                     <option value="ExpansionCube">Expansion Cube</option>
-                  </select>
+                  </Select>
                 </div>
               </td>
               <td>
@@ -243,16 +244,17 @@
             <tr>
               <td>
                 <div transition:slide>
-                  <select
+                  <Select
+                    class="w-48"
                     bind:value={power.name}
                     onchange={() => {
                       power.color = Powers[power.name].color;
                     }}
                   >
                     {#each Object.keys(Powers) as power (power)}
-                      <option>{power}</option>
+                      <option value={power}><span style:color={Powers[power].color}>{power}</span></option>
                     {/each}
-                  </select>
+                  </Select>
                 </div>
               </td>
               <td><div transition:slide><input type="color" bind:value={power.color} /></div></td>
