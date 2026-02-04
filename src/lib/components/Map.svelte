@@ -306,7 +306,7 @@
             <label for={`mspsc-${i}`} class="text-[8px]" title="Visibility">Vis</label>
           </div>
           <input class="flex-none" type="color" bind:value={s.color} title="Color" />
-          <Select bind:value={s.type} class="p-1">
+          <Select bind:value={s.type} class="w-38 p-1">
             <option>Colonization</option>
             <option>Fortified</option>
             <option>Stronghold</option>

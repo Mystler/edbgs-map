@@ -43,6 +43,7 @@
   {#await data.history then history}
     <div class="text-center">
       <Select
+        class="w-38"
         onchange={(e) => {
           goto(resolve(`/pp-stats/${e.currentTarget.value}`));
         }}

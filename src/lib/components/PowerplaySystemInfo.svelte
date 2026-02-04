@@ -34,7 +34,7 @@
   {@const startTier = data.cycleStart?.startTier || controlData.startTier}
   {@const cpDiff = (data.powerStateReinforcement ?? 0) - (data.powerStateUndermining ?? 0)}
   {@const correctedSegmentProgress = getCorrectedSegmentProgress(controlData.totalCP, startTier)}
-  <h3 style={`color: ${Powers[data.controllingPower].color}`}>
+  <h3 style:color={Powers[data.controllingPower].color}>
     {data.controllingPower}
   </h3>
   <h4>{data.cycleStart?.startTier || data.powerState}</h4>
@@ -112,13 +112,13 @@
       <div class="absolute top-0 left-3/4 h-8 grow-0 -translate-x-1/2 border-r-2 border-dashed border-white"></div>
       <div
         class="absolute top-0 -translate-1/2 overflow-visible text-3xl text-white/60"
-        style={`left: ${startBar * 100}%`}
+        style:left={`${startBar * 100}%`}
       >
         <FaIcon icon={faCaretDown} />
       </div>
       <div
         class="absolute -translate-1/2 overflow-visible text-3xl text-white"
-        style={`left: ${controlData.currentBar * 100}%`}
+        style:left={`${controlData.currentBar * 100}%`}
       >
         <FaIcon icon={faCaretUp} />
       </div>
@@ -149,7 +149,7 @@
       {@const normalizedProgress = (acqPower.progress / normalize) * 100}
       <div>
         <b>{index + 1}.</b>
-        <b style={`color: ${powerColor}`}>{acqPower.power}:</b>
+        <b style:color={powerColor}>{acqPower.power}:</b>
         {(acqPower.progress * 100).toFixed(2)}% ({Math.floor(acqPower.progress * 120000).toLocaleString("en-US")})
       </div>
       <div
@@ -158,7 +158,7 @@
       >
         {#if data.powerConflictCycleStart !== undefined}
           {@const acqStart = data.powerConflictCycleStart.find((x) => x.power === acqPower.power)?.progress ?? 0}
-          <div class="absolute top-0 overflow-visible" style={`left: ${(acqStart / normalize) * 100}%`}>
+          <div class="absolute top-0 overflow-visible" style:left={`${(acqStart / normalize) * 100}%`}>
             <Tooltip>
               {#snippet tooltip()}
                 {(acqStart * 100).toFixed(2)}% ({Math.floor(acqStart * 120000).toLocaleString("en-US")})
@@ -168,7 +168,7 @@
               </div>
             </Tooltip>
           </div>
-          <div class="absolute top-full overflow-visible" style={`right: ${100 - normalizedProgress}%`}>
+          <div class="absolute top-full overflow-visible" style:right={`${100 - normalizedProgress}%`}>
             <Tooltip>
               {#snippet tooltip()}
                 +{((acqPower.progress - acqStart) * 100).toFixed(2)}% (+{Math.floor(

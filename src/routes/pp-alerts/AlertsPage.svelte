@@ -238,7 +238,7 @@
         <input type="checkbox" class="align-middle" title="Descending" bind:checked={descending} /> Desc
       </label>
     </div>
-    <Select class="px-2 max-sm:grow" bind:value={sortBy}>
+    <Select class="w-64 px-2 max-sm:grow" bind:value={sortBy}>
       {#each Object.keys(sortingFunctions) as sort (sort)}
         <option>{sort}</option>
       {/each}
@@ -290,7 +290,7 @@
               filterPowers.includes(power) ? "opacity-100" : "opacity-20",
             ]}
           >
-            <span style={`color: ${Powers[power].color}`}>{power}</span>
+            <span style:color={Powers[power].color}>{power}</span>
             <input type="checkbox" class="hidden" name="filterPowers" bind:group={filterPowers} value={power} />
           </label>
         {/each}
@@ -304,7 +304,7 @@
               filterStates.includes(state) ? "opacity-100" : "opacity-20",
             ]}
           >
-            <span style={`color: ${powerStateColor(state)}`}>{state}</span>
+            <span style:color={powerStateColor(state)}>{state}</span>
             <input type="checkbox" class="hidden" name="filterStates" bind:group={filterStates} value={state} />
           </label>
         {/each}
@@ -356,7 +356,7 @@
         >
           <div
             class="w-4 flex-none self-stretch"
-            style={`background-color: ${system.controllingPower ? Powers[system.controllingPower].color : "transparent"}`}
+            style:background-color={system.controllingPower ? Powers[system.controllingPower].color : "transparent"}
           ></div>
           <div class="grow text-left font-semibold">{system.name}</div>
           {#if system.powerStateControlProgress}
@@ -402,7 +402,7 @@
               {#each system.powerConflictProgress
                 ?.toSorted((a, b) => b.progress - a.progress)
                 .slice(0, 2) ?? [] as acqPower (acqPower.power)}
-                <span style={`color: ${Powers[acqPower.power].color}`}>{(acqPower.progress * 100).toFixed(1)}%</span>
+                <span style:color={Powers[acqPower.power].color}>{(acqPower.progress * 100).toFixed(1)}%</span>
               {/each}
             </div>
             <div class="basis-32 max-sm:hidden">
@@ -432,13 +432,13 @@
           {/if}
           <div
             class="basis-40 max-lg:hidden"
-            style={`color: ${system.controllingPower ? Powers[system.controllingPower].color : "inherit"}`}
+            style:color={system.controllingPower ? Powers[system.controllingPower].color : "inherit"}
           >
             {system.controllingPower}
           </div>
           <div
             class="basis-32 max-sm:hidden"
-            style={`color: ${powerStateColor(system.cycleStart?.startTier || system.powerState)}`}
+            style:color={powerStateColor(system.cycleStart?.startTier || system.powerState)}
           >
             {system.cycleStart?.startTier || system.powerState}
           </div>

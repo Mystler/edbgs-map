@@ -143,7 +143,7 @@
         <b>Filters</b>
         <FaIcon class="text-xl" icon={showFilters ? faCaretDown : faCaretRight} />
       </button>
-      <div class="h-0 grow-1 border-1 border-zinc-500"></div>
+      <div class="h-0 grow border border-zinc-500"></div>
     </div>
     {#if showFilters}
       <!-- Filters -->
@@ -152,7 +152,7 @@
           <div class="relative">
             <input
               type="text"
-              class="w-78 p-1 pr-4 max-sm:grow-1"
+              class="w-78 p-1 pr-4 max-sm:grow"
               placeholder="Search System..."
               bind:value={searchSystem}
             />
@@ -176,7 +176,7 @@
             }}>Toggle All Powers</button
           >
         </div>
-        <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
           {#each Object.keys(Powers) as power (power)}
             <label
               class={[
@@ -184,17 +184,17 @@
                 filterPowers.includes(power) ? "opacity-100" : "opacity-20",
               ]}
             >
-              <span style={`color: ${Powers[power].color}`}>{power}</span>
+              <span style:color={Powers[power].color}>{power}</span>
               <input type="checkbox" class="hidden" name="filterPowers" bind:group={filterPowers} value={power} />
             </label>
           {/each}
         </div>
-        <div class="border-1 border-zinc-500"></div>
-        <div class="grid grid-cols-[repeat(auto-fit,_minmax(80px,_1fr))] gap-2 select-none">
+        <div class="border border-zinc-500"></div>
+        <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
           {#each availableTypes as type (type)}
             <label
               class={[
-                "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,_var(--text-base))] font-semibold hover:bg-zinc-700",
+                "flex min-h-16 cursor-pointer items-center justify-center rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-1 text-center text-[min(3vw,var(--text-base))] font-semibold hover:bg-zinc-700",
                 filterTypes.includes(type) ? "opacity-100" : "opacity-20",
               ]}
             >
@@ -203,13 +203,13 @@
             </label>
           {/each}
         </div>
-        <div class="border-1 border-zinc-500"></div>
+        <div class="border border-zinc-500"></div>
         <div class="flex flex-wrap gap-2">
           <label
             ><input type="checkbox" bind:checked={excludeNoPreviousData} /> Exclude entries without previous data</label
           >
         </div>
-        <div class="border-1 border-zinc-500"></div>
+        <div class="border border-zinc-500"></div>
       </div>
     {/if}
   </div>
@@ -239,9 +239,9 @@
           >
             <div
               class="w-4 flex-none self-stretch"
-              style={`background-color: ${snipe.power ? Powers[snipe.power].color : "transparent"}`}
+              style:background-color={snipe.power ? Powers[snipe.power].color : "transparent"}
             ></div>
-            <div class="grow-1 text-left font-semibold">{snipe.system}</div>
+            <div class="grow text-left font-semibold">{snipe.system}</div>
             <div class="basis-40">
               {snipe.amount.toLocaleString("en-US")}<br />
               <span
@@ -252,10 +252,10 @@
                     : ""}>{snipe.type}</span
               >
             </div>
-            <div class="basis-40 max-lg:hidden" style={`color: ${snipe.power ? Powers[snipe.power].color : "inherit"}`}>
+            <div class="basis-40 max-lg:hidden" style:color={snipe.power ? Powers[snipe.power].color : "inherit"}>
               {snipe.power ?? "Unknown"}
             </div>
-            <div class="basis-32 max-sm:hidden" style={`color: ${powerStateColor(newData.powerState)}`}>
+            <div class="basis-32 max-sm:hidden" style:color={powerStateColor(newData.powerState)}>
               {newData.powerState}
             </div>
             <div class="basis-32 max-lg:hidden">

@@ -307,8 +307,8 @@
 {#if stats.powerStats}
   <div class="mt-4 grid grid-cols-[repeat(auto-fit,minmax(225px,1fr))] gap-2">
     {#each Object.entries(stats.powerStats) as [power, ps] (power)}
-      <div class="rounded-xl border-2 bg-zinc-800 p-1.5" style={`border-color: ${Powers[power].color}`}>
-        <h4 style={`color: ${Powers[power].color}`}>{power}</h4>
+      <div class="rounded-xl border-2 bg-zinc-800 p-1.5" style:border-color={Powers[power].color}>
+        <h4 style:color={Powers[power].color}>{power}</h4>
         <div class="flex flex-col">
           {#if ps?.systems}
             <div class="flex justify-between gap-1">
