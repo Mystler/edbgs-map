@@ -198,6 +198,9 @@ async function runEDDNListener() {
         }
       }
     }
+    if (ppData.cycleStart && ppData.cycleStart.startTier === "Unoccupied") {
+      continue; // Cache bug if we got a system that has unoccupied calculated start data
+    }
     if (prevData && prevDate) {
       // Reject outdated data
       if (prevDate > date) continue; // Already got newer data (by timestamp)
@@ -241,6 +244,15 @@ async function runEDDNListener() {
         }*/
         if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement !== undefined) {
           continue; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
+        }
+        if (
+          prevData?.controllingPower &&
+          (prevData.cycleStart?.startBar ?? 0 > 0.25) &&
+          prevData.lastCycleStart === undefined &&
+          ppData.powerConflictProgress &&
+          !ppData.powerConflictProgress.some((x) => x.progress > 0)
+        ) {
+          continue; // Skip if we believe last cycle was not controlled, but then we got control data, and then we got empty acq data again.
         }
       }
     }
