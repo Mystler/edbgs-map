@@ -8,6 +8,12 @@
   "actionButtons": {
     "commands": [
       {
+        "name": "Install",
+        "command": "pnpm install",
+        "singleInstance": true,
+        "focus": true
+      },
+      {
         "name": "Dev Server",
         "command": "pnpm dev",
         "singleInstance": true,
@@ -34,6 +40,12 @@
       {
         "name": "Check & Lint",
         "command": "pnpm check && pnpm lint",
+        "singleInstance": true,
+        "focus": true
+      },
+      {
+        "name": "Test",
+        "command": "pnpm test",
         "singleInstance": true,
         "focus": true
       }

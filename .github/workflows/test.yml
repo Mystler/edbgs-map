@@ -45,3 +45,21 @@ jobs:
         name: Run Checks
       - run: pnpm lint
         name: Run Prettier Check and ESLint
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: latest
+          run_install: false
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: "pnpm"
+      - run: pnpm i
+        name: Install Dependencies
+      - run: pnpm vitest run
+        name: Run Tests

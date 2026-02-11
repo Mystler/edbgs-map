@@ -125,9 +125,9 @@ async function runEDDNListener() {
 }
 
 /**
- * Process a Journal event with PP data. Returns true if good new data was cached and false if it was discarded.
+ * Process a Journal event with PP data. Returns true if good new data was processed as relevant and false if it was discarded.
  */
-async function processPPJournalMessage(data: EDDNJournalMessage): Promise<boolean> {
+export async function processPPJournalMessage(data: EDDNJournalMessage): Promise<boolean> {
   // Get event timestamp of the journal entry
   const date = new Date(data.timestamp);
   // Calculate latest PP tick, for re-use
@@ -290,7 +290,7 @@ async function processPPJournalMessage(data: EDDNJournalMessage): Promise<boolea
 /**
  * Returns true if a snipe has been detected and logged.
  */
-function checkForSnipe(
+export function checkForSnipe(
   prevData: SpanshDumpPPData | null,
   currData: SpanshDumpPPData,
   lastPPTick = getLastPPTickDate(),
@@ -302,6 +302,7 @@ function checkForSnipe(
     const prevProg = prevData?.powerStateControlProgress ?? 0;
     const cp = Math.max(0, Math.floor(prevProg * 650000));
     logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
+    return true;
   } else if (currData.powerConflictProgress) {
     // Aquisition in-progress snipes
     let hadSnipe = false;

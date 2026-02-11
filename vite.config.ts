@@ -1,6 +1,6 @@
+import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 import { sveltekit } from "@sveltejs/kit/vite";
-import { defineConfig } from "vite";
 import { execSync } from "child_process";
 
 const version = execSync("git rev-list --count HEAD").toString().trim();
@@ -13,5 +13,19 @@ export default defineConfig({
     __VERSION__: JSON.stringify(version),
     __COMMIT__: JSON.stringify(commit),
     __COMMITDATE__: JSON.stringify(commitDate),
+  },
+  test: {
+    expect: { requireAssertions: true },
+    projects: [
+      {
+        extends: "./vite.config.ts",
+        test: {
+          name: "server",
+          environment: "node",
+          include: ["src/**/*.{test,spec}.{js,ts}"],
+          exclude: ["src/**/*.svelte.{test,spec}.{js,ts}"],
+        },
+      },
+    ],
   },
 });
