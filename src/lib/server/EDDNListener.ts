@@ -119,167 +119,177 @@ async function runEDDNListener() {
     const data = eddn.message as EDDNJournalMessage;
     // Ignore events that are not expected to contain PP data
     if (data.event !== "FSDJump" && data.event !== "Location") continue;
-    // Get event timestamp of the journal entry
-    const date = new Date(data.timestamp);
-    // Calculate latest PP tick, for re-use
-    const lastPPTick = getLastPPTickDate();
-    // Fix negative overflow
-    if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
-      let scale = 120000; // Should never be reached/used.
-      if (data.PowerplayState === "Exploited") {
-        scale = 349999; // This makes math check out. Idk if the others should also be -1.
-      } else if (data.PowerplayState === "Fortified") {
-        scale = 650000;
-      } else if (data.PowerplayState === "Stronghold") {
-        scale = 1000000;
-      }
-      data.PowerplayStateControlProgress -= 4294967296 / scale;
-    }
-    // Prune data down to PP target data in Spansh Format
-    const ppData: SpanshDumpPPData = {
-      date: data.timestamp,
-      name: data.StarSystem,
-      id64: data.SystemAddress,
-      controllingPower: data.ControllingPower,
-      powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
-        return { power: x.Power, progress: x.ConflictProgress };
-      }),
-      powerState: data.PowerplayState,
-      powerStateControlProgress: data.PowerplayStateControlProgress,
-      powerStateReinforcement: data.PowerplayStateReinforcement,
-      powerStateUndermining: data.PowerplayStateUndermining,
-      powers: data.Powers,
-      population: data.Population,
-    };
-    // Grab existing cache
-    const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
-    const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
-    const prevDate = prevData ? new Date(prevData.date) : null;
-    // If we have a new cycle by clock, store latest state of previously calculated cycle start data as previous cycle data.
-    if (prevData?.powerStateControlProgress !== undefined && prevDate && prevDate < lastPPTick) {
-      ppData.lastCycleStart = prevData.cycleStart;
-    } else if (prevData?.powerState === "Unoccupied" && prevDate && prevDate < lastPPTick) {
-      // Reset last cycle start if last cycle was known to be in acquisition
-      ppData.lastCycleStart = undefined;
-    } else {
-      // Otherwise, carry over existing previous cycle data.
-      ppData.lastCycleStart = prevData?.lastCycleStart;
-    }
-    // Store this cycle's start data for control systems
-    if (ppData.powerStateControlProgress !== undefined) {
-      const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
-      if (
-        startBar !== ppData?.lastCycleStart?.startBar &&
-        adjustedProgress > -0.25 &&
-        (adjustedProgress < 0.25 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
-      ) {
-        // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
-        ppData.cycleStart = { startProgress, startBar, startTier };
-      } else if (prevData?.cycleStart) {
-        // Use stored data otherwise.
-        ppData.cycleStart = prevData.cycleStart;
-      }
-    }
-    // Store cycle start data for acquisition systems
-    if (ppData.powerConflictProgress !== undefined) {
-      if (!prevData || prevData.powerState !== "Unoccupied") {
-        // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
-        ppData.powerConflictCycleStart = [];
-      } else {
-        if (prevDate && prevDate < lastPPTick) {
-          // New Cycle data coming in, store old
-          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
-        } else if (prevData.powerConflictCycleStart !== undefined) {
-          // Same cycle, carry over stored info
-          ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
-        } else {
-          // Missing store state. Start a new one mid cycle.
-          ppData.powerConflictCycleStart = prevData.powerConflictProgress;
-        }
-      }
-    }
-    if (ppData.cycleStart && ppData.cycleStart.startTier === "Unoccupied") {
-      continue; // Cache bug if we got a system that has unoccupied calculated start data
-    }
-    if (prevData && prevDate) {
-      // Reject outdated data
-      if (prevDate > date) continue; // Already got newer data (by timestamp)
-      if (prevDate > lastPPTick) {
-        // During the same cycle, control numbers are only allowed to go up.
-        if (
-          (ppData.powerStateReinforcement &&
-            ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
-          (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
-        ) {
-          // Unless cycle start value changed (compared to either last known or last cycle's last known).
-          if (
-            !ppData.cycleStart?.startBar ||
-            ((ppData.cycleStart.startBar < 1 || (prevData.powerStateControlProgress ?? 0) < 1) && // Special exception for maxed SHs
-              (ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
-                ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar))
-          ) {
-            continue; // Reinforcement or UM went down, skip
-          }
-        }
-        if (
-          ppData.powerConflictProgress &&
-          ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) <
-            (prevData.powerConflictProgress?.reduce((sum, x) => sum + x.progress, 0) ?? 0)
-        ) {
-          continue; // Acquisition went down, skip
-        }
-        /*if (
-          ppData.powerStateReinforcement === 0 &&
-          ppData.powerStateUndermining === 0 &&
-          prevData.powerConflictProgress?.some((x) => x.progress > 0)
-        ) {
-          continue; // We already picked up moving acquisition in prev data, so the 0 CP control now must be cache bug data. Skip.
-        }*/
-        /*if (
-          ppData.powerConflictProgress &&
-          ((prevData.powerStateReinforcement ?? 0) > 0 || (prevData.powerStateUndermining ?? 0) > 0) &&
-          !ppData.powerConflictProgress.some((x) => x.progress > 0)
-        ) {
-          continue; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
-        }*/
-        if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement !== undefined) {
-          continue; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
-        }
-        if (
-          prevData?.controllingPower &&
-          (prevData.cycleStart?.startBar ?? 0 > 0.25) &&
-          prevData.lastCycleStart === undefined &&
-          ppData.powerConflictProgress &&
-          !ppData.powerConflictProgress.some((x) => x.progress > 0)
-        ) {
-          continue; // Skip if we believe last cycle was not controlled, but then we got control data, and then we got empty acq data again.
-        }
-      }
-    }
-    // Do some data analysis if a snipe may have happened and log it asynchronously.
-    const snipe = checkForSnipe(prevData, ppData, lastPPTick);
-    // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
-    if (
-      (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
-      ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
-      snipe // Detected for snipe, probably redundant now but no big deal to keep in
-    ) {
-      // Store system
-      setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
-    } else if (
-      (ppData.powerState === undefined || ppData.powerState === "Unoccupied") &&
-      (ppData.lastCycleStart ||
-        (prevData?.powerState !== undefined &&
-          prevData.powerState !== "Unoccupied" &&
-          new Date(prevData.date) < lastPPTick))
-    ) {
-      // Delete potentially lost systems once if no other data for this cycle
-      deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
-    }
+    await processPPJournalMessage(data);
   }
   console.log("ZMQ runner exited! Restart initiating.");
 }
 
+/**
+ * Process a Journal event with PP data. Returns true if good new data was cached and false if it was discarded.
+ */
+async function processPPJournalMessage(data: EDDNJournalMessage): Promise<boolean> {
+  // Get event timestamp of the journal entry
+  const date = new Date(data.timestamp);
+  // Calculate latest PP tick, for re-use
+  const lastPPTick = getLastPPTickDate();
+  // Fix negative overflow
+  if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
+    let scale = 120000; // Should never be reached/used.
+    if (data.PowerplayState === "Exploited") {
+      scale = 349999; // This makes math check out. Idk if the others should also be -1.
+    } else if (data.PowerplayState === "Fortified") {
+      scale = 650000;
+    } else if (data.PowerplayState === "Stronghold") {
+      scale = 1000000;
+    }
+    data.PowerplayStateControlProgress -= 4294967296 / scale;
+  }
+  // Prune data down to PP target data in Spansh Format
+  const ppData: SpanshDumpPPData = {
+    date: data.timestamp,
+    name: data.StarSystem,
+    id64: data.SystemAddress,
+    controllingPower: data.ControllingPower,
+    powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
+      return { power: x.Power, progress: x.ConflictProgress };
+    }),
+    powerState: data.PowerplayState,
+    powerStateControlProgress: data.PowerplayStateControlProgress,
+    powerStateReinforcement: data.PowerplayStateReinforcement,
+    powerStateUndermining: data.PowerplayStateUndermining,
+    powers: data.Powers,
+    population: data.Population,
+  };
+  // Grab existing cache
+  const prevCache = await getCache(`edbgs-map:pp-alert:${data.SystemAddress}`);
+  const prevData: SpanshDumpPPData | null = prevCache ? JSON.parse(prevCache) : null;
+  const prevDate = prevData ? new Date(prevData.date) : null;
+  // If we have a new cycle by clock, store latest state of previously calculated cycle start data as previous cycle data.
+  if (prevData?.powerStateControlProgress !== undefined && prevDate && prevDate < lastPPTick) {
+    ppData.lastCycleStart = prevData.cycleStart;
+  } else if (prevData?.powerState === "Unoccupied" && prevDate && prevDate < lastPPTick) {
+    // Reset last cycle start if last cycle was known to be in acquisition
+    ppData.lastCycleStart = undefined;
+  } else {
+    // Otherwise, carry over existing previous cycle data.
+    ppData.lastCycleStart = prevData?.lastCycleStart;
+  }
+  // Store this cycle's start data for control systems
+  if (ppData.powerStateControlProgress !== undefined) {
+    const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
+    if (
+      startBar !== ppData?.lastCycleStart?.startBar &&
+      adjustedProgress > -0.25 &&
+      (adjustedProgress < 0.25 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
+    ) {
+      // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
+      ppData.cycleStart = { startProgress, startBar, startTier };
+    } else if (prevData?.cycleStart) {
+      // Use stored data otherwise.
+      ppData.cycleStart = prevData.cycleStart;
+    }
+  }
+  // Store cycle start data for acquisition systems
+  if (ppData.powerConflictProgress !== undefined) {
+    if (!prevData || prevData.powerState !== "Unoccupied") {
+      // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
+      ppData.powerConflictCycleStart = [];
+    } else {
+      if (prevDate && prevDate < lastPPTick) {
+        // New Cycle data coming in, store old
+        ppData.powerConflictCycleStart = prevData.powerConflictProgress;
+      } else if (prevData.powerConflictCycleStart !== undefined) {
+        // Same cycle, carry over stored info
+        ppData.powerConflictCycleStart = prevData.powerConflictCycleStart;
+      } else {
+        // Missing store state. Start a new one mid cycle.
+        ppData.powerConflictCycleStart = prevData.powerConflictProgress;
+      }
+    }
+  }
+  if (ppData.cycleStart && ppData.cycleStart.startTier === "Unoccupied") {
+    return false; // Cache bug if we got a system that has unoccupied calculated start data
+  }
+  if (prevData && prevDate) {
+    // Reject outdated data
+    if (prevDate > date) return false; // Already got newer data (by timestamp)
+    if (prevDate > lastPPTick) {
+      // During the same cycle, control numbers are only allowed to go up.
+      if (
+        (ppData.powerStateReinforcement && ppData.powerStateReinforcement < (prevData.powerStateReinforcement ?? 0)) ||
+        (ppData.powerStateUndermining && ppData.powerStateUndermining < (prevData.powerStateUndermining ?? 0))
+      ) {
+        // Unless cycle start value changed (compared to either last known or last cycle's last known).
+        if (
+          !ppData.cycleStart?.startBar ||
+          ((ppData.cycleStart.startBar < 1 || (prevData.powerStateControlProgress ?? 0) < 1) && // Special exception for maxed SHs
+            (ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
+              ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar))
+        ) {
+          return false; // Reinforcement or UM went down, skip
+        }
+      }
+      if (
+        ppData.powerConflictProgress &&
+        ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) <
+          (prevData.powerConflictProgress?.reduce((sum, x) => sum + x.progress, 0) ?? 0)
+      ) {
+        return false; // Acquisition went down, skip
+      }
+      /*if (
+          ppData.powerStateReinforcement === 0 &&
+          ppData.powerStateUndermining === 0 &&
+          prevData.powerConflictProgress?.some((x) => x.progress > 0)
+        ) {
+          return false; // We already picked up moving acquisition in prev data, so the 0 CP control now must be cache bug data. Skip.
+        }*/
+      /*if (
+          ppData.powerConflictProgress &&
+          ((prevData.powerStateReinforcement ?? 0) > 0 || (prevData.powerStateUndermining ?? 0) > 0) &&
+          !ppData.powerConflictProgress.some((x) => x.progress > 0)
+        ) {
+          return false; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
+        }*/
+      if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement !== undefined) {
+        return false; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
+      }
+      if (
+        prevData?.controllingPower &&
+        (prevData.cycleStart?.startBar ?? 0 > 0.25) &&
+        prevData.lastCycleStart === undefined &&
+        ppData.powerConflictProgress &&
+        !ppData.powerConflictProgress.some((x) => x.progress > 0)
+      ) {
+        return false; // Skip if we believe last cycle was not controlled, but then we got control data, and then we got empty acq data again.
+      }
+    }
+  }
+  // Do some data analysis if a snipe may have happened and log it asynchronously.
+  const snipe = checkForSnipe(prevData, ppData, lastPPTick);
+  // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
+  if (
+    (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
+    ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
+    snipe // Detected for snipe, probably redundant now but no big deal to keep in
+  ) {
+    // Store system
+    setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
+  } else if (
+    (ppData.powerState === undefined || ppData.powerState === "Unoccupied") &&
+    (ppData.lastCycleStart ||
+      (prevData?.powerState !== undefined &&
+        prevData.powerState !== "Unoccupied" &&
+        new Date(prevData.date) < lastPPTick))
+  ) {
+    // Delete potentially lost systems once if no other data for this cycle
+    deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
+  }
+  return true;
+}
+
+/**
+ * Returns true if a snipe has been detected and logged.
+ */
 function checkForSnipe(
   prevData: SpanshDumpPPData | null,
   currData: SpanshDumpPPData,
