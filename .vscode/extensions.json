@@ -3,6 +3,7 @@
     "esbenp.prettier-vscode",
     "svelte.svelte-vscode",
     "bradlc.vscode-tailwindcss",
-    "dbaeumer.vscode-eslint"
+    "dbaeumer.vscode-eslint",
+    "seunlanlege.action-buttons"
   ]
 }
