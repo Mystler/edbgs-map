@@ -5,6 +5,7 @@
     "*.css": "tailwindcss"
   },
   "files.eol": "\n",
+  "terminal.integrated.enablePersistentSessions": false,
   "actionButtons": {
     "commands": [
       {
