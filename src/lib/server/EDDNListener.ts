@@ -265,26 +265,27 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     }
   }
   // Do some data analysis if a snipe may have happened and log it asynchronously.
-  const snipe = checkForSnipe(prevData, ppData, lastPPTick);
+  checkForSnipe(prevData, ppData, lastPPTick);
   // PP Alert filter. Used to filter here but now we log all if any progress and filter on the view. Naming is legacy.
   if (
     (ppData.powerStateReinforcement !== undefined && ppData.powerStateUndermining !== undefined) || // Control system
-    ppData.powerConflictProgress?.some((x) => x.progress > 0) || // Acquisition
-    snipe // Detected for snipe, probably redundant now but no big deal to keep in
+    (ppData.powerConflictProgress?.length ?? 0) > 0 // Acquisition
   ) {
     // Store system
     setCache(`edbgs-map:pp-alert:${ppData.id64}`, JSON.stringify(ppData));
+    return true;
   } else if (
     (ppData.powerState === undefined || ppData.powerState === "Unoccupied") &&
-    (ppData.lastCycleStart ||
-      (prevData?.powerState !== undefined &&
-        prevData.powerState !== "Unoccupied" &&
-        new Date(prevData.date) < lastPPTick))
+    prevData && // System needs to exist in cache
+    new Date(prevData.date) < lastPPTick && // Data needs to be from previous cycle
+    ((ppData.lastCycleStart && prevData.powerState !== undefined && prevData.powerState !== "Unoccupied") ||
+      ((prevData?.powerConflictProgress?.length ?? 0) > 0 && !ppData.lastCycleStart && !prevData.cycleStart))
   ) {
-    // Delete potentially lost systems once if no other data for this cycle
+    // Delete system if no data for this cycle when it was in control before, or when it has not been having PP data for multiple cycles.
     deleteCache(`edbgs-map:pp-alert:${ppData.id64}`);
+    return true;
   }
-  return true;
+  return false;
 }
 
 /**
