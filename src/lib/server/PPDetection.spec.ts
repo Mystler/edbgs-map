@@ -2,16 +2,16 @@ import { describe, expect, vi, test, beforeEach, assert } from "vitest";
 import { processPPJournalMessage } from "./EDDNListener";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { logSnipe } from "$lib/server/DB";
-import { setCache } from "$lib/server/ValkeyCache";
+import { deleteCache, setCache } from "$lib/server/ValkeyCache";
 
 describe("EDDN Powerplay Data Processing", () => {
   // Set up mocks to bypass Valkey and DB with implementations internal to the tests.
   vi.mock(import("$lib/server/ValkeyCache"), () => {
     const testCache: { [key: string]: string } = {};
     return {
-      deleteCache: async (key) => {
+      deleteCache: vi.fn(async (key: string) => {
         delete testCache[key];
-      },
+      }),
       setCache: vi.fn(async (key: string, value: string) => {
         testCache[key] = value;
       }),
@@ -40,6 +40,7 @@ describe("EDDN Powerplay Data Processing", () => {
   beforeEach(() => {
     vi.mocked(logSnipe).mockClear();
     vi.mocked(setCache).mockClear();
+    vi.mocked(deleteCache).mockClear();
   });
 
   test("Cache new system and discard outdated data", async () => {
@@ -161,7 +162,7 @@ describe("EDDN Powerplay Data Processing", () => {
         SystemAddress: 1,
         timestamp: "2026-02-26T13:05:00Z",
         PowerplayState: "Unoccupied",
-        PowerplayConflictProgress: [],
+        PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0 }],
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
@@ -181,6 +182,7 @@ describe("EDDN Powerplay Data Processing", () => {
         PowerplayStateUndermining: 50000,
       }),
     ).toBe(false);
+    expect(logSnipe).not.toHaveBeenCalled();
   });
   test("Mid-cycle Acq snipe logged", async () => {
     vi.setSystemTime(new Date("2026-02-27T20:00:00Z"));
@@ -287,5 +289,58 @@ describe("EDDN Powerplay Data Processing", () => {
       lastCycleStart: { startBar: 0.275, startTier: "Exploited" },
       cycleStart: { startBar: 0.525, startTier: "Fortified" },
     } satisfies DeepPartial<SpanshDumpPPData>);
+  });
+  test("Discard missing data when known control", async () => {
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-03-13T15:05:00Z",
+      }),
+    ).toBe(false);
+    expect(logSnipe).not.toHaveBeenCalled();
+    expect(setCache).not.toHaveBeenCalled();
+    expect(deleteCache).not.toHaveBeenCalled();
+  });
+  test("Don't discard missing when first in new cycle", async () => {
+    vi.setSystemTime(new Date("2026-03-20T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-03-20T15:05:00Z",
+      }),
+    ).toBe(true);
+    expect(logSnipe).not.toHaveBeenCalled();
+    expect(setCache).not.toHaveBeenCalled();
+    expect(deleteCache).toHaveBeenCalled();
+  });
+  test("Cache acquisition", async () => {
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-03-20T16:05:00Z",
+        PowerplayState: "Unoccupied",
+        PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0.1 }],
+      }),
+    ).toBe(true);
+    expect(logSnipe).not.toHaveBeenCalled();
+    expect(setCache).toHaveBeenCalled();
+    expect(deleteCache).not.toHaveBeenCalled();
+  });
+  test("Discard missing after acq progress", async () => {
+    vi.setSystemTime(new Date("2026-03-20T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-03-20T17:05:00Z",
+      }),
+    ).toBe(false);
   });
 });
