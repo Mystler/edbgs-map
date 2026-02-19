@@ -410,14 +410,19 @@ export function checkForSnipe(
         ) {
           return false;
         }
+        const currProgClamped =
+          currData.powerState === "Exploited" && currData.powerStateControlProgress < 0
+            ? 0
+            : currData.powerStateControlProgress;
+        const prevProgClamped = prevData.powerState === "Exploited" && prevProg < 0 ? 0 : prevProg;
         const cp = Math.floor(
-          (currData.powerStateControlProgress - prevProg) *
+          (currProgClamped - prevProgClamped) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
         );
         if (cp > reinfThreshold) {
           logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
           return true;
-        } else if (cp < -25000) {
+        } else if (cp < -25000 || currData.powerStateControlProgress < 0) {
           logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
           return true;
         }
