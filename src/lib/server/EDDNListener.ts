@@ -410,11 +410,20 @@ export function checkForSnipe(
         ) {
           return false;
         }
-        const currProgClamped =
-          currData.powerState === "Exploited" && currData.powerStateControlProgress < 0
-            ? 0
-            : currData.powerStateControlProgress;
-        const prevProgClamped = prevData.powerState === "Exploited" && prevProg < 0 ? 0 : prevProg;
+        let shouldBeDropped = false;
+        let currProgClamped = currData.powerStateControlProgress;
+        let prevProgClamped = prevProg;
+        if (
+          currData.powerState === "Exploited" &&
+          currData.powerStateControlProgress < 0 &&
+          prevData.powerState === "Exploited" &&
+          prevProg < 0 &&
+          new Date(prevData.date) < lastPPTick
+        ) {
+          shouldBeDropped = true;
+          currProgClamped = 0;
+          prevProgClamped = 0;
+        }
         const cp = Math.floor(
           (currProgClamped - prevProgClamped) *
             (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
@@ -422,7 +431,7 @@ export function checkForSnipe(
         if (cp > reinfThreshold) {
           logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
           return true;
-        } else if (cp < -25000 || currData.powerStateControlProgress < 0) {
+        } else if (cp < -25000 || shouldBeDropped) {
           logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
           return true;
         }

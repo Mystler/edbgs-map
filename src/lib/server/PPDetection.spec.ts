@@ -383,12 +383,28 @@ describe("EDDN Powerplay Data Processing", () => {
         timestamp: "2026-04-02T14:05:00Z",
         PowerplayState: "Exploited",
         ControllingPower: "Aisling Duval",
-        PowerplayStateControlProgress: -1,
+        PowerplayStateControlProgress: -0.9,
         PowerplayStateReinforcement: 0,
         PowerplayStateUndermining: 0,
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
     expect(vi.mocked(logSnipe).mock.lastCall[3]).toBeCloseTo(0);
+    vi.mocked(logSnipe).mockClear();
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-02T14:06:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: -1,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    // No duplicate snipe log on further data
+    expect(logSnipe).not.toHaveBeenCalled();
   });
 });
