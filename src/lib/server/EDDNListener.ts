@@ -301,7 +301,9 @@ export function checkForSnipe(
     // Note that without deep analysis, we cannot know if an exploited system dropped due to nearby fort drop or was actually sniped itself.
     // Other types of snipes that leave the power in control are handled further down.
     const prevProg = prevData?.powerStateControlProgress ?? 0;
-    const cp = Math.max(0, Math.floor(prevProg * 650000));
+    const tierCP =
+      prevData.powerState === "Stronghold" ? 1000000 : prevData.powerState === "Fortified" ? 650000 : 350000;
+    const cp = Math.max(0, Math.floor(prevProg * tierCP));
     logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
     return true;
   } else if (currData.powerConflictProgress) {
@@ -417,12 +419,11 @@ export function checkForSnipe(
           currData.powerState === "Exploited" &&
           currData.powerStateControlProgress < 0 &&
           prevData.powerState === "Exploited" &&
-          prevProg < 0 &&
           new Date(prevData.date) < lastPPTick
         ) {
           shouldBeDropped = true;
           currProgClamped = 0;
-          prevProgClamped = 0;
+          prevProgClamped = Math.max(0, prevProg);
         }
         const cp = Math.floor(
           (currProgClamped - prevProgClamped) *
