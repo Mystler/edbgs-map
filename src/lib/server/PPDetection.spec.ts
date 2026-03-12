@@ -15,7 +15,7 @@ describe("EDDN Powerplay Data Processing", () => {
       setCache: vi.fn(async (key: string, value: string) => {
         testCache[key] = value;
       }),
-      getCache: async (key) => {
+      getCache: async (key: string) => {
         return testCache[key];
       },
     };
