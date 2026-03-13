@@ -4,39 +4,39 @@ import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { logSnipe } from "$lib/server/DB";
 import { deleteCache, setCache } from "$lib/server/ValkeyCache";
 
-describe("EDDN Powerplay Data Processing", () => {
-  // Set up mocks to bypass Valkey and DB with implementations internal to the tests.
-  vi.mock(import("$lib/server/ValkeyCache"), () => {
-    const testCache: { [key: string]: string } = {};
-    return {
-      deleteCache: vi.fn(async (key: string) => {
-        delete testCache[key];
-      }),
-      setCache: vi.fn(async (key: string, value: string) => {
-        testCache[key] = value;
-      }),
-      getCache: async (key: string) => {
-        return testCache[key];
+// Set up mocks to bypass Valkey and DB with implementations internal to the tests.
+vi.mock(import("$lib/server/ValkeyCache"), () => {
+  const testCache: { [key: string]: string } = {};
+  return {
+    deleteCache: vi.fn(async (key: string) => {
+      delete testCache[key];
+    }),
+    setCache: vi.fn(async (key: string, value: string) => {
+      testCache[key] = value;
+    }),
+    getCache: async (key: string) => {
+      return testCache[key];
+    },
+  };
+});
+vi.mock(import("$lib/server/DB"), () => {
+  return {
+    logSnipe: vi.fn(
+      async (
+        _system: string,
+        _type: string,
+        _power: string,
+        _amount: number,
+        _old_dump: SpanshDumpPPData | null,
+        _new_dump: SpanshDumpPPData,
+      ) => {
+        /* NOOP */
       },
-    };
-  });
-  vi.mock(import("$lib/server/DB"), () => {
-    return {
-      logSnipe: vi.fn(
-        async (
-          _system: string,
-          _type: string,
-          _power: string,
-          _amount: number,
-          _old_dump: SpanshDumpPPData | null,
-          _new_dump: SpanshDumpPPData,
-        ) => {
-          /* NOOP */
-        },
-      ),
-    };
-  });
+    ),
+  };
+});
 
+describe("EDDN Powerplay Data Processing", () => {
   beforeEach(() => {
     vi.mocked(logSnipe).mockClear();
     vi.mocked(setCache).mockClear();

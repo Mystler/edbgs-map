@@ -37,17 +37,16 @@
   ::picker(select) {
     opacity: 0;
     transition: all 0.4s allow-discrete;
-    left: anchor(10%);
     margin: var(--spacing) 0;
     border: 2px solid var(--ed-orange-light);
     border-radius: 12px;
     background-color: var(--color-zinc-900);
   }
-  ::picker(select):popover-open {
+  :open::picker(select) {
     opacity: 1;
   }
   @starting-style {
-    ::picker(select):popover-open {
+    :open::picker(select) {
       opacity: 0;
     }
   }
