@@ -343,7 +343,7 @@ describe("EDDN Powerplay Data Processing", () => {
       }),
     ).toBe(false);
   });
-  test("EOC Snipe exploited drop cache bug CP when known", async () => {
+  test("EOC Snipe exploited drop cache bug CP when expected", async () => {
     vi.setSystemTime(new Date("2026-04-01T20:00:00Z"));
     expect(
       await processPPJournalMessage({
@@ -407,7 +407,7 @@ describe("EDDN Powerplay Data Processing", () => {
     // No duplicate snipe log on further data
     expect(logSnipe).not.toHaveBeenCalled();
   });
-  test("EOC Snipe exploited drop cache bug CP when unknown", async () => {
+  test("EOC Snipe exploited drop cache bug CP when unexpected", async () => {
     vi.setSystemTime(new Date("2026-04-15T20:00:00Z"));
     expect(
       await processPPJournalMessage({
@@ -439,5 +439,85 @@ describe("EDDN Powerplay Data Processing", () => {
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
     expect(vi.mocked(logSnipe).mock.lastCall[3]).toBeLessThan(100_000);
+  });
+  test("Discard last cycle cache bug across multiple control weeks", async () => {
+    vi.setSystemTime(new Date("2026-04-23T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-23T14:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.1,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 70000,
+      }),
+    ).toBe(true);
+    vi.setSystemTime(new Date("2026-04-30T20:00:00Z"));
+    vi.mocked(logSnipe).mockClear();
+    // Seed new cycle at 0/0 10%. No snipe.
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-30T14:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.1,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    expect(logSnipe).not.toHaveBeenCalled();
+    vi.mocked(logSnipe).mockClear();
+    // Send cache bug data with CP that reverse calculate to last cycle start.
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-30T15:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.1,
+        PowerplayStateReinforcement: 20000,
+        PowerplayStateUndermining: 90000,
+      }),
+    ).toBe(false);
+    expect(logSnipe).not.toHaveBeenCalled();
+    // More valid data
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-30T16:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.2,
+        PowerplayStateReinforcement: 35000,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    expect(logSnipe).not.toHaveBeenCalled();
+    vi.mocked(logSnipe).mockClear();
+    // More cache bug data that should be discarded.
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-04-30T17:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.1,
+        PowerplayStateReinforcement: 20000,
+        PowerplayStateUndermining: 90000,
+      }),
+    ).toBe(false);
+    expect(logSnipe).not.toHaveBeenCalled();
   });
 });

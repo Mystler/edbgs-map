@@ -174,7 +174,7 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     // Otherwise, carry over existing previous cycle data.
     ppData.lastCycleStart = prevData?.lastCycleStart;
   }
-  // Store this cycle's start data for control systems
+  // Handle this cycle's start data for control systems
   if (ppData.powerStateControlProgress !== undefined) {
     const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
     if (
@@ -184,12 +184,15 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     ) {
       // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
       ppData.cycleStart = { startProgress, startBar, startTier };
+    } else if (startBar === ppData?.lastCycleStart?.startBar && startBar !== prevData?.cycleStart?.startBar) {
+      // We calculated a start bar that is the same as last cycle but we already had different data before. Discard as cache bug!
+      return false;
     } else if (prevData?.cycleStart) {
       // Use stored data otherwise.
       ppData.cycleStart = prevData.cycleStart;
     }
   }
-  // Store cycle start data for acquisition systems
+  // Handle cycle start data for acquisition systems
   if (ppData.powerConflictProgress !== undefined) {
     if (!prevData || prevData.powerState !== "Unoccupied") {
       // No previous data known or last known was Control means we assume 0 acquisition CP at start of cycle.
