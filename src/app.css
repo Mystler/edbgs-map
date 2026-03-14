@@ -3,13 +3,13 @@
 @font-face {
   font-family: "Noto Sans";
   font-style: normal;
-  src: url("/3d/NotoSans-VariableFont_wdth,wght.ttf");
+  src: url("/NotoSans-VariableFont_wdth,wght.ttf");
 }
 
 @font-face {
   font-family: "Noto Sans";
   font-style: italic;
-  src: url("/3d/NotoSans-Italic-VariableFont_wdth,wght.ttf");
+  src: url("/NotoSans-Italic-VariableFont_wdth,wght.ttf");
 }
 
 /* Tailwind setup */
