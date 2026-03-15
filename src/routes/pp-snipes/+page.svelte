@@ -255,10 +255,10 @@
             <div class="basis-40 max-lg:hidden" style:color={snipe.power ? Powers[snipe.power].color : "inherit"}>
               {snipe.power ?? "Unknown"}
             </div>
-            <div class="basis-32 max-sm:hidden" style:color={powerStateColor(newData.powerState)}>
+            <div class="basis-32 max-lg:hidden" style:color={powerStateColor(newData.powerState)}>
               {newData.powerState}
             </div>
-            <div class="basis-32 max-lg:hidden">
+            <div class="basis-32 max-sm:hidden">
               <Time
                 class={{
                   "text-red-500": lastUpdate < lastTick,

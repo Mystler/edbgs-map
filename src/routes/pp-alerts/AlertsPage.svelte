@@ -437,12 +437,12 @@
             {system.controllingPower}
           </div>
           <div
-            class="basis-32 max-sm:hidden"
+            class="basis-32 max-lg:hidden"
             style:color={powerStateColor(system.cycleStart?.startTier || system.powerState)}
           >
             {system.cycleStart?.startTier || system.powerState}
           </div>
-          <div class="basis-32 max-lg:hidden">
+          <div class="basis-32 max-sm:hidden">
             <Time
               class={{
                 "text-red-500": lastUpdate < lastTick,
