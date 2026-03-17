@@ -297,7 +297,7 @@
         />
       </form>
       <hr />
-      <h4>Ranges</h4>
+      <h4>Distance Ranges</h4>
       {#each data.Spheres as s, i (i)}
         <div class="flex items-center gap-1" transition:slide>
           <label for={`mspsc-${i}`} class="grow">{s.name}</label>

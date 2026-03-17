@@ -6,7 +6,7 @@ export const ClickMode = {
   edsm: "Open EDSM",
   spansh: "Open Spansh",
   measure: "Measure Distance",
-  range: "Toggle Range",
+  range: "Toggle Distance Range",
   powerplay: "Show Powerplay Status",
 };
 export type PanMode = "screen" | "grid";

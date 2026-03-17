@@ -165,7 +165,7 @@
     />
   </p>
 
-  <h3>Ranges</h3>
+  <h3>Distance Ranges</h3>
   <p>
     <button
       type="button"
