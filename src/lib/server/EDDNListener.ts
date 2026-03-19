@@ -240,19 +240,19 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
         return false; // Acquisition went down, skip
       }
       /*if (
-          ppData.powerStateReinforcement === 0 &&
-          ppData.powerStateUndermining === 0 &&
-          prevData.powerConflictProgress?.some((x) => x.progress > 0)
-        ) {
-          return false; // We already picked up moving acquisition in prev data, so the 0 CP control now must be cache bug data. Skip.
-        }*/
-      /*if (
-          ppData.powerConflictProgress &&
-          ((prevData.powerStateReinforcement ?? 0) > 0 || (prevData.powerStateUndermining ?? 0) > 0) &&
-          !ppData.powerConflictProgress.some((x) => x.progress > 0)
-        ) {
-          return false; // We already picked up moving control in prev data, so 0 acquisition data must be cache bug. Skip.
-        }*/
+        ppData.powerStateReinforcement === 0 &&
+        ppData.powerStateUndermining === 0 &&
+        prevData.powerConflictProgress?.some((x) => x.progress > 0)
+      ) {
+        return false; // We already picked up moving acquisition in prev data, so the 0 CP control now must be cache bug data. Skip.
+      }*/
+      if (
+        ppData.powerConflictProgress &&
+        ((prevData.powerStateReinforcement ?? 0) > 0 || (prevData.powerStateUndermining ?? 0) > 0) &&
+        !ppData.powerConflictProgress.some((x) => x.progress > 0)
+      ) {
+        return false; // We already picked up moving control in prev data this cycle, so 0 acquisition data might be cache bug. Skip.
+      }
       if (ppData.lastCycleStart && prevData.powerConflictProgress && ppData.powerStateReinforcement !== undefined) {
         return false; // Last cycle was known to be in control and we picked up acq info already, discard control system claim.
       }
