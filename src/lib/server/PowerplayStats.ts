@@ -76,8 +76,11 @@ export async function getCurrentCycleStats() {
           const cycleAcqCP = Math.floor(
             (x.progress - (system.powerConflictCycleStart.find((y) => y.power === x.power)?.progress ?? 0)) * 120000,
           );
-          powerStats[x.power].cycleAcquisitionCP += cycleAcqCP;
-          allPowerStats.cycleAcquisitionCP += cycleAcqCP;
+          // This may be negative if we have cache bug (usually early cycle) and get some erroneous progress that's lower, so ignore all negatives.
+          if (cycleAcqCP > 0) {
+            powerStats[x.power].cycleAcquisitionCP += cycleAcqCP;
+            allPowerStats.cycleAcquisitionCP += cycleAcqCP;
+          }
         }
       }
     }
