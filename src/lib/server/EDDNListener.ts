@@ -399,12 +399,22 @@ export function checkForSnipe(
         return true;
       }
       // Reinforcement drops that changed tier over EOC
-      if (prevData?.powerState === "Exploited" && prevProg < 1 && currStartTier === "Fortified") {
+      if (
+        prevData?.powerState === "Exploited" &&
+        prevProg < 1 &&
+        currStartTier === "Fortified" &&
+        currData.powerStateControlProgress >= 0
+      ) {
         const cp = Math.floor(currStartProgress * 650000 + (1 - prevProg) * 350000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
       }
-      if (prevData?.powerState === "Fortified" && prevProg < 1 && currStartTier === "Stronghold") {
+      if (
+        prevData?.powerState === "Fortified" &&
+        prevProg < 1 &&
+        currStartTier === "Stronghold" &&
+        currData.powerStateControlProgress >= 0
+      ) {
         const cp = Math.floor(currStartProgress * 1000000 + (1 - prevProg) * 650000);
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
