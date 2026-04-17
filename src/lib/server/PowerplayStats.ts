@@ -11,8 +11,10 @@ function getCycleNumber(date: Date) {
 function initStats() {
   return {
     reinfCP: 0,
+    reinfCPNoWaste: 0,
     umCP: 0,
     umCPNoDecay: 0,
+    umCPNoDecayNoWaste: 0,
     acquisitionCP: 0,
     cycleAcquisitionCP: 0,
     progressCP: 0,
@@ -102,6 +104,16 @@ export async function getCurrentCycleStats() {
       const playerUM = Math.max(0, (system.powerStateUndermining ?? 0) - decayUM);
       allPowerStats.umCPNoDecay += playerUM;
       powerStats[system.controllingPower].umCPNoDecay += playerUM;
+
+      if (
+        system.powerState !== "Stronghold" ||
+        (system.powerStateControlProgress && system.powerStateControlProgress <= 0.75)
+      ) {
+        allPowerStats.reinfCPNoWaste += system.powerStateReinforcement ?? 0;
+        powerStats[system.controllingPower].reinfCPNoWaste += system.powerStateReinforcement ?? 0;
+        allPowerStats.umCPNoDecayNoWaste += playerUM;
+        powerStats[system.controllingPower].umCPNoDecayNoWaste += playerUM;
+      }
     } else if (system.powerConflictProgress) {
       const leader = system.powerConflictProgress.toSorted((a, b) => b.progress - a.progress).at(0);
       if (leader && leader.progress >= 1) {

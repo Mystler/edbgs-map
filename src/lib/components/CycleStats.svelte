@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { browser } from "$app/environment";
   import Chart from "$lib/components/Chart.svelte";
   import Tooltip from "$lib/components/Tooltip.svelte";
   import { Powers } from "$lib/Constants";
@@ -35,7 +36,28 @@
       ? "Activity"
       : undefined,
   );
+
+  let noWaste = $state(false);
+
+  if (browser) {
+    (() => {
+      const lsNoWaste = localStorage.getItem("ppStatsNoWaste");
+      if (lsNoWaste) noWaste = JSON.parse(lsNoWaste);
+    })();
+    $effect(() => {
+      localStorage.setItem("ppStatsNoWaste", JSON.stringify(noWaste));
+    });
+  }
 </script>
+
+{#if stats.allPowerStats?.reinfCPNoWaste !== undefined}
+  <div>
+    <label
+      ><input type="checkbox" bind:checked={noWaste} /> Exclude CP in Strongholds above 75% from Reinforcement and Player
+      UM</label
+    >
+  </div>
+{/if}
 
 <!-- General stats -->
 <div class="mt-4 flex flex-wrap justify-center gap-x-10 gap-y-2">
@@ -58,7 +80,15 @@
           decay removed) across all known Powerplay systems with data from this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP Activity:</b>
       </Tooltip><br />
-      {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay + stats.allPowerStats.cycleAcquisitionCP)}
+      {#if noWaste && stats.allPowerStats.reinfCPNoWaste !== undefined && stats.allPowerStats.umCPNoDecayNoWaste !== undefined}
+        {f(
+          stats.allPowerStats.reinfCPNoWaste +
+            stats.allPowerStats.umCPNoDecayNoWaste +
+            stats.allPowerStats.cycleAcquisitionCP,
+        )}
+      {:else}
+        {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay + stats.allPowerStats.cycleAcquisitionCP)}
+      {/if}
     </div>
   {:else if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined}
     <div>
@@ -88,7 +118,11 @@
           from this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP of Reinforcements in Control Systems:</b>
       </Tooltip><br />
-      {f(stats.allPowerStats.reinfCP)}
+      {f(
+        noWaste && stats.allPowerStats.reinfCPNoWaste
+          ? stats.allPowerStats.reinfCPNoWaste
+          : stats.allPowerStats.reinfCP,
+      )}
     </div>
   {/if}
   {#if stats.allPowerStats?.umCP !== undefined}
@@ -108,7 +142,11 @@
           control systems with data from this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP of Player UM in Control Systems:</b>
       </Tooltip><br />
-      {f(stats.allPowerStats.umCPNoDecay)}
+      {f(
+        noWaste && stats.allPowerStats.umCPNoDecayNoWaste
+          ? stats.allPowerStats.umCPNoDecayNoWaste
+          : stats.allPowerStats.umCPNoDecay,
+      )}
     </div>
   {/if}
   {#if stats.allPowerStats?.acquisitionCP !== undefined}
@@ -199,8 +237,20 @@
         {#if displayChart === "Activity"}
           {@const chartData = (
             [
-              ["Reinforcement", "#00a5ff", stats.allPowerStats?.reinfCP ?? 0],
-              ["Undermining", "#ff3632", stats.allPowerStats?.umCPNoDecay ?? 0],
+              [
+                "Reinforcement",
+                "#00a5ff",
+                noWaste && stats.allPowerStats?.reinfCPNoWaste
+                  ? stats.allPowerStats.reinfCPNoWaste
+                  : (stats.allPowerStats?.reinfCP ?? 0),
+              ],
+              [
+                "Undermining",
+                "#ff3632",
+                noWaste && stats.allPowerStats?.umCPNoDecayNoWaste
+                  ? stats.allPowerStats.umCPNoDecayNoWaste
+                  : (stats.allPowerStats?.umCPNoDecay ?? 0),
+              ],
               ["Acquisition", "#aaaaaa", stats.allPowerStats?.cycleAcquisitionCP ?? 0],
             ] as const
           ).toSorted((a, b) => b[2] - a[2])}
@@ -219,7 +269,14 @@
           />
         {:else if displayChart === "Reinforcement"}
           {@const chartData = Object.entries(stats.powerStats ?? [])
-            .map((x) => [x[0], Powers[x[0]].color, x[1]?.reinfCP ?? 0] as const)
+            .map(
+              (x) =>
+                [
+                  x[0],
+                  Powers[x[0]].color,
+                  noWaste && x[1]?.reinfCPNoWaste ? x[1].reinfCPNoWaste : (x[1]?.reinfCP ?? 0),
+                ] as const,
+            )
             .toSorted((a, b) => b[2] - a[2])}
           <Chart
             type="bar"
@@ -235,7 +292,14 @@
           />
         {:else if displayChart === "Undermining"}
           {@const chartData = Object.entries(stats.powerStats ?? [])
-            .map((x) => [x[0], Powers[x[0]].color, x[1]?.umCPNoDecay ?? 0] as const)
+            .map(
+              (x) =>
+                [
+                  x[0],
+                  Powers[x[0]].color,
+                  noWaste && x[1]?.umCPNoDecayNoWaste ? x[1].umCPNoDecayNoWaste : (x[1]?.umCPNoDecay ?? 0),
+                ] as const,
+            )
             .toSorted((a, b) => b[2] - a[2])}
           <Chart
             type="bar"
@@ -341,7 +405,13 @@
                   (with decay removed) of this power's space this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Activity:</b>
               </Tooltip>
-              <span>{f(ps.reinfCP + ps.umCPNoDecay + ps.cycleAcquisitionCP)}</span>
+              <span>
+                {#if noWaste && ps.reinfCPNoWaste !== undefined && ps.umCPNoDecayNoWaste !== undefined}
+                  {f(ps.reinfCPNoWaste + ps.umCPNoDecayNoWaste + ps.cycleAcquisitionCP)}
+                {:else}
+                  {f(ps.reinfCP + ps.umCPNoDecay + ps.cycleAcquisitionCP)}
+                {/if}
+              </span>
             </div>
           {:else if ps?.reinfCP !== undefined && ps?.umCPNoDecay !== undefined}
             <div class="flex justify-between gap-1">
@@ -371,7 +441,7 @@
                 {#snippet tooltip()}The total number of CP in Reinforcement of this power's space this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Reinforcement:</b>
               </Tooltip>
-              <span>{f(ps.reinfCP)}</span>
+              <span>{f(noWaste && ps.reinfCPNoWaste ? ps.reinfCPNoWaste : ps.reinfCP)}</span>
             </div>
           {/if}
           {#if ps?.umCP !== undefined}
@@ -391,7 +461,7 @@
                   this cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Player UM:</b>
               </Tooltip>
-              {f(ps.umCPNoDecay)}
+              {f(noWaste && ps.umCPNoDecayNoWaste ? ps.umCPNoDecayNoWaste : ps.umCPNoDecay)}
             </div>
           {/if}
           {#if ps?.acquisitionCP !== undefined}
