@@ -52,7 +52,7 @@
 
 {#key systems}
   {#if systems.length > 0}
-    <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} zOffset={isNC ? -1 : 0} />
+    <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} zOffset={isNC ? -1 : 1} />
     <Billboard
       position={textPosition}
       visible={faction.visible}
