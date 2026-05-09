@@ -20,6 +20,7 @@
     mapData.addFaction({ name: "Clans of Mandalore", color: "#c252ff" });
     mapData.addFaction({ name: "Off World Collective", color: "#fe8b62" });
     mapData.addFaction({ name: "House of Saga", color: "#97afc8" });
+    mapData.addFaction({ name: "The 10th Legion", color: "#912436" });
     mapData.sortAll();
   })();
 </script>
