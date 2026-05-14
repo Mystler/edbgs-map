@@ -276,8 +276,8 @@
               [
                 "Excess Undermining",
                 "#ff817f",
-                stats.allPowerStats?.umCPNoDecayNoWaste && stats.allPowerStats.umCPNoDecayNoWaste
-                  ? stats.allPowerStats.umCPNoDecayNoWaste - stats.allPowerStats.umCPNoDecayNoWaste
+                stats.allPowerStats?.umCPNoDecayNoWaste && stats.allPowerStats.umCPNoDecay
+                  ? stats.allPowerStats.umCPNoDecay - stats.allPowerStats.umCPNoDecayNoWaste
                   : 0,
                 stats.allPowerStats?.umCPNoDecayNoWaste
                   ? stats.allPowerStats.umCPNoDecayNoWaste - 1
