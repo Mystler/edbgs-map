@@ -18,8 +18,9 @@
     data: ChartData;
     type: "bar" | "pie";
     legend?: boolean;
+    stack?: boolean;
   }
-  let { data, type, legend = false }: Props = $props();
+  let { data, type, legend = false, stack = false }: Props = $props();
 
   Chart.defaults.color = "#aaaaaa";
   Chart.defaults.borderColor = "#333333";
@@ -39,6 +40,7 @@
   let chart: Chart;
 
   $effect(() => {
+    let scales = stack ? { x: { stacked: true }, y: { stacked: true } } : undefined;
     chart = new Chart(canvas, {
       type,
       data,
@@ -49,7 +51,7 @@
             color: "#ffffff",
             anchor: "end",
             align: "start",
-            formatter: (n) => formatBigNumber(n),
+            formatter: (n) => (n === 0 ? "" : formatBigNumber(n)),
             textStrokeWidth: 2,
             textStrokeColor: "#222222",
             clamp: true,
@@ -59,6 +61,7 @@
             display: legend,
           },
         },
+        scales: scales,
       },
     });
     return () => {

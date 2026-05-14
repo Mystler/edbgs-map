@@ -5,6 +5,7 @@
   import { Powers } from "$lib/Constants";
   import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
   import { slide } from "$lib/types/Animations.svelte";
+  import Color from "colorjs.io";
 
   // For some reason typescript wants the definition here and doesn't see the one in app.d.ts
   type DeepPartial<T> = T extends object
@@ -237,23 +238,57 @@
         {#if displayChart === "Activity"}
           {@const chartData = (
             [
+              // Last column is for sort hacking to make excess appear after main
               [
                 "Reinforcement",
                 "#00a5ff",
-                noWaste && stats.allPowerStats?.reinfCPNoWaste
+                stats.allPowerStats?.reinfCPNoWaste
                   ? stats.allPowerStats.reinfCPNoWaste
+                  : (stats.allPowerStats?.reinfCP ?? 0),
+                stats.allPowerStats?.reinfCPNoWaste
+                  ? stats.allPowerStats.reinfCPNoWaste
+                  : (stats.allPowerStats?.reinfCP ?? 0),
+              ],
+              [
+                "Excess Reinforcement",
+                "#7fd2ff",
+                stats.allPowerStats?.reinfCPNoWaste && stats.allPowerStats.reinfCP
+                  ? stats.allPowerStats.reinfCP - stats.allPowerStats.reinfCPNoWaste
+                  : 0,
+                stats.allPowerStats?.reinfCPNoWaste
+                  ? stats.allPowerStats.reinfCPNoWaste - 1
                   : (stats.allPowerStats?.reinfCP ?? 0),
               ],
               [
                 "Undermining",
                 "#ff3632",
-                noWaste && stats.allPowerStats?.umCPNoDecayNoWaste
+                stats.allPowerStats?.umCPNoDecayNoWaste
+                  ? stats.allPowerStats.umCPNoDecayNoWaste
+                  : (stats.allPowerStats?.umCPNoDecay ?? 0),
+                stats.allPowerStats?.umCPNoDecayNoWaste
                   ? stats.allPowerStats.umCPNoDecayNoWaste
                   : (stats.allPowerStats?.umCPNoDecay ?? 0),
               ],
-              ["Acquisition", "#aaaaaa", stats.allPowerStats?.cycleAcquisitionCP ?? 0],
+              [
+                "Excess Undermining",
+                "#ff817f",
+                stats.allPowerStats?.umCPNoDecayNoWaste && stats.allPowerStats.umCPNoDecayNoWaste
+                  ? stats.allPowerStats.umCPNoDecayNoWaste - stats.allPowerStats.umCPNoDecayNoWaste
+                  : 0,
+                stats.allPowerStats?.umCPNoDecayNoWaste
+                  ? stats.allPowerStats.umCPNoDecayNoWaste - 1
+                  : (stats.allPowerStats?.umCPNoDecay ?? 0),
+              ],
+              [
+                "Acquisition",
+                "#aaaaaa",
+                stats.allPowerStats?.cycleAcquisitionCP ?? 0,
+                stats.allPowerStats?.cycleAcquisitionCP ?? 0,
+              ],
             ] as const
-          ).toSorted((a, b) => b[2] - a[2])}
+          )
+            .filter((x) => x[2] > 0)
+            .toSorted((a, b) => b[3] - a[3])}
           <Chart
             type="pie"
             legend={true}
@@ -263,6 +298,9 @@
                 {
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
+                  datalabels: {
+                    display: (context) => !chartData[context.dataIndex][0].includes("Excess"),
+                  },
                 },
               ],
             }}
@@ -274,18 +312,29 @@
                 [
                   x[0],
                   Powers[x[0]].color,
-                  noWaste && x[1]?.reinfCPNoWaste ? x[1].reinfCPNoWaste : (x[1]?.reinfCP ?? 0),
+                  x[1]?.reinfCPNoWaste ? x[1].reinfCPNoWaste : (x[1]?.reinfCP ?? 0),
+                  x[1]?.reinfCPNoWaste ? (x[1]?.reinfCP ?? 0) - (x[1]?.reinfCPNoWaste ?? 0) : 0,
                 ] as const,
             )
-            .toSorted((a, b) => b[2] - a[2])}
+            .toSorted((a, b) => b[2] + b[3] - a[2] - a[3])}
           <Chart
             type="bar"
+            stack={true}
             data={{
               labels: chartData.map((x) => x[0]),
               datasets: [
                 {
+                  label: "Reinforcement",
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
+                },
+                {
+                  label: "Excess Reinforcement",
+                  data: chartData.map((x) => x[3]),
+                  backgroundColor: chartData.map((x) => new Color(x[1]).lighten(0.2).toString({ format: "hex" })),
+                  datalabels: {
+                    display: "auto",
+                  },
                 },
               ],
             }}
@@ -297,18 +346,29 @@
                 [
                   x[0],
                   Powers[x[0]].color,
-                  noWaste && x[1]?.umCPNoDecayNoWaste ? x[1].umCPNoDecayNoWaste : (x[1]?.umCPNoDecay ?? 0),
+                  x[1]?.umCPNoDecayNoWaste ? x[1].umCPNoDecayNoWaste : (x[1]?.umCPNoDecay ?? 0),
+                  x[1]?.umCPNoDecayNoWaste ? (x[1]?.umCPNoDecay ?? 0) - (x[1]?.umCPNoDecayNoWaste ?? 0) : 0,
                 ] as const,
             )
-            .toSorted((a, b) => b[2] - a[2])}
+            .toSorted((a, b) => b[2] + b[3] - a[2] - a[3])}
           <Chart
             type="bar"
+            stack={true}
             data={{
               labels: chartData.map((x) => x[0]),
               datasets: [
                 {
+                  label: "Undermining",
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
+                },
+                {
+                  label: "Excess Undermining",
+                  data: chartData.map((x) => x[3]),
+                  backgroundColor: chartData.map((x) => new Color(x[1]).lighten(0.2).toString({ format: "hex" })),
+                  datalabels: {
+                    display: "auto",
+                  },
                 },
               ],
             }}
