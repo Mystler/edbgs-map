@@ -23,6 +23,10 @@
     return number.toLocaleString("en-GB");
   }
 
+  function excessColor(color: string) {
+    return new Color(color).set({ alpha: 0.33 }).toString({ format: "hex" });
+  }
+
   type ChartType =
     | "Activity"
     | "Reinforcement"
@@ -289,6 +293,7 @@
           )
             .filter((x) => x[2] > 0)
             .toSorted((a, b) => b[3] - a[3])}
+          {@const activityLabelThreshold = 0.05 * chartData.reduce((sum, x) => sum + x[2], 0)}
           <Chart
             type="pie"
             legend={true}
@@ -299,7 +304,9 @@
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
                   datalabels: {
-                    display: (context) => !chartData[context.dataIndex][0].includes("Excess"),
+                    display: (context) =>
+                      !chartData[context.dataIndex][0].includes("Excess") ||
+                      chartData[context.dataIndex][2] > activityLabelThreshold,
                   },
                 },
               ],
@@ -331,7 +338,7 @@
                 {
                   label: "Excess Reinforcement",
                   data: chartData.map((x) => x[3]),
-                  backgroundColor: chartData.map((x) => new Color(x[1]).lighten(0.2).toString({ format: "hex" })),
+                  backgroundColor: chartData.map((x) => excessColor(x[1])),
                   datalabels: {
                     display: "auto",
                   },
@@ -365,7 +372,7 @@
                 {
                   label: "Excess Undermining",
                   data: chartData.map((x) => x[3]),
-                  backgroundColor: chartData.map((x) => new Color(x[1]).lighten(0.2).toString({ format: "hex" })),
+                  backgroundColor: chartData.map((x) => excessColor(x[1])),
                   datalabels: {
                     display: "auto",
                   },
