@@ -256,7 +256,7 @@
               [
                 "Excess Reinforcement",
                 "#7fd2ff",
-                stats.allPowerStats?.reinfCPNoWaste && stats.allPowerStats.reinfCP
+                !noWaste && stats.allPowerStats?.reinfCPNoWaste && stats.allPowerStats.reinfCP
                   ? stats.allPowerStats.reinfCP - stats.allPowerStats.reinfCPNoWaste
                   : 0,
                 stats.allPowerStats?.reinfCPNoWaste
@@ -276,7 +276,7 @@
               [
                 "Excess Undermining",
                 "#ff817f",
-                stats.allPowerStats?.umCPNoDecayNoWaste && stats.allPowerStats.umCPNoDecay
+                !noWaste && stats.allPowerStats?.umCPNoDecayNoWaste && stats.allPowerStats.umCPNoDecay
                   ? stats.allPowerStats.umCPNoDecay - stats.allPowerStats.umCPNoDecayNoWaste
                   : 0,
                 stats.allPowerStats?.umCPNoDecayNoWaste
@@ -320,7 +320,7 @@
                   x[0],
                   Powers[x[0]].color,
                   x[1]?.reinfCPNoWaste ? x[1].reinfCPNoWaste : (x[1]?.reinfCP ?? 0),
-                  x[1]?.reinfCPNoWaste ? (x[1]?.reinfCP ?? 0) - (x[1]?.reinfCPNoWaste ?? 0) : 0,
+                  !noWaste && x[1]?.reinfCPNoWaste ? (x[1]?.reinfCP ?? 0) - (x[1]?.reinfCPNoWaste ?? 0) : 0,
                 ] as const,
             )
             .toSorted((a, b) => b[2] + b[3] - a[2] - a[3])}
@@ -354,7 +354,7 @@
                   x[0],
                   Powers[x[0]].color,
                   x[1]?.umCPNoDecayNoWaste ? x[1].umCPNoDecayNoWaste : (x[1]?.umCPNoDecay ?? 0),
-                  x[1]?.umCPNoDecayNoWaste ? (x[1]?.umCPNoDecay ?? 0) - (x[1]?.umCPNoDecayNoWaste ?? 0) : 0,
+                  !noWaste && x[1]?.umCPNoDecayNoWaste ? (x[1]?.umCPNoDecay ?? 0) - (x[1]?.umCPNoDecayNoWaste ?? 0) : 0,
                 ] as const,
             )
             .toSorted((a, b) => b[2] + b[3] - a[2] - a[3])}
