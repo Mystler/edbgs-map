@@ -304,9 +304,15 @@
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
                   datalabels: {
-                    display: (context) =>
-                      !chartData[context.dataIndex][0].includes("Excess") ||
-                      chartData[context.dataIndex][2] > activityLabelThreshold,
+                    display: (context) => {
+                      const next = context.dataIndex >= chartData.length - 1 ? 0 : context.dataIndex + 1;
+                      const prev = context.dataIndex <= 0 ? chartData.length - 1 : context.dataIndex - 1;
+                      return (
+                        !chartData[context.dataIndex][0].includes("Excess") ||
+                        chartData[context.dataIndex][2] > activityLabelThreshold ||
+                        (chartData[next][2] > activityLabelThreshold && chartData[prev][2] > activityLabelThreshold)
+                      );
+                    },
                   },
                 },
               ],
