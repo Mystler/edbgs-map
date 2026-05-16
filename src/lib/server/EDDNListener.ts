@@ -179,8 +179,8 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
     if (
       startBar !== ppData?.lastCycleStart?.startBar &&
-      adjustedProgress > -0.25 &&
-      (adjustedProgress < 0.25 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
+      adjustedProgress > -0.24 &&
+      (adjustedProgress < 0.24 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
     ) {
       // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
       ppData.cycleStart = { startProgress, startBar, startTier };
