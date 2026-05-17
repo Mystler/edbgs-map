@@ -17,6 +17,7 @@ function initStats() {
     umCPNoDecayNoWaste: 0,
     acquisitionCP: 0,
     cycleAcquisitionCP: 0,
+    cycleAcquisitionCPNoWaste: 0,
     progressCP: 0,
 
     systems: 0,
@@ -67,8 +68,9 @@ export async function getCurrentCycleStats() {
       powerStats[system.controllingPower].progressCP += totalCP;
       allPowerStats.progressCP += totalCP;
     }
+    const acqPowers = system.powerConflictProgress?.toSorted((a, b) => b.progress - a.progress) ?? [];
     if (system.powerConflictProgress) {
-      for (const x of system.powerConflictProgress) {
+      for (const [idx, x] of acqPowers.entries()) {
         const acqCP = Math.floor(x.progress * 120000);
         powerStats[x.power].acquisitionCP += acqCP;
         allPowerStats.acquisitionCP += acqCP;
@@ -82,6 +84,19 @@ export async function getCurrentCycleStats() {
           if (cycleAcqCP > 0) {
             powerStats[x.power].cycleAcquisitionCP += cycleAcqCP;
             allPowerStats.cycleAcquisitionCP += cycleAcqCP;
+
+            // Check for wasted CP
+            let wastedAcqCP = 0;
+            if (acqPowers.length === 1 && acqCP > 120000) {
+              // Every CP beyond 120k if this is the only available acquisition power.
+              wastedAcqCP += acqCP - 120000;
+            } else if (idx === 0 && acqPowers.every((a) => a.power === x.power || a.progress < 0.3) && acqCP > 240000) {
+              // Every CP of leading power beyond 240k if and only if no other power has more than 30% progress
+              wastedAcqCP += acqCP - 240000;
+            }
+            const cycleAcqCPNoWaste = Math.max(0, cycleAcqCP - wastedAcqCP);
+            powerStats[x.power].cycleAcquisitionCPNoWaste += cycleAcqCPNoWaste;
+            allPowerStats.cycleAcquisitionCPNoWaste += cycleAcqCPNoWaste;
           }
         }
       }
@@ -115,7 +130,7 @@ export async function getCurrentCycleStats() {
         powerStats[system.controllingPower].umCPNoDecayNoWaste += playerUM;
       }
     } else if (system.powerConflictProgress) {
-      const leader = system.powerConflictProgress.toSorted((a, b) => b.progress - a.progress).at(0);
+      const leader = acqPowers.at(0);
       if (leader && leader.progress >= 1) {
         allPowerStats.expectedAcquisitions += 1;
         powerStats[leader.power].expectedAcquisitions += 1;

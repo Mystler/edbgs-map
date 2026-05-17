@@ -57,10 +57,33 @@
 
 {#if stats.allPowerStats?.reinfCPNoWaste !== undefined}
   <div>
-    <label
-      ><input type="checkbox" bind:checked={noWaste} /> Exclude CP in Strongholds above 75% from Reinforcement and Player
-      UM</label
-    >
+    <label>
+      <input type="checkbox" bind:checked={noWaste} />
+      <Tooltip>
+        {#snippet tooltip()}
+          <div class="text-left">
+            <p>
+              Excess CP are an attempt at categorizing Control Points that are needlessly overdoing systems or grinding
+              merits for personal gain with no actual relevance to Powerplay.
+            </p>
+            <p>
+              For Reinforcement and Undermining, any CP in systems that currently sit above 75% into Stronghold are
+              considered excess CP.
+            </p>
+            <p>
+              For Acquisitions, excess CP are considered:<br />
+              - Every CP beyond 120k if this is the only available acquisition power in range.<br />
+              - Every CP of leading power beyond 240k if and only if no other power has more than 30% progress.
+            </p>
+            <p>
+              The filtering is only applied to the Activity, Reinforcement, Player UM, and In-Cycle-Acquisition stats.
+              Charts will toggle the excess segment.
+            </p>
+          </div>
+        {/snippet}
+        <span class="underline decoration-dotted decoration-1">Exclude Excess CP from numbers and charts</span></Tooltip
+      >
+    </label>
   </div>
 {/if}
 
@@ -89,7 +112,7 @@
         {f(
           stats.allPowerStats.reinfCPNoWaste +
             stats.allPowerStats.umCPNoDecayNoWaste +
-            stats.allPowerStats.cycleAcquisitionCP,
+            (stats.allPowerStats.cycleAcquisitionCPNoWaste ?? stats.allPowerStats.cycleAcquisitionCP),
         )}
       {:else}
         {f(stats.allPowerStats.reinfCP + stats.allPowerStats.umCPNoDecay + stats.allPowerStats.cycleAcquisitionCP)}
@@ -170,7 +193,11 @@
         {#snippet tooltip()}The calculated number of CP that powers were known to do in Acquisitions this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">CP of Acquisition in Cycle:</b>
       </Tooltip><br />
-      {f(stats.allPowerStats.cycleAcquisitionCP)}
+      {f(
+        noWaste && stats.allPowerStats.cycleAcquisitionCPNoWaste
+          ? stats.allPowerStats.cycleAcquisitionCPNoWaste
+          : stats.allPowerStats.cycleAcquisitionCP,
+      )}
     </div>
   {/if}
   {#if stats.allPowerStats?.expectedAcquisitions !== undefined}
@@ -286,8 +313,22 @@
               [
                 "Acquisition",
                 "#aaaaaa",
-                stats.allPowerStats?.cycleAcquisitionCP ?? 0,
-                stats.allPowerStats?.cycleAcquisitionCP ?? 0,
+                stats.allPowerStats?.cycleAcquisitionCPNoWaste
+                  ? stats.allPowerStats.cycleAcquisitionCPNoWaste
+                  : (stats.allPowerStats?.cycleAcquisitionCP ?? 0),
+                stats.allPowerStats?.cycleAcquisitionCPNoWaste
+                  ? stats.allPowerStats.cycleAcquisitionCPNoWaste
+                  : (stats.allPowerStats?.cycleAcquisitionCP ?? 0),
+              ],
+              [
+                "Excess Acquisition",
+                "#dddddd",
+                !noWaste && stats.allPowerStats?.cycleAcquisitionCPNoWaste && stats.allPowerStats.cycleAcquisitionCP
+                  ? stats.allPowerStats.cycleAcquisitionCP - stats.allPowerStats.cycleAcquisitionCPNoWaste
+                  : 0,
+                stats.allPowerStats?.cycleAcquisitionCPNoWaste
+                  ? stats.allPowerStats.cycleAcquisitionCPNoWaste - 1
+                  : (stats.allPowerStats?.cycleAcquisitionCP ?? 0),
               ],
             ] as const
           )
@@ -371,12 +412,12 @@
               labels: chartData.map((x) => x[0]),
               datasets: [
                 {
-                  label: "Undermining",
+                  label: "Player Undermining",
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
                 },
                 {
-                  label: "Excess Undermining",
+                  label: "Excess Player Undermining",
                   data: chartData.map((x) => x[3]),
                   backgroundColor: chartData.map((x) => excessColor(x[1])),
                   datalabels: {
@@ -388,16 +429,36 @@
           />
         {:else if displayChart === "Acquisition"}
           {@const chartData = Object.entries(stats.powerStats ?? [])
-            .map((x) => [x[0], Powers[x[0]].color, x[1]?.cycleAcquisitionCP ?? 0] as const)
+            .map(
+              (x) =>
+                [
+                  x[0],
+                  Powers[x[0]].color,
+                  x[1]?.cycleAcquisitionCPNoWaste ? x[1].cycleAcquisitionCPNoWaste : (x[1]?.cycleAcquisitionCP ?? 0),
+                  !noWaste && x[1]?.cycleAcquisitionCPNoWaste
+                    ? (x[1]?.cycleAcquisitionCP ?? 0) - (x[1]?.cycleAcquisitionCPNoWaste ?? 0)
+                    : 0,
+                ] as const,
+            )
             .toSorted((a, b) => b[2] - a[2])}
           <Chart
             type="bar"
+            stack={true}
             data={{
               labels: chartData.map((x) => x[0]),
               datasets: [
                 {
+                  label: "Acquisition in Cycle",
                   data: chartData.map((x) => x[2]),
                   backgroundColor: chartData.map((x) => x[1]),
+                },
+                {
+                  label: "Excess Acquisition in Cycle",
+                  data: chartData.map((x) => x[3]),
+                  backgroundColor: chartData.map((x) => excessColor(x[1])),
+                  datalabels: {
+                    display: "auto",
+                  },
                 },
               ],
             }}
@@ -480,7 +541,9 @@
               </Tooltip>
               <span>
                 {#if noWaste && ps.reinfCPNoWaste !== undefined && ps.umCPNoDecayNoWaste !== undefined}
-                  {f(ps.reinfCPNoWaste + ps.umCPNoDecayNoWaste + ps.cycleAcquisitionCP)}
+                  {f(
+                    ps.reinfCPNoWaste + ps.umCPNoDecayNoWaste + (ps.cycleAcquisitionCPNoWaste ?? ps.cycleAcquisitionCP),
+                  )}
                 {:else}
                   {f(ps.reinfCP + ps.umCPNoDecay + ps.cycleAcquisitionCP)}
                 {/if}
@@ -554,7 +617,11 @@
                   cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Acq in Cycle:</b>
               </Tooltip>
-              <span>{f(ps.cycleAcquisitionCP)}</span>
+              <span
+                >{f(
+                  noWaste && ps.cycleAcquisitionCPNoWaste ? ps.cycleAcquisitionCPNoWaste : ps.cycleAcquisitionCP,
+                )}</span
+              >
             </div>
           {/if}
           {#if ps?.expectedAcquisitions !== undefined}
