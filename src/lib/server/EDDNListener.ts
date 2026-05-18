@@ -265,6 +265,16 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
       ) {
         return false; // Skip if we believe last cycle was not controlled, but then we got control data, and then we got empty acq data again.
       }
+      if (
+        ppData.powerConflictProgress === undefined &&
+        ppData.powerStateControlProgress === undefined &&
+        (prevData.powerConflictProgress !== undefined || prevData.powerStateControlProgress !== undefined)
+      ) {
+        // Skip if we already got data this cycle and then get total absence of it. This may in edge cases cause systems that fall out of range
+        // of anyone to not be detected as a drop until the next cycle, but this is unlikely enough that I prefer to have this around and exclude
+        // cache bug weirdnesses that occurs more often.
+        return false;
+      }
     }
   }
   // Do some data analysis if a snipe may have happened and log it asynchronously.
