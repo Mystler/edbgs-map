@@ -1,5 +1,10 @@
 import { Powers } from "$lib/Constants";
-import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
+import {
+  calculatePPControlSegments,
+  getCorrectedSegmentProgress,
+  getDecayValue,
+  getLastPPTickDate,
+} from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
 
@@ -114,16 +119,15 @@ export async function getCurrentCycleStats() {
       powerStats[system.controllingPower].reinfCP += system.powerStateReinforcement ?? 0;
       powerStats[system.controllingPower].umCP += system.powerStateUndermining ?? 0;
 
-      const { startProgress, startTier } = system.cycleStart || calculatePPControlSegments(system);
+      const ppcs = calculatePPControlSegments(system);
+      const { startProgress, startTier } = system.cycleStart || ppcs;
       const decayUM = getDecayValue(startProgress, startTier);
       const playerUM = Math.max(0, (system.powerStateUndermining ?? 0) - decayUM);
       allPowerStats.umCPNoDecay += playerUM;
       powerStats[system.controllingPower].umCPNoDecay += playerUM;
 
-      if (
-        system.powerState !== "Stronghold" ||
-        (system.powerStateControlProgress && system.powerStateControlProgress <= 0.75)
-      ) {
+      const excess = startTier === "Stronghold" && getCorrectedSegmentProgress(ppcs.totalCP, startTier) > 0.75;
+      if (!excess) {
         allPowerStats.reinfCPNoWaste += system.powerStateReinforcement ?? 0;
         powerStats[system.controllingPower].reinfCPNoWaste += system.powerStateReinforcement ?? 0;
         allPowerStats.umCPNoDecayNoWaste += playerUM;
