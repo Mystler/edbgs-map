@@ -47,7 +47,7 @@ To use it, wrap your actual content that should trigger the tooltip by this comp
   {#if tooltip}
     <div
       bind:this={tooltipEl}
-      class="pointer-events-none invisible fixed z-50 w-max max-w-xs rounded-xl border-2 border-(--ed-orange) bg-zinc-800/50 p-2 opacity-0 backdrop-blur-sm transition-[opacity,_visibility] transition-discrete duration-400 group-hover:visible group-hover:opacity-100"
+      class="pointer-events-none invisible fixed z-50 w-max max-w-xs rounded-xl border-2 border-(--ed-orange) bg-zinc-800/50 p-2 opacity-0 backdrop-blur-sm transition-[opacity,visibility] transition-discrete duration-400 group-hover:visible group-hover:opacity-100"
     >
       {@render tooltip()}
     </div>
