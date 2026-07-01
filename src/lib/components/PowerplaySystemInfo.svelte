@@ -125,7 +125,7 @@
       </div>
     </div>
     <div>
-      <b>CP to Tier Drop:</b>
+      <b>CP To Tier Drop:</b>
       {getCPToTierDrop(controlData.totalCP, startTier).toLocaleString("en-US")}
     </div>
     <div>
