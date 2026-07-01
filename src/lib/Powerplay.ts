@@ -51,6 +51,11 @@ export function getCorrectedSegmentProgress(totalCP: number, startTier: string) 
   return (totalCP - tierStart) / tierRange;
 }
 
+export function getCPToTierDrop(totalCP: number, startTier: string) {
+  const tierStart = startTier === "Stronghold" ? 1350000 : startTier === "Fortified" ? 700000 : 350000;
+  return totalCP - tierStart;
+}
+
 function totalCPToBarPercent(cp: number) {
   if (cp >= 1350000) {
     // Stronghold
