@@ -21,6 +21,9 @@ export interface SpanshDumpPPData {
   name: string;
   id64: number;
   date: string;
+  x?: number;
+  y?: number;
+  z?: number;
   powerState?: string;
   powerStateControlProgress?: number;
   powerStateReinforcement?: number;
@@ -74,6 +77,9 @@ export function pruneSystemDumpPPObject(system: SpanshDumpPPData): RequireAssign
     name: system.name,
     id64: system.id64,
     date: system.date,
+    x: system.x,
+    y: system.y,
+    z: system.z,
     powerState: system.powerState,
     powerStateControlProgress: system.powerStateControlProgress,
     powerStateReinforcement: system.powerStateReinforcement,

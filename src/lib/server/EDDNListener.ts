@@ -26,6 +26,7 @@ interface EDDNMessageHeader {
 interface EDDNJournalMessage {
   timestamp: string;
   event: string;
+  StarPos?: [number, number, number];
   StarSystem: string;
   SystemAddress: number;
   ControllingPower?: string;
@@ -149,6 +150,9 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     date: data.timestamp,
     name: data.StarSystem,
     id64: data.SystemAddress,
+    x: data.StarPos?.[0],
+    y: data.StarPos?.[1],
+    z: data.StarPos?.[2],
     controllingPower: data.ControllingPower,
     powerConflictProgress: data.PowerplayConflictProgress?.map((x) => {
       return { power: x.Power, progress: x.ConflictProgress };
