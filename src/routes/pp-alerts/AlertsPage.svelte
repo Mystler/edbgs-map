@@ -181,8 +181,7 @@
       const lsExcludeMaxed = localStorage.getItem("ppAlertsExcludeMaxedStrongholds");
       if (lsExcludeMaxed) excludeMaxedStrongholds = JSON.parse(lsExcludeMaxed);
       const lsAcquisitonFiltering = localStorage.getItem("ppAlertsAcquisitonFiltering") as
-        | (typeof acquisitionFilteringModes)[number]
-        | null;
+        (typeof acquisitionFilteringModes)[number] | null;
       if (lsAcquisitonFiltering && acquisitionFilteringModes.includes(lsAcquisitonFiltering))
         acquisitonFiltering = lsAcquisitonFiltering;
     })();

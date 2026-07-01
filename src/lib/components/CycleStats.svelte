@@ -28,12 +28,7 @@
   }
 
   type ChartType =
-    | "Activity"
-    | "Reinforcement"
-    | "Undermining"
-    | "Acquisition"
-    | "Expected Acquisitions"
-    | "Population";
+    "Activity" | "Reinforcement" | "Undermining" | "Acquisition" | "Expected Acquisitions" | "Population";
   let displayChart = $derived<ChartType | undefined>(
     stats.allPowerStats?.reinfCP !== undefined &&
       stats.allPowerStats?.umCPNoDecay !== undefined &&
