@@ -520,4 +520,28 @@ describe("EDDN Powerplay Data Processing", () => {
     ).toBe(false);
     expect(logSnipe).not.toHaveBeenCalled();
   });
+  test("Acquisition not allowed to go down over EOC", async () => {
+    vi.setSystemTime(new Date("2026-05-06T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest2",
+        SystemAddress: 1,
+        timestamp: "2026-05-06T17:05:00Z",
+        PowerplayState: "Unoccupied",
+        PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0.5 }],
+      }),
+    ).toBe(true);
+    vi.setSystemTime(new Date("2026-05-07T11:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest2",
+        SystemAddress: 1,
+        timestamp: "2026-05-07T10:05:00Z",
+        PowerplayState: "Unoccupied",
+        PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0 }],
+      }),
+    ).toBe(false);
+  });
 });

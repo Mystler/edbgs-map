@@ -279,6 +279,19 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
         // cache bug weirdnesses that occurs more often.
         return false;
       }
+    } else {
+      // Prev data was definitely last cycle
+      if (
+        date.getTime() - lastPPTick.getTime() < 172_800_000 && // Arbitrary limiting this to 48h after EOC
+        prevData.powerConflictProgress?.some((x) => x.progress > 0) &&
+        !prevData.powerConflictProgress.some((x) => x.progress >= 1) &&
+        ppData.powerConflictProgress !== undefined &&
+        (ppData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0) ?? 0) <
+          prevData.powerConflictProgress.reduce((sum, x) => sum + x.progress, 0)
+      ) {
+        // Acquisition went down over EOC.
+        return false;
+      }
     }
   }
   // Do some data analysis if a snipe may have happened and log it asynchronously.
