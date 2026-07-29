@@ -247,7 +247,16 @@
               {sphere.name}
               <CopyToClipboardButton text={sphere.name} />
             </h2>
-            <p><button class="link-btn" onclick={() => (displayInnerSystem = sphere)}>View System</button></p>
+            <p>
+              <button
+                class="link-btn"
+                onclick={() => (displayInnerSystem = sphere)}
+                draggable="true"
+                ondragstart={(e) => {
+                  e.dataTransfer?.setData("json/edbgs-map-pp-alert", JSON.stringify(sphere));
+                }}>View System</button
+              >
+            </p>
             <div class="mb-4 flex flex-col items-start justify-start gap-2">
               <div>
                 <b>Supporting Systems:</b>
