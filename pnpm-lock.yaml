@@ -87,6 +87,9 @@ importers:
       prettier-plugin-tailwindcss:
         specifier: ^0.8.1
         version: 0.8.1(prettier-plugin-svelte@4.1.1(prettier@3.9.6)(svelte@5.56.8(@typescript-eslint/types@8.65.0)))(prettier@3.9.6)
+      sparse-octree:
+        specifier: ^7.2.0
+        version: 7.2.0(three@0.185.1)
       svelte:
         specifier: ^5.56.8
         version: 5.56.8(@typescript-eslint/types@8.65.0)
@@ -1713,6 +1716,11 @@ packages:
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
+
+  sparse-octree@7.2.0:
+    resolution: {integrity: sha512-p7pqHKT8xOAjC8Ax5A8BcTFriBFl4sZKI7wvYjIkOfv8m0tfY5QrfAsrQs8Yw4MwwmksPeSH4GLEU5ZEgGUB0g==}
+    peerDependencies:
+      three: 0.x.x
 
   sqlite3@6.0.1:
     resolution: {integrity: sha512-X0czUUMG2tmSqJpEQa3tCuZSHKIx8PwM53vLZzKp/o6Rpy25fiVfjdbnZ988M8+O3ZWR1ih0K255VumCb3MAnQ==}
@@ -3397,6 +3405,10 @@ snapshots:
       totalist: 3.0.1
 
   source-map-js@1.2.1: {}
+
+  sparse-octree@7.2.0(three@0.185.1):
+    dependencies:
+      three: 0.185.1
 
   sqlite3@6.0.1:
     dependencies:
