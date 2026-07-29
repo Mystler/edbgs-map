@@ -214,7 +214,7 @@
               {sphere.collateral.soleSupportingSystemsFort.length}
             {/if}
           </div>
-          <div class="basis-32">{sphere.collateral.CPToTierDrop.toLocaleString("en-US")}</div>
+          <div class="basis-32 max-sm:hidden">{sphere.collateral.CPToTierDrop.toLocaleString("en-US")}</div>
           <div
             class="basis-40 max-lg:hidden"
             style:color={sphere.controllingPower ? Powers[sphere.controllingPower].color : "inherit"}
