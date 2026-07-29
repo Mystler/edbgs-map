@@ -26,7 +26,7 @@
     "@three.ez/instanced-mesh": "^0.3.16",
     "@threlte/core": "^8.5.16",
     "@threlte/extras": "^9.21.0",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.1.2",
     "@types/three": "^0.185.1",
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
@@ -35,14 +35,14 @@
     "eslint": "^10.8.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.22.0",
-    "globals": "^17.7.0",
+    "globals": "^17.8.0",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "sparse-octree": "^7.2.0",
     "svelte": "^5.56.8",
-    "svelte-check": "^4.7.3",
-    "svelte-time": "^2.2.0",
+    "svelte-check": "^4.7.4",
+    "svelte-time": "^2.3.0",
     "tailwindcss": "^4.3.3",
     "three": "^0.185.1",
     "typescript": "^6.0.3",
@@ -51,7 +51,7 @@
     "vitest": "^4.1.10"
   },
   "dependencies": {
-    "iovalkey": "^0.3.3",
+    "iovalkey": "^0.4.0",
     "sqlite3": "^6.0.1",
     "zeromq": "^6.5.0"
   }
