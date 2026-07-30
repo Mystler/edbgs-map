@@ -7,10 +7,7 @@ interface Cache {
   spheres: CollateralSphereInfo[];
 }
 
-export async function GET({ setHeaders }) {
-  setHeaders({
-    "cache-control": "max-age=600",
-  });
+export async function GET() {
   const cachedResult = await getCache(`edbgs-map:pp-collateral`);
   if (cachedResult) {
     const cache: Cache = JSON.parse(cachedResult);
