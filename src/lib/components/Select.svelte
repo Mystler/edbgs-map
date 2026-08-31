@@ -12,7 +12,7 @@
 </script>
 
 <select bind:value {...rest}>
-  <!-- Not working (yet?) in map related uses for some reason... <button><selectedcontent></selectedcontent></button> -->
+  <button><selectedcontent></selectedcontent></button>
   {@render children()}
 </select>
 
