@@ -56,6 +56,11 @@ export function getCPToTierDrop(totalCP: number, startTier: string) {
   return totalCP - tierStart;
 }
 
+export function segmentPercentToCP(percent: number, startTier: string) {
+  const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
+  return percent * tierRange;
+}
+
 function totalCPToBarPercent(cp: number) {
   if (cp >= 1350000) {
     // Stronghold

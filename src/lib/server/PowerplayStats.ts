@@ -4,6 +4,7 @@ import {
   getCorrectedSegmentProgress,
   getDecayValue,
   getLastPPTickDate,
+  segmentPercentToCP,
 } from "$lib/Powerplay";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { getAllCacheMatching } from "./ValkeyCache";
@@ -126,8 +127,22 @@ export async function getCurrentCycleStats() {
       allPowerStats.umCPNoDecay += playerUM;
       powerStats[system.controllingPower].umCPNoDecay += playerUM;
 
-      const excess = startTier === "Stronghold" && getCorrectedSegmentProgress(ppcs.totalCP, startTier) > 0.75;
-      if (!excess) {
+      const correctedSegmentProgress = getCorrectedSegmentProgress(ppcs.totalCP, startTier);
+      if (correctedSegmentProgress > 1 && ppcs.adjustedProgress >= 0.25) {
+        // Capping system. Excess will be any CP over cap when we have a 500k+ CP net positive difference
+        const requiredForCap = segmentPercentToCP(correctedSegmentProgress - startProgress, startTier);
+        const netPosBeyond =
+          (system.powerStateReinforcement ?? 0) - (system.powerStateUndermining ?? 0) - requiredForCap;
+        if (netPosBeyond > 500_000) {
+          const reinfCPNoWaste = requiredForCap + (system.powerStateUndermining ?? 0);
+          allPowerStats.reinfCPNoWaste += reinfCPNoWaste;
+          powerStats[system.controllingPower].reinfCPNoWaste += reinfCPNoWaste;
+          // All Player UM is waste so no lines for that necessary.
+        }
+      } else if (startTier === "Stronghold" && correctedSegmentProgress > 0.75) {
+        // Grinder Stronghold. Greedily count everything as excess.
+      } else {
+        // Normal system, no waste, so track as such
         allPowerStats.reinfCPNoWaste += system.powerStateReinforcement ?? 0;
         powerStats[system.controllingPower].reinfCPNoWaste += system.powerStateReinforcement ?? 0;
         allPowerStats.umCPNoDecayNoWaste += playerUM;
