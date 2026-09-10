@@ -1,4 +1,4 @@
-import { describe, expect, vi, test, beforeEach, assert } from "vitest";
+import { describe, expect, vi, test, assert } from "vitest";
 import { processPPJournalMessage } from "./EDDNListener";
 import type { SpanshDumpPPData } from "$lib/SpanshAPI";
 import { logSnipe } from "$lib/server/DB";
@@ -37,12 +37,6 @@ vi.mock(import("$lib/server/DB"), () => {
 });
 
 describe("EDDN Powerplay Data Processing", () => {
-  beforeEach(() => {
-    vi.mocked(logSnipe).mockClear();
-    vi.mocked(setCache).mockClear();
-    vi.mocked(deleteCache).mockClear();
-  });
-
   test("Cache new system and discard outdated data", async () => {
     vi.setSystemTime(new Date("2026-02-11T20:00:00Z"));
     expect(
@@ -198,7 +192,7 @@ describe("EDDN Powerplay Data Processing", () => {
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
     assert(
-      JSON.parse(vi.mocked(setCache).mock.lastCall[1]).lastCycleStart !== undefined,
+      JSON.parse(vi.mocked(setCache).mock.lastCall![1]).lastCycleStart !== undefined,
       "should have last cycle start data",
     );
   });
@@ -232,7 +226,7 @@ describe("EDDN Powerplay Data Processing", () => {
     ).toBe(true);
     expect(logSnipe).not.toHaveBeenCalled();
     assert(
-      JSON.parse(vi.mocked(setCache).mock.lastCall[1]).lastCycleStart === undefined,
+      JSON.parse(vi.mocked(setCache).mock.lastCall![1]).lastCycleStart === undefined,
       "should not have last cycle start data",
     );
   });
@@ -265,7 +259,7 @@ describe("EDDN Powerplay Data Processing", () => {
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
-    expect(JSON.parse(vi.mocked(setCache).mock.lastCall[1])).toMatchObject({
+    expect(JSON.parse(vi.mocked(setCache).mock.lastCall![1])).toMatchObject({
       lastCycleStart: { startBar: 0.275, startTier: "Exploited" },
       cycleStart: { startBar: 0.525, startTier: "Fortified" },
     } satisfies DeepPartial<SpanshDumpPPData>);
@@ -285,7 +279,7 @@ describe("EDDN Powerplay Data Processing", () => {
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
-    expect(JSON.parse(vi.mocked(setCache).mock.lastCall[1])).toMatchObject({
+    expect(JSON.parse(vi.mocked(setCache).mock.lastCall![1])).toMatchObject({
       lastCycleStart: { startBar: 0.275, startTier: "Exploited" },
       cycleStart: { startBar: 0.525, startTier: "Fortified" },
     } satisfies DeepPartial<SpanshDumpPPData>);
@@ -389,7 +383,7 @@ describe("EDDN Powerplay Data Processing", () => {
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
-    expect(vi.mocked(logSnipe).mock.lastCall[3]).toBeCloseTo(0);
+    expect(vi.mocked(logSnipe).mock.lastCall![3]).toBeCloseTo(0);
     vi.mocked(logSnipe).mockClear();
     expect(
       await processPPJournalMessage({
@@ -438,7 +432,7 @@ describe("EDDN Powerplay Data Processing", () => {
       }),
     ).toBe(true);
     expect(logSnipe).toHaveBeenCalled();
-    expect(vi.mocked(logSnipe).mock.lastCall[3]).toBeLessThan(100_000);
+    expect(vi.mocked(logSnipe).mock.lastCall![3]).toBeLessThan(100_000);
   });
   test("Discard last cycle cache bug across multiple control weeks", async () => {
     vi.setSystemTime(new Date("2026-04-23T20:00:00Z"));
