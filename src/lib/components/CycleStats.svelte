@@ -56,14 +56,17 @@
       <input type="checkbox" bind:checked={noWaste} />
       <Tooltip>
         {#snippet tooltip()}
-          <div class="text-left">
+          <div class="text-left text-xs">
             <p>
               Excess CP are an attempt at categorizing Control Points that are needlessly overdoing systems or grinding
               merits for personal gain with no actual relevance to Powerplay.
             </p>
             <p>
-              For Reinforcement and Undermining, any CP in systems that currently sit above 75% into Stronghold are
-              considered excess CP.
+              For Reinforcement and Undermining, excess CP are considered:<br />
+              - Any CP in systems that currently sit above 75% into Stronghold. These are assumed to be grinder systems.<br
+              />
+              - When a system is reinforced to the 25% cap of the next tier and Reinforcement past the cap is over 500k CP
+              more than Undermining, then every Reinforcement CP above cap and all Undermining CP will be counted as excess.
             </p>
             <p>
               For Acquisitions, excess CP are considered:<br />
