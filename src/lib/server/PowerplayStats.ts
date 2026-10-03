@@ -1,12 +1,12 @@
-import { Powers } from "$lib/Constants";
+import { Powers } from "#lib/Constants.js";
 import {
   calculatePPControlSegments,
   getCorrectedSegmentProgress,
   getDecayValue,
   getLastPPTickDate,
   segmentPercentToCP,
-} from "$lib/Powerplay";
-import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+} from "#lib/Powerplay.js";
+import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
 import { getAllCacheMatching } from "./ValkeyCache";
 
 const pp2Start = new Date("2024-10-31T07:05:00Z");

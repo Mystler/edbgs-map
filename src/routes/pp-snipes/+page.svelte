@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { getLastPPTickDate, powerStateColor } from "$lib/Powerplay";
+  import { getLastPPTickDate, powerStateColor } from "#lib/Powerplay.js";
   import Time from "svelte-time";
   import type { PageProps } from "./$types";
-  import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
-  import { slide } from "$lib/types/Animations.svelte";
-  import { Powers } from "$lib/Constants";
-  import type { SpanshDumpPPData } from "$lib/SpanshAPI";
-  import { browser } from "$app/environment";
-  import FaIcon from "$lib/components/FaIcon.svelte";
+  import PowerplaySystemInfo from "#lib/components/PowerplaySystemInfo.svelte";
+  import { slide } from "#lib/types/Animations.svelte.js";
+  import { Powers } from "#lib/Constants.js";
+  import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
+  import { browser } from "$app/env";
+  import FaIcon from "#lib/components/FaIcon.svelte";
   import {
     faArrowDown,
     faArrowRight,
@@ -17,8 +17,8 @@
     faXmark,
   } from "@fortawesome/free-solid-svg-icons";
   import { invalidate } from "$app/navigation";
-  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
-  import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
+  import PowerplayPageNav from "#lib/components/PowerplayPageNav.svelte";
+  import CopyToClipboardButton from "#lib/components/CopyToClipboardButton.svelte";
   import { onMount, untrack } from "svelte";
   import { on } from "svelte/events";
 
@@ -41,7 +41,6 @@
   let filterTypes: string[] = $state((() => availableTypes)());
   let searchSystem = $state("");
   let excludeNoPreviousData = $state(true);
-
   let filteredEntries = $derived(
     data.snipeData?.filter(
       (x) =>

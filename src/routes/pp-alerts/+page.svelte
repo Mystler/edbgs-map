@@ -2,9 +2,9 @@
   import Time from "svelte-time";
   import type { PageProps } from "./$types";
   import { invalidate } from "$app/navigation";
-  import FaIcon from "$lib/components/FaIcon.svelte";
+  import FaIcon from "#lib/components/FaIcon.svelte";
   import { faRotate } from "@fortawesome/free-solid-svg-icons";
-  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
+  import PowerplayPageNav from "#lib/components/PowerplayPageNav.svelte";
   import AlertsPage from "./AlertsPage.svelte";
 
   let { data }: PageProps = $props();

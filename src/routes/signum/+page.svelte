@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Map from "$lib/components/Map.svelte";
-  import { MapData } from "$lib/types/MapData.svelte";
+  import Map from "#lib/components/Map.svelte";
+  import { MapData } from "#lib/types/MapData.svelte.js";
 
   let mapData = $state(new MapData());
 

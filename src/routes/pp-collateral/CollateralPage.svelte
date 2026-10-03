@@ -1,18 +1,18 @@
 <script lang="ts">
-  import FaIcon from "$lib/components/FaIcon.svelte";
-  import { Powers } from "$lib/Constants";
-  import { slide } from "$lib/types/Animations.svelte";
+  import FaIcon from "#lib/components/FaIcon.svelte";
+  import { Powers } from "#lib/Constants.js";
+  import { slide } from "#lib/types/Animations.svelte.js";
   import { faCaretDown, faCaretRight, faXmark } from "@fortawesome/free-solid-svg-icons";
   import Time from "svelte-time/Time.svelte";
   import { onMount, untrack } from "svelte";
   import { on } from "svelte/events";
-  import { getLastPPTickDate, powerStateColor } from "$lib/Powerplay";
-  import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
-  import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
-  import type { CollateralSphereInfo } from "$lib/server/Collateral";
-  import Select from "$lib/components/Select.svelte";
+  import { getLastPPTickDate, powerStateColor } from "#lib/Powerplay.js";
+  import CopyToClipboardButton from "#lib/components/CopyToClipboardButton.svelte";
+  import PowerplaySystemInfo from "#lib/components/PowerplaySystemInfo.svelte";
+  import type { CollateralSphereInfo } from "#lib/server/Collateral.js";
+  import Select from "#lib/components/Select.svelte";
   import { browser } from "$app/env";
-  import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+  import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
 
   interface Props {
     spheres: CollateralSphereInfo[];

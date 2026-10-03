@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatBigNumber } from "$lib/Helpers";
+  import { formatBigNumber } from "#lib/Helpers.js";
   import {
     ArcElement,
     BarController,

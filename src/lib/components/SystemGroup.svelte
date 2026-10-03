@@ -5,8 +5,8 @@
   import { Billboard, Text } from "@threlte/extras";
   import type { SpanshSystem } from "../SpanshAPI";
   import { DefaultMapFont } from "../Constants";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
+  import { CurrentCamera } from "#lib/types/CurrentCamera.svelte.js";
   import { untrack } from "svelte";
 
   interface Props {
@@ -17,7 +17,7 @@
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(system.name, "System");
-    let response = await fetch(resolve(`/api/system/${system.name}`));
+    let response = await fetch(resolve(`api/system/${system.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for system: ${system.name}`);

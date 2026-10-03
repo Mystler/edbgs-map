@@ -1,4 +1,4 @@
-import { getLastPPTickDate } from "$lib/Powerplay";
+import { getLastPPTickDate } from "#lib/Powerplay.js";
 import { db } from "./DB";
 import { getCurrentCycleStats } from "./PowerplayStats";
 

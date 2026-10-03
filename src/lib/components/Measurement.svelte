@@ -2,7 +2,7 @@
   import { DoubleSide, Vector3 } from "three";
   import { T, useTask } from "@threlte/core";
   import { MeshLineGeometry, MeshLineMaterial } from "@threlte/extras";
-  import { fade } from "$lib/types/Animations.svelte";
+  import { fade } from "#lib/types/Animations.svelte.js";
 
   interface MeasurementSystem {
     name: string;

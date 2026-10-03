@@ -1,12 +1,12 @@
 import { Subscriber } from "zeromq";
 import { inflateSync } from "zlib";
-import { deleteCache, getCache, setCache } from "$lib/server/ValkeyCache";
+import { deleteCache, getCache, setCache } from "#lib/server/ValkeyCache.js";
 import {
   calculatePPControlSegments,
   getCorrectedSegmentProgress,
   getDecayValue,
   getLastPPTickDate,
-} from "$lib/Powerplay";
+} from "#lib/Powerplay.js";
 import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
 

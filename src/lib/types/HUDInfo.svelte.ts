@@ -1,5 +1,5 @@
-import { browser } from "$app/environment";
-import type { SpanshSystem } from "$lib/SpanshAPI";
+import { browser } from "$app/env";
+import type { SpanshSystem } from "#lib/SpanshAPI.js";
 
 export const ClickMode = {
   inara: "Open Inara",

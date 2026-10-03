@@ -2,11 +2,11 @@
   import { T, useTask } from "@threlte/core";
   import { Grid, Instance, InstancedMesh, OrbitControls, Text, useInteractivity } from "@threlte/extras";
   import { DefaultMapFont } from "../Constants";
-  import type { CameraData } from "$lib/types/MapData.svelte";
-  import { type SpanshSystem } from "$lib/SpanshAPI";
+  import type { CameraData } from "#lib/types/MapData.svelte.js";
+  import { type SpanshSystem } from "#lib/SpanshAPI.js";
   import { resolve } from "$app/paths";
-  import { CurrentCamera, FlyToTarget } from "$lib/types/CurrentCamera.svelte";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { CurrentCamera, FlyToTarget } from "#lib/types/CurrentCamera.svelte.js";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
   import { DoubleSide, Group, type Matrix4, MOUSE, Vector3 } from "three";
   import { OrbitControls as ThreeOrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
   import ArrowShape from "../shapes/ArrowShape";
@@ -52,7 +52,7 @@
   }
 
   async function fetchData(): Promise<SpanshSystem | null> {
-    let response = await fetch(resolve(`/api/system/${cameraSetup.lookAtSystem}`));
+    let response = await fetch(resolve(`api/system/${cameraSetup.lookAtSystem}`));
     if (!response.ok) {
       alert(`Error while fetching data from Spansh.co.uk for camera system: ${cameraSetup.lookAtSystem}`);
       return null;

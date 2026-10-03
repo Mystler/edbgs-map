@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { Powers } from "$lib/Constants";
+  import { Powers } from "#lib/Constants.js";
   import {
     calculatePPControlSegments,
     getCorrectedSegmentProgress,
     getCPToTierDrop,
     getDecayValue,
     getLastPPTickDate,
-  } from "$lib/Powerplay";
-  import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+  } from "#lib/Powerplay.js";
+  import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
   import {
     faCaretDown,
     faCaretLeft,

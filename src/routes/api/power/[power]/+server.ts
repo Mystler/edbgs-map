@@ -1,6 +1,5 @@
-import { getAllCacheMatching, getCache, setTimedCache } from "$lib/server/ValkeyCache";
-import { fetchPowerSystems, type SpanshDumpPPData, type SpanshSystem } from "$lib/SpanshAPI";
-import { json } from "@sveltejs/kit";
+import { getAllCacheMatching, getCache, setTimedCache } from "#lib/server/ValkeyCache.js";
+import { fetchPowerSystems, type SpanshDumpPPData, type SpanshSystem } from "#lib/SpanshAPI.js";
 
 export async function GET({ params, setHeaders }) {
   setHeaders({
@@ -9,7 +8,7 @@ export async function GET({ params, setHeaders }) {
   const cachedResult = await getCache(`edbgs-map:power:${params.power}`);
   if (cachedResult) {
     const systems: SpanshSystem[] = JSON.parse(cachedResult);
-    return json(systems);
+    return Response.json(systems);
   } else {
     if (import.meta.env.VITE_USE_VALKEY === "true" && import.meta.env.VITE_RUN_LISTENER === "true") {
       const systemsCache =
@@ -30,11 +29,11 @@ export async function GET({ params, setHeaders }) {
         };
       });
       setTimedCache(`edbgs-map:power:${params.power}`, JSON.stringify(systems));
-      return json(systems);
+      return Response.json(systems);
     } else {
       const systems = await fetchPowerSystems(params.power);
       setTimedCache(`edbgs-map:power:${params.power}`, JSON.stringify(systems));
-      return json(systems);
+      return Response.json(systems);
     }
   }
 }

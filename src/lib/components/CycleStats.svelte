@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { browser } from "$app/environment";
-  import Chart from "$lib/components/Chart.svelte";
-  import Tooltip from "$lib/components/Tooltip.svelte";
-  import { Powers } from "$lib/Constants";
-  import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
-  import { slide } from "$lib/types/Animations.svelte";
+  import { browser } from "$app/env";
+  import Chart from "#lib/components/Chart.svelte";
+  import Tooltip from "#lib/components/Tooltip.svelte";
+  import { Powers } from "#lib/Constants.js";
+  import type { getCurrentCycleStats } from "#lib/server/PowerplayStats.js";
+  import { slide } from "#lib/types/Animations.svelte.js";
   import Color from "colorjs.io";
 
   // For some reason typescript wants the definition here and doesn't see the one in app.d.ts
@@ -29,6 +29,7 @@
 
   type ChartType =
     "Activity" | "Reinforcement" | "Undermining" | "Acquisition" | "Expected Acquisitions" | "Population";
+
   let displayChart = $derived<ChartType | undefined>(
     stats.allPowerStats?.reinfCP !== undefined &&
       stats.allPowerStats?.umCPNoDecay !== undefined &&
@@ -36,7 +37,6 @@
       ? "Activity"
       : undefined,
   );
-
   let noWaste = $state(false);
 
   if (browser) {
@@ -93,7 +93,9 @@
         {#snippet tooltip()}The number of known Control Systems across all powers and the percentage of control systems
           that have been visited and updated at least once this cycle.{/snippet}
         <b class="underline decoration-dotted decoration-1">Control Systems:</b>
-      </Tooltip><br />
+      </Tooltip>
+
+      <br />
       {f(stats.allPowerStats.systems)} ({f(
         Math.round((stats.allPowerStats.updatedThisCycle / stats.allPowerStats.systems) * 100),
       )}%)
@@ -332,6 +334,7 @@
           )
             .filter((x) => x[2] > 0)
             .toSorted((a, b) => b[3] - a[3])}
+
           {@const activityLabelThreshold = 0.05 * chartData.reduce((sum, x) => sum + x[2], 0)}
           <Chart
             type="pie"
@@ -346,6 +349,7 @@
                     display: (context) => {
                       const next = context.dataIndex >= chartData.length - 1 ? 0 : context.dataIndex + 1;
                       const prev = context.dataIndex <= 0 ? chartData.length - 1 : context.dataIndex - 1;
+
                       return (
                         !chartData[context.dataIndex][0].includes("Excess") ||
                         chartData[context.dataIndex][2] > activityLabelThreshold ||
@@ -433,6 +437,7 @@
                   x[0],
                   Powers[x[0]].color,
                   x[1]?.cycleAcquisitionCPNoWaste ? x[1].cycleAcquisitionCPNoWaste : (x[1]?.cycleAcquisitionCP ?? 0),
+
                   !noWaste && x[1]?.cycleAcquisitionCPNoWaste
                     ? (x[1]?.cycleAcquisitionCP ?? 0) - (x[1]?.cycleAcquisitionCPNoWaste ?? 0)
                     : 0,

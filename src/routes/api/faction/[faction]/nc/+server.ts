@@ -1,6 +1,5 @@
-import { getCache, setTimedCache } from "$lib/server/ValkeyCache.js";
-import { fetchFactionSystems, type SpanshSystem } from "$lib/SpanshAPI";
-import { json } from "@sveltejs/kit";
+import { getCache, setTimedCache } from "#lib/server/ValkeyCache.js";
+import { fetchFactionSystems, type SpanshSystem } from "#lib/SpanshAPI.js";
 
 export async function GET({ params, setHeaders }) {
   setHeaders({
@@ -14,5 +13,5 @@ export async function GET({ params, setHeaders }) {
     systems = await fetchFactionSystems(params.faction);
     setTimedCache(`edbgs-map:faction:${params.faction}`, JSON.stringify(systems));
   }
-  return json(systems.filter((x) => x.controlling_minor_faction !== params.faction));
+  return Response.json(systems.filter((x) => x.controlling_minor_faction !== params.faction));
 }

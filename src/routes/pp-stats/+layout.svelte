@@ -1,6 +1,6 @@
 <script lang="ts">
-  import FaIcon from "$lib/components/FaIcon.svelte";
-  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
+  import FaIcon from "#lib/components/FaIcon.svelte";
+  import PowerplayPageNav from "#lib/components/PowerplayPageNav.svelte";
   import { faRotate } from "@fortawesome/free-solid-svg-icons";
   import type { LayoutProps } from "./$types";
   import Time from "svelte-time/Time.svelte";
@@ -8,7 +8,7 @@
   import { page } from "$app/state";
   import { untrack } from "svelte";
   import { resolve } from "$app/paths";
-  import Select from "$lib/components/Select.svelte";
+  import Select from "#lib/components/Select.svelte";
 
   let { data, children }: LayoutProps = $props();
 
@@ -45,7 +45,7 @@
       <Select
         class="w-38"
         onchange={(e) => {
-          goto(resolve(`/pp-stats/${e.currentTarget.value}`));
+          goto(resolve(`pp-stats/${e.currentTarget.value}`));
         }}
       >
         <option value="">Live Data</option>

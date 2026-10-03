@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { ClickMode } from "$lib/types/HUDInfo.svelte";
+  import { ClickMode } from "#lib/types/HUDInfo.svelte.js";
   import Dialog from "./Dialog.svelte";
 
   interface Props {

@@ -5,23 +5,23 @@
   import { Billboard, Text } from "@threlte/extras";
   import type { SpanshSystem } from "../SpanshAPI";
   import { DefaultMapFont } from "../Constants";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
-  import { calculateGeometricMedian } from "$lib/Helpers";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
+  import { CurrentCamera } from "#lib/types/CurrentCamera.svelte.js";
+  import { calculateGeometricMedian } from "#lib/Helpers.js";
   import { untrack } from "svelte";
 
   interface Props {
     faction: FactionData;
   }
-  let { faction }: Props = $props();
 
+  let { faction }: Props = $props();
   let isNC = $state(false);
 
   async function fetchData(): Promise<SpanshSystem[]> {
     isNC = faction.name.endsWith(" (NC)");
     const queryName = isNC ? faction.name.slice(0, -5) : faction.name;
     const m = HUDInfo.showMessage(faction.name, "Faction");
-    let response = await fetch(resolve(`/api/faction/${queryName}${isNC ? "/nc" : ""}`));
+    let response = await fetch(resolve(`api/faction/${queryName}${isNC ? "/nc" : ""}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for faction: ${faction.name}`);
@@ -53,6 +53,7 @@
 {#key systems}
   {#if systems.length > 0}
     <SystemRenderGroup {systems} color={faction.color} visible={faction.visible} zOffset={isNC ? -1 : 1} />
+
     <Billboard
       position={textPosition}
       visible={faction.visible}

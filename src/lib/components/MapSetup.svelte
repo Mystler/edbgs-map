@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { Powers } from "$lib/Constants";
-  import { slide } from "$lib/types/Animations.svelte";
+  import { Powers } from "#lib/Constants.js";
+  import { slide } from "#lib/types/Animations.svelte.js";
   import { type MapData } from "../types/MapData.svelte";
   import AutocompleteInput from "./AutocompleteInput.svelte";
   import Select from "./Select.svelte";

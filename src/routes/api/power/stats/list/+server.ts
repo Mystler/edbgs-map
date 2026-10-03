@@ -1,6 +1,5 @@
-import { dbGetAll } from "$lib/server/DB";
-import { getCurrentCycleStats } from "$lib/server/PowerplayStats";
-import { json } from "@sveltejs/kit";
+import { dbGetAll } from "#lib/server/DB.js";
+import { getCurrentCycleStats } from "#lib/server/PowerplayStats.js";
 
 export async function GET() {
   const q = await dbGetAll<{
@@ -8,7 +7,7 @@ export async function GET() {
     timestamp: string;
     snapshot: string;
   }>("SELECT * FROM cycle_stats ORDER BY id DESC");
-  return json(
+  return Response.json(
     q.map((x) => {
       return {
         id: x.id,

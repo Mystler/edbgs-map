@@ -1,6 +1,6 @@
 import { asset } from "$app/paths";
 
-export const DefaultMapFont = asset("/NotoSans-VariableFont_wdth,wght.ttf");
+export const DefaultMapFont = asset("NotoSans-VariableFont_wdth,wght.ttf");
 
 interface PowerData {
   color: string;

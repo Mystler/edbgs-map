@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { FlyToSystem } from "$lib/types/CurrentCamera.svelte";
-  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
+  import { FlyToSystem } from "#lib/types/CurrentCamera.svelte.js";
+  import { LoadedSystems } from "#lib/types/LoadedData.svelte.js";
 
   let search = $state("");
 </script>

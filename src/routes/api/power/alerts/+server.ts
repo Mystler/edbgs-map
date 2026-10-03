@@ -1,7 +1,6 @@
-import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "$lib/Powerplay";
-import type { SpanshDumpPPData } from "$lib/SpanshAPI";
-import { getAllCacheMatching } from "$lib/server/ValkeyCache";
-import { json } from "@sveltejs/kit";
+import { calculatePPControlSegments, getDecayValue, getLastPPTickDate } from "#lib/Powerplay.js";
+import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
+import { getAllCacheMatching } from "#lib/server/ValkeyCache.js";
 
 export async function GET() {
   // This and last cycle
@@ -28,5 +27,5 @@ export async function GET() {
     if (x.powerConflictProgress !== undefined && x.powerConflictProgress.some((y) => y.progress >= 0.3)) return true;
     return false;
   });
-  return json(cachedResult);
+  return Response.json(cachedResult);
 }

@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
-  import { MapData } from "$lib/types/MapData.svelte";
+  import { CurrentCamera } from "#lib/types/CurrentCamera.svelte.js";
+  import { MapData } from "#lib/types/MapData.svelte.js";
   import { SvelteMap } from "svelte/reactivity";
   import Dialog from "./Dialog.svelte";
-  import { browser } from "$app/environment";
-  import { slide } from "$lib/types/Animations.svelte";
+  import { browser } from "$app/env";
+  import { slide } from "#lib/types/Animations.svelte.js";
   import { faTrashCan } from "@fortawesome/free-solid-svg-icons";
   import FaIcon from "./FaIcon.svelte";
 

@@ -1,5 +1,5 @@
 import { resolve } from "$app/paths";
-import { page } from "$app/state";
+import { page, type ReadonlyURLSearchParams } from "$app/state";
 import { CurrentCamera } from "./types/CurrentCamera.svelte";
 import {
   MapData,
@@ -60,7 +60,7 @@ export function createCustomURL(data: MapData) {
   return params;
 }
 
-export function readCustomURL(params: URLSearchParams, data: MapData) {
+export function readCustomURL(params: ReadonlyURLSearchParams, data: MapData) {
   data.reset();
 
   // Get camera data first
@@ -172,7 +172,7 @@ export function readCustomURL(params: URLSearchParams, data: MapData) {
 }
 
 export async function createShortlink(data: MapData) {
-  const short = await fetch(resolve("/s"), {
+  const short = await fetch(resolve("s"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -183,7 +183,7 @@ export async function createShortlink(data: MapData) {
     alert("Error on creating shareable shortlink!");
     return;
   }
-  const link = page.url.origin + resolve(`/s/${short}`);
+  const link = page.url.origin + resolve(`s/${short}`);
   navigator.clipboard.writeText(link);
   alert("A shareable link has been copied to your clipboard!");
 }

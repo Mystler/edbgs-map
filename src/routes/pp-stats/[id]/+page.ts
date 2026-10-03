@@ -1,5 +1,5 @@
 import { resolve } from "$app/paths";
-import type { getCurrentCycleStats } from "$lib/server/PowerplayStats";
+import type { getCurrentCycleStats } from "#lib/server/PowerplayStats.js";
 import type { PageLoad } from "./$types";
 
 export const load: PageLoad = async ({ params, fetch, depends }) => {

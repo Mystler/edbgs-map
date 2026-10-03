@@ -5,19 +5,19 @@
     getDecayValue,
     getLastPPTickDate,
     powerStateColor,
-  } from "$lib/Powerplay";
+  } from "#lib/Powerplay.js";
   import Time from "svelte-time";
-  import PowerplaySystemInfo from "$lib/components/PowerplaySystemInfo.svelte";
-  import { slide } from "$lib/types/Animations.svelte";
-  import { Powers } from "$lib/Constants";
-  import type { SpanshDumpPPData } from "$lib/SpanshAPI";
-  import { browser } from "$app/environment";
-  import FaIcon from "$lib/components/FaIcon.svelte";
+  import PowerplaySystemInfo from "#lib/components/PowerplaySystemInfo.svelte";
+  import { slide } from "#lib/types/Animations.svelte.js";
+  import { Powers } from "#lib/Constants.js";
+  import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
+  import { browser } from "$app/env";
+  import FaIcon from "#lib/components/FaIcon.svelte";
   import { faCaretDown, faCaretRight, faXmark } from "@fortawesome/free-solid-svg-icons";
   import { on } from "svelte/events";
   import { onMount, untrack } from "svelte";
-  import CopyToClipboardButton from "$lib/components/CopyToClipboardButton.svelte";
-  import Select from "$lib/components/Select.svelte";
+  import CopyToClipboardButton from "#lib/components/CopyToClipboardButton.svelte";
+  import Select from "#lib/components/Select.svelte";
 
   interface Props {
     systems: SpanshDumpPPData[];
@@ -65,6 +65,7 @@
       const { startProgress: startProgressB, startTier: startTierB } = b.cycleStart || calculatePPControlSegments(b);
       const aDecay = getDecayValue(startProgressA, startTierA);
       const bDecay = getDecayValue(startProgressB, startTierB);
+
       return (
         (a.powerConflictProgress
           ? Math.floor(a.powerConflictProgress.reduce((sum, entry) => sum + entry.progress * 120000, 0)) -
@@ -137,7 +138,6 @@
   } as const satisfies Record<string, (a: SpanshDumpPPData, b: SpanshDumpPPData) => number>;
   let sortBy = $state<keyof typeof sortingFunctions>("Total Control Points");
   let descending = $state(true);
-
   let filteredSystems = $derived(
     systems?.filter(
       (x) =>
@@ -158,7 +158,6 @@
           (x.powerStateControlProgress ?? 0) < 0.75),
     ),
   );
-
   let sortedSystems = $derived(
     filteredSystems?.toSorted((a, b) => (descending ? -1 : 1) * sortingFunctions[sortBy](a, b)),
   );

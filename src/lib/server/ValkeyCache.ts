@@ -1,4 +1,4 @@
-import { building } from "$app/environment";
+import { building } from "$app/env";
 import Valkey from "iovalkey";
 
 let isReconnecting = false;

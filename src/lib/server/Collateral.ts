@@ -1,8 +1,8 @@
-import type { SpanshDumpPPData } from "$lib/SpanshAPI";
+import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
 import { Vector3 } from "three";
 import { getAllCacheMatching } from "./ValkeyCache";
 import { PointOctree } from "sparse-octree";
-import { calculatePPControlSegments, getCPToTierDrop } from "$lib/Powerplay";
+import { calculatePPControlSegments, getCPToTierDrop } from "#lib/Powerplay.js";
 
 export type CollateralSphereInfo = SpanshDumpPPData & {
   collateral: {

@@ -1,11 +1,11 @@
 import { describe, expect, vi, test, assert } from "vitest";
 import { processPPJournalMessage } from "./EDDNListener";
-import type { SpanshDumpPPData } from "$lib/SpanshAPI";
-import { logSnipe } from "$lib/server/DB";
-import { deleteCache, setCache } from "$lib/server/ValkeyCache";
+import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
+import { logSnipe } from "#lib/server/DB.js";
+import { deleteCache, setCache } from "#lib/server/ValkeyCache.js";
 
 // Set up mocks to bypass Valkey and DB with implementations internal to the tests.
-vi.mock(import("$lib/server/ValkeyCache"), () => {
+vi.mock(import("#lib/server/ValkeyCache.js"), () => {
   const testCache: { [key: string]: string } = {};
   return {
     deleteCache: vi.fn(async (key: string) => {
@@ -19,7 +19,7 @@ vi.mock(import("$lib/server/ValkeyCache"), () => {
     },
   };
 });
-vi.mock(import("$lib/server/DB"), () => {
+vi.mock(import("#lib/server/DB.js"), () => {
   return {
     logSnipe: vi.fn(
       async (

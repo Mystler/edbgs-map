@@ -3,7 +3,7 @@
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
   import { resolve } from "$app/paths";
   import type { SpanshSystem } from "../SpanshAPI";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
   import { untrack } from "svelte";
 
   interface Props {
@@ -13,7 +13,7 @@
 
   async function fetchData(): Promise<SpanshSystem[]> {
     const m = HUDInfo.showMessage(power.name, "Power");
-    let response = await fetch(resolve(`/api/power/${power.name}`));
+    let response = await fetch(resolve(`api/power/${power.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for power: ${power.name}`);

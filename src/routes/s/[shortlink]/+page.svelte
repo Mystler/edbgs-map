@@ -1,7 +1,7 @@
 <script lang="ts">
-  import Map from "$lib/components/Map.svelte";
-  import { readCustomURL } from "$lib/CustomURL";
-  import { MapData } from "$lib/types/MapData.svelte";
+  import Map from "#lib/components/Map.svelte";
+  import { readCustomURL } from "#lib/CustomURL.js";
+  import { MapData } from "#lib/types/MapData.svelte.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();

@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { PageProps } from "./$types";
-  import CycleStats from "$lib/components/CycleStats.svelte";
+  import CycleStats from "#lib/components/CycleStats.svelte";
 
   let { data }: PageProps = $props();
 </script>

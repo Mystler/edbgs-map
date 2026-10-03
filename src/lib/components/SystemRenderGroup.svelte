@@ -17,17 +17,17 @@
     SphereGeometry,
     MeshBasicMaterial,
   } from "three";
-  import { CurrentCamera, FlyToSystem, FlyToSystemOnceLoaded } from "$lib/types/CurrentCamera.svelte";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { CurrentCamera, FlyToSystem, FlyToSystemOnceLoaded } from "#lib/types/CurrentCamera.svelte.js";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
   import { getContext, untrack } from "svelte";
   import { InstancedMesh2 } from "@three.ez/instanced-mesh";
-  import { Powers } from "$lib/Constants";
+  import { Powers } from "#lib/Constants.js";
   import { CurrentMeasurement } from "./Measurement.svelte";
-  import type { MapData } from "$lib/types/MapData.svelte";
+  import type { MapData } from "#lib/types/MapData.svelte.js";
   import { Spring } from "svelte/motion";
   import StarShape from "../shapes/StarShape";
   import TriangleShape from "../shapes/TriangleShape";
-  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
+  import { LoadedSystems } from "#lib/types/LoadedData.svelte.js";
 
   interface Props {
     systems: SpanshSystem[];

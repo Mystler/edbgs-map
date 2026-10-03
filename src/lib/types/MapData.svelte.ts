@@ -1,4 +1,4 @@
-import { randomColor } from "$lib/Helpers";
+import { randomColor } from "#lib/Helpers.js";
 
 export interface FactionData {
   name: string;

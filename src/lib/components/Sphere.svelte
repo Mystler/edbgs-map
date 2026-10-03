@@ -5,10 +5,10 @@
   import { untrack } from "svelte";
   import { T } from "@threlte/core";
   import { DoubleSide, Vector3 } from "three";
-  import { HUDInfo } from "$lib/types/HUDInfo.svelte";
+  import { HUDInfo } from "#lib/types/HUDInfo.svelte.js";
   import SystemRenderGroup from "./SystemRenderGroup.svelte";
-  import { LoadedSystems } from "$lib/types/LoadedData.svelte";
-  import { scale3d } from "$lib/types/Animations.svelte";
+  import { LoadedSystems } from "#lib/types/LoadedData.svelte.js";
+  import { scale3d } from "#lib/types/Animations.svelte.js";
   import { global, transitions } from "@threlte/extras";
 
   interface Props {
@@ -21,7 +21,7 @@
 
   async function fetchData(): Promise<SpanshSystem | null> {
     const m = HUDInfo.showMessage(sphere.name, "Sphere");
-    let response = await fetch(resolve(`/api/system/${sphere.name}`));
+    let response = await fetch(resolve(`api/system/${sphere.name}`));
     HUDInfo.removeMessage(m);
     if (!response.ok) {
       alert(`Error while fetching data for sphere: ${sphere.name}`);
@@ -68,7 +68,8 @@
     if (!sphere.position) return;
     colonizationLoaded = true;
     const m = HUDInfo.showMessage(sphere.name, "Colonization Targets");
-    fetch(resolve(`/api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
+
+    fetch(resolve(`api/colonization/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
       .then((x) => x.json())
       .then((x) => {
         colonizationTargets = x;
@@ -90,7 +91,8 @@
     if (!sphere.position) return;
     acquisitionLoaded = true;
     const m = HUDInfo.showMessage(sphere.name, "Acquisition Targets");
-    fetch(resolve(`/api/acquisition/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
+
+    fetch(resolve(`api/acquisition/${sphere.position[0]}/${sphere.position[1]}/${sphere.position[2]}`))
       .then((x) => x.json())
       .then((x) => {
         acquisitionTargets = x;

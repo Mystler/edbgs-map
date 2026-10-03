@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invalidate } from "$app/navigation";
-  import FaIcon from "$lib/components/FaIcon.svelte";
-  import PowerplayPageNav from "$lib/components/PowerplayPageNav.svelte";
+  import FaIcon from "#lib/components/FaIcon.svelte";
+  import PowerplayPageNav from "#lib/components/PowerplayPageNav.svelte";
   import { faRotate } from "@fortawesome/free-solid-svg-icons";
   import Time from "svelte-time/Time.svelte";
   import type { PageProps } from "./$types";

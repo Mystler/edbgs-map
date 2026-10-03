@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Map from "$lib/components/Map.svelte";
-  import { MapData } from "$lib/types/MapData.svelte";
-  import MapSetup from "$lib/components/MapSetup.svelte";
-  import { browser } from "$app/environment";
-  import { CurrentCamera } from "$lib/types/CurrentCamera.svelte";
+  import Map from "#lib/components/Map.svelte";
+  import { MapData } from "#lib/types/MapData.svelte.js";
+  import MapSetup from "#lib/components/MapSetup.svelte";
+  import { browser } from "$app/env";
+  import { CurrentCamera } from "#lib/types/CurrentCamera.svelte.js";
   import { page } from "$app/state";
-  import { readCustomURL } from "$lib/CustomURL";
+  import { readCustomURL } from "#lib/CustomURL.js";
 
   let mapData = $state(new MapData());
   let setupComplete = $state(false);

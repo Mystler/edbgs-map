@@ -1,6 +1,5 @@
-import { getCurrentCycleStats } from "$lib/server/PowerplayStats";
-import { json } from "@sveltejs/kit";
+import { getCurrentCycleStats } from "#lib/server/PowerplayStats.js";
 
 export async function GET() {
-  return json(await getCurrentCycleStats());
+  return Response.json(await getCurrentCycleStats());
 }
