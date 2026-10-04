@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { T } from "@threlte/core";
+  import { T, useThrelte } from "@threlte/core";
   import { useCursor, useInteractivity } from "@threlte/extras";
   import { type SpanshSystem } from "../SpanshAPI";
   import {
@@ -253,9 +253,12 @@
         }),
     ),
   );
+  const { canvas } = useThrelte();
   const mapData: MapData = getContext("mapData");
   const interactivity = useInteractivity();
-  const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor();
+  // In Threlte/extras 9.22 there seems to be a conflict of useCursor setting the cursor on document body but a generic cursor on the
+  // Canvas wrapper taking priority and thus overriding it. We are fixing this by manually setting the canvas as the target.
+  const { onPointerEnter: cursorEnter, onPointerLeave: cursorLeave } = useCursor("pointer", "auto", canvas);
   interface IM2InteractivityEvent {
     instanceId: number;
   }
