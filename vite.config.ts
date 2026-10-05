@@ -13,7 +13,7 @@ export default defineConfig({
     tailwindcss(),
     sveltekit({
       adapter: adapter(),
-      paths: { base: "/3d" },
+      paths: { base: "/3d", origin: process.env.ORIGIN },
     }),
   ],
   define: {
