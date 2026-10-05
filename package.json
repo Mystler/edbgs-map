@@ -32,7 +32,7 @@
     "chartjs-plugin-datalabels": "^2.2.0",
     "colorjs.io": "^0.7.1",
     "dayjs": "^1.11.23",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.23.0",
     "globals": "^17.13.0",
