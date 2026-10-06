@@ -41,7 +41,6 @@ module.exports = {
       env: {
         PORT: 8000,
         HOST: "127.0.0.1",
-        ORIGIN: "https://www.example.com",
       },
       time: true,
     },
