@@ -1,7 +1,7 @@
-import sqlite3 from "sqlite3";
+import sqlite3 from "better-sqlite3";
 import type { SpanshDumpPPData } from "../SpanshAPI";
 
-export const db = new sqlite3.Database("db.sqlite3");
+export const db = sqlite3("db.sqlite3");
 
 // Setup the database
 db.exec("CREATE TABLE IF NOT EXISTS shortlinks (short TEXT PRIMARY KEY, long TEXT)");
@@ -10,30 +10,12 @@ db.exec(
 );
 db.exec("CREATE TABLE IF NOT EXISTS cycle_stats (id INTEGER PRIMARY KEY, timestamp TEXT, snapshot TEXT)");
 
-/** Wrapper for the db.get function that allows async awaiting for the results. */
 export async function dbGet<T>(sql: string, ...params: unknown[]): Promise<T | undefined> {
-  return await new Promise<T | undefined>((resolve, reject) => {
-    db.get<T | undefined>(sql, params, (err, row) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(row);
-      }
-    });
-  });
+  return db.prepare<unknown[], T>(sql).get(...params);
 }
 
-/** Wrapper for the db.all function that allows async awaiting for the results. */
 export async function dbGetAll<T>(sql: string, ...params: unknown[]): Promise<T[]> {
-  return await new Promise<T[]>((resolve, reject) => {
-    db.all<T>(sql, params, (err, rows) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(rows);
-      }
-    });
-  });
+  return db.prepare<unknown[], T>(sql).all(...params);
 }
 
 export async function logSnipe(
@@ -44,13 +26,7 @@ export async function logSnipe(
   old_dump: SpanshDumpPPData | null,
   new_dump: SpanshDumpPPData,
 ) {
-  db.run(
+  db.prepare(
     "INSERT INTO snipe_history (system, type, power, amount, old_dump, new_dump) VALUES (?, ?, ?, ?, ?, ?)",
-    system,
-    type,
-    power,
-    amount,
-    JSON.stringify(old_dump),
-    JSON.stringify(new_dump),
-  );
+  ).run(system, type, power, amount, JSON.stringify(old_dump), JSON.stringify(new_dump));
 }

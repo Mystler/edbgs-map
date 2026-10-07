@@ -22,6 +22,9 @@ export async function scheduleStatSnapshot() {
 function takeSnapshot() {
   console.log("Taking EOC Powerplay stats snapshot.");
   getCurrentCycleStats().then((x) => {
-    db.run("INSERT INTO cycle_stats (timestamp, snapshot) VALUES (?, ?)", new Date().toISOString(), JSON.stringify(x));
+    db.prepare("INSERT INTO cycle_stats (timestamp, snapshot) VALUES (?, ?)").run(
+      new Date().toISOString(),
+      JSON.stringify(x),
+    );
   });
 }
