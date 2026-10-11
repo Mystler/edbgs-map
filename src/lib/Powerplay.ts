@@ -51,9 +51,9 @@ export function getCorrectedSegmentProgress(totalCP: number, startTier: string) 
   return (totalCP - tierStart) / tierRange;
 }
 
-export function getCPToTierDrop(totalCP: number, startTier: string) {
-  const tierStart = startTier === "Stronghold" ? 1350000 : startTier === "Fortified" ? 700000 : 350000;
-  return totalCP - tierStart;
+export function getCPToTierDrop(netCP: number, startProgress: number, startTier: string) {
+  const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
+  return startProgress * tierRange + netCP;
 }
 
 export function segmentPercentToCP(percent: number, startTier: string) {

@@ -126,7 +126,11 @@
     </div>
     <div>
       <b>CP To Tier Drop:</b>
-      {getCPToTierDrop(controlData.totalCP, startTier).toLocaleString("en-US")}
+      {getCPToTierDrop(
+        (data.powerStateReinforcement ?? 0) - (data.powerStateUndermining ?? 0),
+        startProgress,
+        startTier,
+      ).toLocaleString("en-US")}
     </div>
     <div>
       <b>Expected Decay From This Cycle:</b>

@@ -2,7 +2,7 @@ import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
 import { Vector3 } from "three";
 import { getAllCacheMatching } from "./ValkeyCache";
 import { PointOctree } from "sparse-octree";
-import { calculatePPControlSegments, getCPToTierDrop } from "#lib/Powerplay.js";
+import { getCPToTierDrop } from "#lib/Powerplay.js";
 
 export type CollateralSphereInfo = SpanshDumpPPData & {
   collateral: {
@@ -79,7 +79,8 @@ export async function getCollateralDamageSystems(): Promise<CollateralSphereInfo
 
     if (collateral.soleSupportingSystemsSH.length > 0 || collateral.soleSupportingSystemsFort.length > 0) {
       collateral.CPToTierDrop = getCPToTierDrop(
-        calculatePPControlSegments(sys).totalCP,
+        (sys.powerStateReinforcement ?? 0) - (sys.powerStateUndermining ?? 0),
+        sys.cycleStart?.startProgress ?? sys.powerStateControlProgress ?? 0,
         sys.cycleStart?.startTier ?? sys.powerState ?? "",
       );
       results.push({
