@@ -47,6 +47,7 @@
    * The grid follows the camera on the y axis. Its origin and label then shift in increments of 10 ly with our camera movements.
    */
   function updateGrid(x: number, y: number, z: number) {
+    if (!gridGroup) return;
     gridGroup.position.set(Math.round(x / 10) * 10, y, Math.round(z / 10) * 10);
     gridLabel = `${gridGroup.position.x} : ${Math.round(gridGroup.position.y)} : ${-gridGroup.position.z}`;
   }
@@ -210,60 +211,6 @@
 
 <svelte:window onmouseup={onMouseChange} onmousedown={onMouseChange} onkeydown={onKeyDown} onkeyup={onKeyUp} />
 
-<T.PerspectiveCamera
-  makeDefault
-  position={cameraSetup.position}
-  fov={60}
-  near={1}
-  far={2000}
-  oncreate={(ref) => {
-    if (cameraSetup.lookAt) ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
-  }}
->
-  <OrbitControls
-    maxDistance={1000}
-    target={cameraSetup.lookAt}
-    panSpeed={HUDInfo.PanSpeed}
-    onchange={(e) => {
-      updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
-      CurrentCamera.LookAt = e.target.target.toArray();
-      CurrentCamera.Position = e.target.object.position.toArray();
-      cameraAngle = e.target.getAzimuthalAngle();
-      arrowGroup.position.set(...e.target.target.toArray());
-    }}
-    bind:ref={controls}
-    mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
-    screenSpacePanning={HUDInfo.PanMode === "screen" ? true : false}
-    oncreate={(ref) => {
-      cameraAngle = ref.getAzimuthalAngle();
-      // HACK: Monkey patching OrbitControls to allow for panning up when not in screen space.
-      const controls = ref as PatchedOrbitControls;
-      const v = new Vector3();
-      controls._panUp = (distance: number, objectMatrix: Matrix4) => {
-        if (controls.screenSpacePanning === true && panPlane === "horizontal") {
-          v.setFromMatrixColumn(objectMatrix, 2).multiplyScalar(-1);
-        } else if (controls.screenSpacePanning === true) {
-          v.setFromMatrixColumn(objectMatrix, 1);
-        } else if (panPlane === "horizontal") {
-          v.setFromMatrixColumn(objectMatrix, 0);
-          v.crossVectors(controls.object.up, v);
-        } else if (panPlane === "vertical") {
-          v.set(controls.object.up.x, controls.object.up.y, controls.object.up.z);
-        }
-        v.multiplyScalar(distance);
-        controls._panOffset.add(v);
-      };
-      CurrentCamera.Controls = ref;
-    }}
-    onstart={() => {
-      if (controls.state === _STATE.PAN) isPanning = true;
-    }}
-    onend={() => {
-      isPanning = false;
-    }}
-  />
-</T.PerspectiveCamera>
-
 <T.Group bind:ref={gridGroup} visible={HUDInfo.ShowGrid}>
   <Grid
     sectionThickness={1}
@@ -318,3 +265,57 @@
     {/if}
   </InstancedMesh>
 </T.Group>
+
+<T.PerspectiveCamera
+  makeDefault
+  position={cameraSetup.position}
+  fov={60}
+  near={1}
+  far={2000}
+  oncreate={(ref) => {
+    if (cameraSetup.lookAt) ref.lookAt(cameraSetup.lookAt[0], cameraSetup.lookAt[1], cameraSetup.lookAt[2]);
+  }}
+>
+  <OrbitControls
+    maxDistance={1000}
+    target={cameraSetup.lookAt}
+    panSpeed={HUDInfo.PanSpeed}
+    onchange={(e) => {
+      updateGrid(e.target.target.x, e.target.target.y, e.target.target.z);
+      CurrentCamera.LookAt = e.target.target.toArray();
+      CurrentCamera.Position = e.target.object.position.toArray();
+      cameraAngle = e.target.getAzimuthalAngle();
+      arrowGroup?.position.set(...e.target.target.toArray());
+    }}
+    bind:ref={controls}
+    mouseButtons={{ LEFT: MOUSE.ROTATE, MIDDLE: MOUSE.PAN, RIGHT: MOUSE.PAN }}
+    screenSpacePanning={HUDInfo.PanMode === "screen" ? true : false}
+    oncreate={(ref) => {
+      cameraAngle = ref.getAzimuthalAngle();
+      // HACK: Monkey patching OrbitControls to allow for panning up when not in screen space.
+      const controls = ref as PatchedOrbitControls;
+      const v = new Vector3();
+      controls._panUp = (distance: number, objectMatrix: Matrix4) => {
+        if (controls.screenSpacePanning === true && panPlane === "horizontal") {
+          v.setFromMatrixColumn(objectMatrix, 2).multiplyScalar(-1);
+        } else if (controls.screenSpacePanning === true) {
+          v.setFromMatrixColumn(objectMatrix, 1);
+        } else if (panPlane === "horizontal") {
+          v.setFromMatrixColumn(objectMatrix, 0);
+          v.crossVectors(controls.object.up, v);
+        } else if (panPlane === "vertical") {
+          v.set(controls.object.up.x, controls.object.up.y, controls.object.up.z);
+        }
+        v.multiplyScalar(distance);
+        controls._panOffset.add(v);
+      };
+      CurrentCamera.Controls = ref;
+    }}
+    onstart={() => {
+      if (controls.state === _STATE.PAN) isPanning = true;
+    }}
+    onend={() => {
+      isPanning = false;
+    }}
+  />
+</T.PerspectiveCamera>
