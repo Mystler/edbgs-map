@@ -79,7 +79,8 @@ export async function getCollateralDamageSystems(): Promise<CollateralSphereInfo
 
     if (collateral.soleSupportingSystemsSH.length > 0 || collateral.soleSupportingSystemsFort.length > 0) {
       collateral.CPToTierDrop = getCPToTierDrop(
-        (sys.powerStateReinforcement ?? 0) - (sys.powerStateUndermining ?? 0),
+        sys.powerStateReinforcement,
+        sys.powerStateUndermining,
         sys.cycleStart?.startProgress ?? sys.powerStateControlProgress ?? 0,
         sys.cycleStart?.startTier ?? sys.powerState ?? "",
       );

@@ -4,8 +4,11 @@ import { deleteCache, getCache, setCache } from "#lib/server/ValkeyCache.js";
 import {
   calculatePPControlSegments,
   getCorrectedSegmentProgress,
+  getCPToTierDrop,
   getDecayValue,
   getLastPPTickDate,
+  segmentPercentToCP,
+  segmentPercentToTotalCP,
 } from "#lib/Powerplay.js";
 import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
@@ -326,14 +329,19 @@ export function checkForSnipe(
   currData: SpanshDumpPPData,
   lastPPTick = getLastPPTickDate(),
 ): boolean {
-  if (currData.powerState === "Unoccupied" /*&& prevData?.powerState === "Fortified"*/ && prevData?.controllingPower) {
+  if (currData.powerState === "Unoccupied" && prevData?.controllingPower && prevData.cycleStart) {
     // Snipes from control to unoccupied.
     // Note that without deep analysis, we cannot know if an exploited system dropped due to nearby fort drop or was actually sniped itself.
     // Other types of snipes that leave the power in control are handled further down.
-    const prevProg = prevData?.powerStateControlProgress ?? 0;
-    const tierCP =
-      prevData.powerState === "Stronghold" ? 1000000 : prevData.powerState === "Fortified" ? 650000 : 350000;
-    const cp = Math.max(0, Math.floor(prevProg * tierCP));
+    const cp = Math.max(
+      0,
+      getCPToTierDrop(
+        prevData.powerStateReinforcement,
+        prevData.powerStateUndermining,
+        prevData.cycleStart.startProgress,
+        prevData.cycleStart.startTier,
+      ),
+    );
     logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
     return true;
   } else if (currData.powerConflictProgress) {
@@ -379,11 +387,12 @@ export function checkForSnipe(
     // UM Snipe, just check for 25k drops (beyond expected decay), better catch a bit too much than too little
     const um = currData?.powerStateUndermining ?? 0;
     const umDiff = um - (prevData?.powerStateUndermining ?? 0);
+    const currPPCS = calculatePPControlSegments(currData);
     const {
       startProgress: currStartProgress,
       startTier: currStartTier,
       startBar: currStartBar,
-    } = currData.cycleStart || calculatePPControlSegments(currData);
+    } = currData.cycleStart || currPPCS;
     if (umDiff > 25000 && um > getDecayValue(currStartProgress, currStartTier) + 25000) {
       logSnipe(currData.name, "Undermining", currData.controllingPower, umDiff, prevData, currData);
       return true;
@@ -403,81 +412,60 @@ export function checkForSnipe(
       logSnipe(currData.name, "Reinforcement", currData.controllingPower, reinfDiff, prevData, currData);
       return true;
     }
-    // EOC progress control snipes that weren't caught.
+    // EOC progress control snipes that weren't caught so far.
+    // From this point forward require prevData to exist
+    if (!prevData) return false;
+    const prevDataDate = new Date(prevData.date);
+    // Log snipes for systems that should be dropped but have cache bug
     if (
-      (prevData && new Date(prevData.date) < lastPPTick) ||
+      currData.powerState === "Exploited" &&
+      currData.powerStateControlProgress < 0 &&
+      prevData.powerState === "Exploited" &&
+      prevDataDate < lastPPTick
+    ) {
+      const cp = Math.max(0, segmentPercentToCP(prevData.powerStateControlProgress ?? 0, prevData.powerState));
+      logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
+      return true;
+    }
+    // Check movements around what should be a cycle tick
+    if (
+      prevDataDate < lastPPTick ||
       (currData.lastCycleStart &&
         currStartBar !== currData.lastCycleStart.startBar &&
-        currStartBar !== prevData?.lastCycleStart?.startBar &&
-        currStartBar !== prevData?.cycleStart?.startBar)
+        currStartBar !== prevData.lastCycleStart?.startBar &&
+        currStartBar !== prevData.cycleStart?.startBar)
     ) {
-      const prevProg = prevData?.powerStateControlProgress ?? 0;
-      // Use reverse calculated start of cycle data, in-cycle stuff should be caught above.
-      // Sanity check currProg as well because of the stupid game cache bug (showing last cycle's tier with >100% or <0% progress still).
-      // Undermining drops that changed tier over EOC
-      if (prevData?.powerState === "Stronghold" && prevProg > 0 && currStartTier === "Fortified") {
-        const cp = Math.floor(prevProg * 1000000 + (1 - currStartProgress) * 650000);
-        logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
-        return true;
-      }
-      if (prevData?.powerState === "Fortified" && prevProg > 0 && currStartTier === "Exploited") {
-        const cp = Math.floor(prevProg * 650000 + (1 - currStartProgress) * 350000);
-        logSnipe(currData.name, "EOC Undermining", currData.controllingPower, cp, prevData, currData);
-        return true;
-      }
-      // Reinforcement drops that changed tier over EOC
+      // Require prev cycle start data.
+      if (!prevData.cycleStart) return false;
+      const prevPPCS = calculatePPControlSegments(prevData);
+      const currTotalStartCP = segmentPercentToTotalCP(currStartProgress, currStartTier);
+      // Ignore snipes above 25% that did less than 20% in the same tier
       if (
-        prevData?.powerState === "Exploited" &&
-        prevProg < 1 &&
-        currStartTier === "Fortified" &&
-        currData.powerStateControlProgress >= 0
-      ) {
-        const cp = Math.floor(currStartProgress * 650000 + (1 - prevProg) * 350000);
+        prevData.cycleStart.startTier === currStartTier &&
+        currStartProgress > 0.25 &&
+        Math.abs(currStartProgress - prevPPCS.currentProgress) < 0.2
+      )
+        return false;
+      // Ignore maxed Strongholds resetting
+      if (currStartTier === "Stronghold" && currStartProgress > 0.999) {
+        return false;
+      }
+      // Get marker difference between last marker and current cycle start marker.
+      const diffMarkerCP = currTotalStartCP - prevPPCS.totalCP;
+      // Require marker to have moved at least 25k UM or reinf threshold reinforcements
+      if (diffMarkerCP > -25000 && diffMarkerCP < reinfThreshold) return false;
+      // Calculate prev cycle CP without caps, to include overcapped CP that can be snipe countered.
+      const prevCP =
+        segmentPercentToTotalCP(prevData.cycleStart.startProgress, prevData.cycleStart.startTier) +
+        (prevData.powerStateReinforcement ?? 0) -
+        (prevData.powerStateUndermining ?? 0);
+      const cp = currTotalStartCP - prevCP;
+      if (cp > 0) {
         logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
         return true;
-      }
-      if (
-        prevData?.powerState === "Fortified" &&
-        prevProg < 1 &&
-        currStartTier === "Stronghold" &&
-        currData.powerStateControlProgress >= 0
-      ) {
-        const cp = Math.floor(currStartProgress * 1000000 + (1 - prevProg) * 650000);
-        logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
+      } else {
+        logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
         return true;
-      }
-      // Uncaught major percentage changes in same tier between cycles.
-      if (prevData?.powerState === currData.powerState && prevData?.powerState === currStartTier) {
-        if (
-          (currStartProgress > 0.25 && Math.abs(currStartProgress - prevProg) < 0.2) || // Ignore snipes above 25% that did less than 20%
-          (currData.powerState === "Stronghold" && currStartProgress > 0.999) // Ignore maxed Strongholds resetting
-        ) {
-          return false;
-        }
-        let shouldBeDropped = false;
-        let currProgClamped = currData.powerStateControlProgress;
-        let prevProgClamped = prevProg;
-        if (
-          currData.powerState === "Exploited" &&
-          currData.powerStateControlProgress < 0 &&
-          prevData.powerState === "Exploited" &&
-          new Date(prevData.date) < lastPPTick
-        ) {
-          shouldBeDropped = true;
-          currProgClamped = 0;
-          prevProgClamped = Math.max(0, prevProg);
-        }
-        const cp = Math.floor(
-          (currProgClamped - prevProgClamped) *
-            (currData.powerState === "Stronghold" ? 1000000 : currData.powerState === "Fortified" ? 650000 : 350000),
-        );
-        if (cp > reinfThreshold) {
-          logSnipe(currData.name, "EOC Reinforcement", currData.controllingPower, cp, prevData, currData);
-          return true;
-        } else if (cp < -25000 || shouldBeDropped) {
-          logSnipe(currData.name, "EOC Undermining", currData.controllingPower, -cp, prevData, currData);
-          return true;
-        }
       }
     }
   }

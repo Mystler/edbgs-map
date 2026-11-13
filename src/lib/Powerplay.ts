@@ -30,9 +30,7 @@ export function getLastPPTickDate() {
  */
 export function calculatePPControlSegments(data: SpanshDumpPPData) {
   const segmentProgress = data.powerStateControlProgress ?? 0;
-  const tierStart = data.powerState === "Stronghold" ? 1350000 : data.powerState === "Fortified" ? 700000 : 350000;
-  const tierRange = data.powerState === "Stronghold" ? 1000000 : data.powerState === "Fortified" ? 650000 : 350000;
-  const totalCP = Math.round(tierStart + segmentProgress * tierRange);
+  const totalCP = segmentPercentToTotalCP(segmentProgress, data.powerState!);
   const cycleStartCP = totalCP - (data.powerStateReinforcement ?? 0) + (data.powerStateUndermining ?? 0);
   const currentBar = totalCPToBarPercent(totalCP);
   const startBar = totalCPToBarPercent(cycleStartCP);
@@ -45,20 +43,38 @@ export function calculatePPControlSegments(data: SpanshDumpPPData) {
   return { startBar, currentBar, currentProgress, currentTier, adjustedProgress, startProgress, startTier, totalCP };
 }
 
+/**
+ * To account for caching issues, re-calculate segment progress based on total CP and the tier we should be in.
+ * In comparison to calculatePPControlSegments' currentProgress, this can be a different tier that the marker isn't in.
+ */
 export function getCorrectedSegmentProgress(totalCP: number, startTier: string) {
   const tierStart = startTier === "Stronghold" ? 1350000 : startTier === "Fortified" ? 700000 : 350000;
   const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
   return (totalCP - tierStart) / tierRange;
 }
 
-export function getCPToTierDrop(netCP: number, startProgress: number, startTier: string) {
+/**
+ * Calculate the required CP to drop the system from the given tier, accounting for current CP movement.
+ */
+export function getCPToTierDrop(
+  reinforcement: number | undefined,
+  undermining: number | undefined,
+  startProgress: number,
+  startTier: string,
+) {
   const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
-  return startProgress * tierRange + netCP;
+  return startProgress * tierRange + (reinforcement ?? 0) - (undermining ?? 0);
 }
 
 export function segmentPercentToCP(percent: number, startTier: string) {
   const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
   return percent * tierRange;
+}
+
+export function segmentPercentToTotalCP(percent: number, startTier: string) {
+  const tierStart = startTier === "Stronghold" ? 1350000 : startTier === "Fortified" ? 700000 : 350000;
+  const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
+  return Math.round(tierStart + percent * tierRange);
 }
 
 function totalCPToBarPercent(cp: number) {

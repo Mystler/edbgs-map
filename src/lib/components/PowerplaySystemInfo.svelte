@@ -127,7 +127,8 @@
     <div>
       <b>CP To Tier Drop:</b>
       {getCPToTierDrop(
-        (data.powerStateReinforcement ?? 0) - (data.powerStateUndermining ?? 0),
+        data.powerStateReinforcement,
+        data.powerStateUndermining,
         startProgress,
         startTier,
       ).toLocaleString("en-US")}

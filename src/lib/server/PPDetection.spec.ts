@@ -520,7 +520,7 @@ describe("EDDN Powerplay Data Processing", () => {
       await processPPJournalMessage({
         event: "FSDJump",
         StarSystem: "PPDataTest2",
-        SystemAddress: 1,
+        SystemAddress: 2,
         timestamp: "2026-05-06T17:05:00Z",
         PowerplayState: "Unoccupied",
         PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0.5 }],
@@ -531,11 +531,124 @@ describe("EDDN Powerplay Data Processing", () => {
       await processPPJournalMessage({
         event: "FSDJump",
         StarSystem: "PPDataTest2",
-        SystemAddress: 1,
+        SystemAddress: 2,
         timestamp: "2026-05-07T10:05:00Z",
         PowerplayState: "Unoccupied",
         PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 0 }],
       }),
     ).toBe(false);
+  });
+  test("EOC Reinf Snipe accounts for progress cap", async () => {
+    vi.setSystemTime(new Date("2026-05-13T20:00:00Z"));
+    // Process this first to seed cycle start data.
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-12T16:05:00Z",
+        PowerplayState: "Fortified",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.1,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    // Send UM capped data
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-13T16:05:00Z",
+        PowerplayState: "Fortified",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: -0.1346,
+        PowerplayStateReinforcement: 100000,
+        PowerplayStateUndermining: 500000,
+      }),
+    ).toBe(true);
+    vi.mocked(logSnipe).mockClear();
+    vi.setSystemTime(new Date("2026-05-14T11:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-14T10:05:00Z",
+        PowerplayState: "Fortified",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.2,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    expect(logSnipe).toHaveBeenCalled();
+    expect(vi.mocked(logSnipe).mock.lastCall![3]).toBe(465_000);
+  });
+  test("EOC UM Snipe accounts for progress cap", async () => {
+    vi.setSystemTime(new Date("2026-05-20T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-20T16:05:00Z",
+        PowerplayState: "Fortified",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 1.3846,
+        PowerplayStateReinforcement: 5_000_000,
+        PowerplayStateUndermining: 1_000_000,
+      }),
+    ).toBe(true);
+    expect(logSnipe).toHaveBeenCalled();
+    vi.mocked(logSnipe).mockClear();
+    vi.setSystemTime(new Date("2026-05-21T11:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-21T10:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 0.9,
+        PowerplayStateReinforcement: 0,
+        PowerplayStateUndermining: 0,
+      }),
+    ).toBe(true);
+    expect(logSnipe).toHaveBeenCalled();
+    expect(vi.mocked(logSnipe).mock.lastCall![3]).toBe(4_165_000);
+  });
+  test("EOC UM Snipe System Drop accounts for progress cap", async () => {
+    vi.setSystemTime(new Date("2026-05-26T20:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-26T16:05:00Z",
+        PowerplayState: "Exploited",
+        ControllingPower: "Aisling Duval",
+        PowerplayStateControlProgress: 1.464,
+        PowerplayStateReinforcement: 5_000_000,
+        PowerplayStateUndermining: 1_000_000,
+      }),
+    ).toBe(true);
+    expect(logSnipe).toHaveBeenCalled();
+    vi.mocked(logSnipe).mockClear();
+    vi.setSystemTime(new Date("2026-05-27T11:00:00Z"));
+    expect(
+      await processPPJournalMessage({
+        event: "FSDJump",
+        StarSystem: "PPDataTest",
+        SystemAddress: 1,
+        timestamp: "2026-05-27T10:05:00Z",
+        PowerplayState: "Unoccupied",
+        PowerplayConflictProgress: [{ Power: "Aisling Duval", ConflictProgress: 1 }],
+      }),
+    ).toBe(true);
+    expect(logSnipe).toHaveBeenCalled();
+    expect(vi.mocked(logSnipe).mock.lastCall![3]).toBe(4_315_000);
   });
 });
