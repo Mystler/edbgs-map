@@ -13,6 +13,7 @@
   import Select from "#lib/components/Select.svelte";
   import { browser } from "$app/env";
   import type { SpanshDumpPPData } from "#lib/SpanshAPI.js";
+  import { equals } from "#lib/Helpers.ts";
 
   interface Props {
     spheres: CollateralSphereInfo[];
@@ -232,7 +233,7 @@
                   lastUpdate >= lastTick &&
                   sphere.powerState !== "Unoccupied" &&
                   (sphere.cycleStart?.startBar ?? 0) < 1 &&
-                  sphere.lastCycleStart?.startBar === sphere.cycleStart?.startBar,
+                  equals(sphere.lastCycleStart?.startBar, sphere.cycleStart?.startBar),
               }}
               relative
               live

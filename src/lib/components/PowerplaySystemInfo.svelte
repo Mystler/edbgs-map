@@ -20,6 +20,7 @@
   import FaIcon from "./FaIcon.svelte";
   import Tooltip from "./Tooltip.svelte";
   import Time from "svelte-time";
+  import { equals } from "#lib/Helpers.ts";
 
   interface Props {
     data: SpanshDumpPPData | null;
@@ -224,7 +225,7 @@
                 date >= lastTick &&
                 ppInfo.powerState !== "Unoccupied" &&
                 (ppInfo.cycleStart?.startBar ?? 0) < 1 &&
-                ppInfo.lastCycleStart?.startBar === ppInfo.cycleStart?.startBar,
+                equals(ppInfo.lastCycleStart?.startBar, ppInfo.cycleStart?.startBar),
               underline: true,
               "decoration-dashed": true,
               "decoration-1": true,

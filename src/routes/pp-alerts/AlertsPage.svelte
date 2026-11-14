@@ -18,6 +18,7 @@
   import { onMount, untrack } from "svelte";
   import CopyToClipboardButton from "#lib/components/CopyToClipboardButton.svelte";
   import Select from "#lib/components/Select.svelte";
+  import { equals } from "#lib/Helpers.ts";
 
   interface Props {
     systems: SpanshDumpPPData[];
@@ -448,7 +449,7 @@
                   lastUpdate >= lastTick &&
                   system.powerState !== "Unoccupied" &&
                   (system.cycleStart?.startBar ?? 0) < 1 &&
-                  system.lastCycleStart?.startBar === system.cycleStart?.startBar,
+                  equals(system.lastCycleStart?.startBar, system.cycleStart?.startBar),
               }}
               relative
               live

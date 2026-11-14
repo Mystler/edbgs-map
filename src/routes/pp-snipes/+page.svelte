@@ -21,6 +21,7 @@
   import CopyToClipboardButton from "#lib/components/CopyToClipboardButton.svelte";
   import { onMount, untrack } from "svelte";
   import { on } from "svelte/events";
+  import { equals } from "#lib/Helpers.ts";
 
   let { data }: PageProps = $props();
   const lastTick = getLastPPTickDate();
@@ -265,7 +266,7 @@
                     lastUpdate >= lastTick &&
                     newData.powerState !== "Unoccupied" &&
                     (newData.cycleStart?.startBar ?? 0) < 1 &&
-                    newData.lastCycleStart?.startBar === newData.cycleStart?.startBar,
+                    equals(newData.lastCycleStart?.startBar, newData.cycleStart?.startBar),
                 }}
                 relative
                 live

@@ -12,6 +12,7 @@ import {
 } from "#lib/Powerplay.js";
 import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
+import { equals } from "#lib/Helpers.ts";
 
 interface EDDNMessage {
   $schemaRef: string;
@@ -185,13 +186,16 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
   if (ppData.powerStateControlProgress !== undefined) {
     const { startProgress, startBar, startTier, adjustedProgress, totalCP } = calculatePPControlSegments(ppData);
     if (
-      startBar !== ppData?.lastCycleStart?.startBar &&
+      !equals(startBar, ppData?.lastCycleStart?.startBar) &&
       adjustedProgress > -0.24 &&
       (adjustedProgress < 0.24 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
     ) {
       // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
       ppData.cycleStart = { startProgress, startBar, startTier };
-    } else if (startBar === ppData?.lastCycleStart?.startBar && startBar !== prevData?.cycleStart?.startBar) {
+    } else if (
+      equals(startBar, ppData?.lastCycleStart?.startBar) &&
+      !equals(startBar, prevData?.cycleStart?.startBar)
+    ) {
       // We calculated a start bar that is the same as last cycle but we already had different data before. Discard as cache bug!
       return false;
     } else if (prevData?.cycleStart) {
@@ -233,8 +237,8 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
         if (
           !ppData.cycleStart?.startBar ||
           ((ppData.cycleStart.startBar < 1 || (prevData.powerStateControlProgress ?? 0) < 1) && // Special exception for maxed SHs
-            (ppData.cycleStart.startBar === prevData.cycleStart?.startBar ||
-              ppData.cycleStart.startBar === ppData.lastCycleStart?.startBar))
+            (equals(ppData.cycleStart.startBar, prevData.cycleStart?.startBar) ||
+              equals(ppData.cycleStart.startBar, ppData.lastCycleStart?.startBar)))
         ) {
           return false; // Reinforcement or UM went down, skip
         }
@@ -431,9 +435,9 @@ export function checkForSnipe(
     if (
       prevDataDate < lastPPTick ||
       (currData.lastCycleStart &&
-        currStartBar !== currData.lastCycleStart.startBar &&
-        currStartBar !== prevData.lastCycleStart?.startBar &&
-        currStartBar !== prevData.cycleStart?.startBar)
+        !equals(currStartBar, currData.lastCycleStart.startBar) &&
+        !equals(currStartBar, prevData.lastCycleStart?.startBar) &&
+        !equals(currStartBar, prevData.cycleStart?.startBar))
     ) {
       // Require prev cycle start data.
       if (!prevData.cycleStart) return false;

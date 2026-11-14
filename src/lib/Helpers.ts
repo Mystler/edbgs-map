@@ -74,3 +74,10 @@ export function formatBigNumber(n: number) {
   const decimals = 4 - num.toFixed(0).length;
   return num.toFixed(decimals) + suffix[exp];
 }
+
+/**
+ * Check floats for equality at a lower precision.
+ */
+export function equals(a: number | undefined, b: number | undefined): boolean {
+  return a?.toFixed(4) === b?.toFixed(4);
+}
