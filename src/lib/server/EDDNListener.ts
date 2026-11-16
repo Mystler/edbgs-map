@@ -195,7 +195,7 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
         adjustedProgress < 0 &&
         prevDate &&
         prevDate > lastPPTick &&
-        closeTo(startBar, prevData?.cycleStart?.startBar, 0.01)
+        closeTo(startProgress, prevData?.cycleStart?.startProgress, 0.01)
       )
     ) {
       // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
