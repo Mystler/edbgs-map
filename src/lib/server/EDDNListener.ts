@@ -141,13 +141,13 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
   if (data.PowerplayStateControlProgress && data.PowerplayStateControlProgress > 4000) {
     let scale = 120000; // Should never be reached/used.
     if (data.PowerplayState === "Exploited") {
-      scale = 349999; // This makes math check out. Idk if the others should also be -1.
+      scale = 349999; // This makes math check out. Did not find the same to be true for the higher tiers.
     } else if (data.PowerplayState === "Fortified") {
       scale = 650000;
     } else if (data.PowerplayState === "Stronghold") {
       scale = 1000000;
     }
-    data.PowerplayStateControlProgress -= 4294967296 / scale;
+    data.PowerplayStateControlProgress -= 4294967295 / scale;
   }
   // Prune data down to PP target data in Spansh Format
   const ppData: SpanshDumpPPData = {
