@@ -78,6 +78,13 @@ export function formatBigNumber(n: number) {
 /**
  * Check floats for equality at a lower precision.
  */
-export function equals(a: number | undefined, b: number | undefined): boolean {
-  return a?.toFixed(4) === b?.toFixed(4);
+export function equals(a: number | undefined, b: number | undefined, precision: number = 4): boolean {
+  return a?.toFixed(precision) === b?.toFixed(precision);
+}
+
+/**
+ * Check if two floats are close within the specified epsilon value.
+ */
+export function closeTo(a: number | undefined, b: number | undefined, epsilon: number = 0.01) {
+  return Math.abs((a ?? 0) - (b ?? 0)) <= epsilon;
 }

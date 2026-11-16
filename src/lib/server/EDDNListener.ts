@@ -12,7 +12,7 @@ import {
 } from "#lib/Powerplay.js";
 import { type SpanshDumpPPData } from "../SpanshAPI";
 import { logSnipe } from "./DB";
-import { equals } from "#lib/Helpers.ts";
+import { closeTo, equals } from "#lib/Helpers.ts";
 
 interface EDDNMessage {
   $schemaRef: string;
@@ -188,7 +188,15 @@ export async function processPPJournalMessage(data: EDDNJournalMessage): Promise
     if (
       !equals(startBar, ppData?.lastCycleStart?.startBar) &&
       adjustedProgress > -0.24 &&
-      (adjustedProgress < 0.24 || getCorrectedSegmentProgress(totalCP, startTier) <= 1)
+      (adjustedProgress < 0.24 || getCorrectedSegmentProgress(totalCP, startTier) <= 1) &&
+      !(
+        // HACKY Exception: Do not update reverse calculation if we have negative tier progress and are witinh a percent of previous reverse calculations this cycle.
+        // Negative progress seems to mess up reverse calculations on occasion. Hopefully this removes some edge cases that are worse then the edge cases from this hack.
+        adjustedProgress < 0 &&
+        prevDate &&
+        prevDate > lastPPTick &&
+        closeTo(startBar, prevData?.cycleStart?.startBar, 0.01)
+      )
     ) {
       // Use reverse calculated start values, if the start marker moved compared to last cycle without tier cap being reached
       ppData.cycleStart = { startProgress, startBar, startTier };
