@@ -81,8 +81,10 @@
     The data source for all Elite Dangerous data is the amazing website of <a
       href="https://spansh.co.uk/"
       target="_blank"
-      rel="noopener">Spansh.co.uk</a
+      rel="noopener"
     >
+      Spansh.co.uk
+    </a>
     as well as the <a href="https://eddn.edcd.io" target="_blank" rel="noopener">EDDN</a> realtime data relay.
   </p>
 </Dialog>

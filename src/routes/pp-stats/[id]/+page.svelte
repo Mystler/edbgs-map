@@ -15,15 +15,15 @@
     <div class="mx-auto w-full p-2 text-center">
       <h2>Cycle 2.{stats.stats.cycle}</h2>
       <p>
-        <i
-          >Snapshot from {new Date(stats.date).toLocaleString(undefined, {
+        <i>
+          Snapshot from {new Date(stats.date).toLocaleString(undefined, {
             weekday: "short",
             month: "short",
             day: "numeric",
             hour: "numeric",
             minute: "numeric",
-          })}</i
-        >
+          })}
+        </i>
       </p>
       {#key stats.stats}
         <CycleStats stats={stats.stats} />

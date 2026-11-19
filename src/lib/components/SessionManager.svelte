@@ -84,16 +84,20 @@
         class="link-btn"
         onclick={() => {
           if (confirm("Are you sure you want to overwrite the saved session?")) saveSession(name);
-        }}>Overwrite</button
+        }}
       >
+        Overwrite
+      </button>
       <button
         type="button"
         class="link-btn"
         onclick={() => {
           loadSession(name);
           close();
-        }}>Load</button
+        }}
       >
+        Load
+      </button>
       <button
         type="button"
         class="link-btn"
@@ -101,8 +105,10 @@
         aria-label="Delete"
         onclick={() => {
           if (confirm("Are you sure you want to delete the saved session?")) sessions.delete(name);
-        }}><FaIcon icon={faTrashCan} /></button
+        }}
       >
+        <FaIcon icon={faTrashCan} />
+      </button>
     </div>
   {/each}
 </Dialog>

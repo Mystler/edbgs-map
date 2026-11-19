@@ -50,9 +50,9 @@
       >
         <option value="">Live Data</option>
         {#each history as cycle (cycle.id)}
-          <option value={cycle.id} selected={page.params.id ? parseInt(page.params.id) === cycle.id : false}
-            >Cycle 2.{cycle.cycle}</option
-          >
+          <option value={cycle.id} selected={page.params.id ? parseInt(page.params.id) === cycle.id : false}>
+            Cycle 2.{cycle.cycle}
+          </option>
         {/each}
       </Select>
     </div>
@@ -73,8 +73,10 @@
           icon?.classList.remove("animate-spin");
           button.disabled = false;
         }, 1000);
-      }}><FaIcon class="inline" icon={faRotate} /></button
+      }}
     >
+      <FaIcon class="inline" icon={faRotate} />
+    </button>
   </p>
   {@render children()}
 </div>

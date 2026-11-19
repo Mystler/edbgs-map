@@ -268,8 +268,10 @@
               title="Clear Search"
               onclick={() => {
                 searchSystem = "";
-              }}><FaIcon icon={faXmark} /></button
+              }}
             >
+              <FaIcon icon={faXmark} />
+            </button>
           {/if}
         </div>
         <button
@@ -278,8 +280,10 @@
           onclick={() => {
             if (filterPowers.length > 0) filterPowers = [];
             else filterPowers = Object.keys(Powers);
-          }}>Toggle All Powers</button
+          }}
         >
+          Toggle All Powers
+        </button>
       </div>
       <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
         {#each Object.keys(Powers) as power (power)}

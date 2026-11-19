@@ -192,8 +192,10 @@
     class="hover:cur fixed top-0 left-0 z-50 p-2 text-3xl"
     onclick={() => {
       menuOpen = !menuOpen;
-    }}><FaIcon icon={faBars} /></button
+    }}
   >
+    <FaIcon icon={faBars} />
+  </button>
   {#if menuOpen}
     <div
       transition:slide

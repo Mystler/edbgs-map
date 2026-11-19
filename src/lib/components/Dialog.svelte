@@ -43,9 +43,9 @@
     onclose();
   }}
 >
-  <button type="button" class="absolute top-2 right-2 p-2" onclick={close} aria-label="Close"
-    ><FaIcon icon={faXmark} /></button
-  >
+  <button type="button" class="absolute top-2 right-2 p-2" onclick={close} aria-label="Close">
+    <FaIcon icon={faXmark} />
+  </button>
   <div class="max-w-3xl rounded-xl border-2 border-(--ed-orange) bg-zinc-800 p-4">
     {@render children?.()}
   </div>

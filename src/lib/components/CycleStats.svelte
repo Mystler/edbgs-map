@@ -79,8 +79,8 @@
             </p>
           </div>
         {/snippet}
-        <span class="underline decoration-dotted decoration-1">Exclude Excess CP from numbers and charts</span></Tooltip
-      >
+        <span class="underline decoration-dotted decoration-1">Exclude Excess CP from numbers and charts</span>
+      </Tooltip>
     </label>
   </div>
 {/if}
@@ -236,8 +236,10 @@
     class="link-btn"
     onclick={() => {
       displayChart = displayChart !== type ? type : undefined;
-    }}>{type}</button
+    }}
   >
+    {type}
+  </button>
 {/snippet}
 <div class="mt-4 flex flex-wrap justify-center gap-x-6 gap-y-2">
   {#if stats.allPowerStats?.reinfCP !== undefined && stats.allPowerStats?.umCPNoDecay !== undefined && stats.allPowerStats.cycleAcquisitionCP !== undefined}
@@ -620,11 +622,9 @@
                   cycle.{/snippet}
                 <b class="underline decoration-dotted decoration-1">Acq in Cycle:</b>
               </Tooltip>
-              <span
-                >{f(
-                  noWaste && ps.cycleAcquisitionCPNoWaste ? ps.cycleAcquisitionCPNoWaste : ps.cycleAcquisitionCP,
-                )}</span
-              >
+              <span>
+                {f(noWaste && ps.cycleAcquisitionCPNoWaste ? ps.cycleAcquisitionCPNoWaste : ps.cycleAcquisitionCP)}
+              </span>
             </div>
           {/if}
           {#if ps?.expectedAcquisitions !== undefined}

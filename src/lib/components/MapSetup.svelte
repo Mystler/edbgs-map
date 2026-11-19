@@ -45,8 +45,10 @@
       class="link-btn"
       onclick={() => {
         data.Factions = [];
-      }}>Clear All Factions</button
+      }}
     >
+      Clear All Factions
+    </button>
   </p>
   {#if data.Factions.length > 0}
     <div class="overflow-auto" transition:slide>
@@ -112,8 +114,10 @@
       class="link-btn"
       onclick={() => {
         data.Systems = [];
-      }}>Clear All Systems</button
+      }}
     >
+      Clear All Systems
+    </button>
   </p>
   {#if data.Systems.length > 0}
     <div class="overflow-auto" transition:slide>
@@ -172,8 +176,10 @@
       class="link-btn"
       onclick={() => {
         data.Spheres = [];
-      }}>Clear All Ranges</button
+      }}
     >
+      Clear All Ranges
+    </button>
   </p>
   {#if data.Spheres.length > 0}
     <div class="overflow-auto" transition:slide>
@@ -232,8 +238,10 @@
       class="link-btn"
       onclick={() => {
         data.Powers = [];
-      }}>Clear All Powers</button
+      }}
     >
+      Clear All Powers
+    </button>
   </p>
   {#if data.Powers.length > 0}
     <div class="overflow-auto" transition:slide>

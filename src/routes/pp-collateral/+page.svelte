@@ -44,8 +44,10 @@
           icon?.classList.remove("animate-spin");
           button.disabled = false;
         }, 1000);
-      }}><FaIcon class="inline" icon={faRotate} /></button
+      }}
     >
+      <FaIcon class="inline" icon={faRotate} />
+    </button>
   </p>
   {#await data.cache}
     <div class="flex justify-center overflow-hidden">

@@ -133,8 +133,10 @@
           icon?.classList.remove("animate-spin");
           button.disabled = false;
         }, 1000);
-      }}><FaIcon class="inline" icon={faRotate} /></button
+      }}
     >
+      <FaIcon class="inline" icon={faRotate} />
+    </button>
   </p>
   <!-- Filters -->
   <div class="mb-2">
@@ -163,8 +165,10 @@
                 title="Clear Search"
                 onclick={() => {
                   searchSystem = "";
-                }}><FaIcon icon={faXmark} /></button
+                }}
               >
+                <FaIcon icon={faXmark} />
+              </button>
             {/if}
           </div>
           <button
@@ -173,8 +177,10 @@
             onclick={() => {
               if (filterPowers.length > 0) filterPowers = [];
               else filterPowers = Object.keys(Powers);
-            }}>Toggle All Powers</button
+            }}
           >
+            Toggle All Powers
+          </button>
         </div>
         <div class="grid grid-cols-[repeat(auto-fit,minmax(80px,1fr))] gap-2 select-none">
           {#each Object.keys(Powers) as power (power)}
@@ -205,9 +211,9 @@
         </div>
         <div class="border border-zinc-500"></div>
         <div class="flex flex-wrap gap-2">
-          <label
-            ><input type="checkbox" bind:checked={excludeNoPreviousData} /> Exclude entries without previous data</label
-          >
+          <label>
+            <input type="checkbox" bind:checked={excludeNoPreviousData} /> Exclude entries without previous data
+          </label>
         </div>
         <div class="border border-zinc-500"></div>
       </div>
@@ -249,8 +255,10 @@
                   ? "text-[#00a5ff]"
                   : snipe.type.includes("Undermining")
                     ? "text-[#ff3632]"
-                    : ""}>{snipe.type}</span
+                    : ""}
               >
+                {snipe.type}
+              </span>
             </div>
             <div class="basis-40 max-lg:hidden" style:color={snipe.power ? Powers[snipe.power].color : "inherit"}>
               {snipe.power ?? "Unknown"}
