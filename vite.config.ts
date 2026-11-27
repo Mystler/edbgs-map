@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import tailwindcss from "@tailwindcss/vite";
 import { sveltekit } from "@sveltejs/kit/vite";
+import { svelteDevtools } from "@sveltejs/vite-devtools-svelte";
 import adapter from "@sveltejs/adapter-node";
 import { execSync } from "child_process";
 
@@ -9,8 +10,10 @@ const commit = execSync("git rev-parse --short HEAD").toString().trim();
 const commitDate = execSync("git log -1 --format=%cI").toString().trim();
 
 export default defineConfig({
+  devtools: { apply: "serve" },
   plugins: [
     tailwindcss(),
+    svelteDevtools(),
     sveltekit({
       adapter: adapter(),
       paths: { base: "/3d", origin: "https://www.prismatic-imperium.com" },
