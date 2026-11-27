@@ -68,7 +68,7 @@ export function getCPToTierDrop(
 
 export function segmentPercentToCP(percent: number, startTier: string) {
   const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
-  return percent * tierRange;
+  return Math.round(percent * tierRange);
 }
 
 export function segmentPercentToTotalCP(percent: number, startTier: string) {
