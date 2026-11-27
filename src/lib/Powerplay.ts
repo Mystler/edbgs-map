@@ -63,7 +63,7 @@ export function getCPToTierDrop(
   startTier: string,
 ) {
   const tierRange = startTier === "Stronghold" ? 1000000 : startTier === "Fortified" ? 650000 : 350000;
-  return startProgress * tierRange + (reinforcement ?? 0) - (undermining ?? 0);
+  return Math.round(startProgress * tierRange + (reinforcement ?? 0) - (undermining ?? 0));
 }
 
 export function segmentPercentToCP(percent: number, startTier: string) {

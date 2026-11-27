@@ -345,15 +345,15 @@ export function checkForSnipe(
     // Snipes from control to unoccupied.
     // Note that without deep analysis, we cannot know if an exploited system dropped due to nearby fort drop or was actually sniped itself.
     // Other types of snipes that leave the power in control are handled further down.
-    const cp = Math.max(
-      0,
-      getCPToTierDrop(
-        prevData.powerStateReinforcement,
-        prevData.powerStateUndermining,
-        prevData.cycleStart.startProgress,
-        prevData.cycleStart.startTier,
-      ),
-    );
+    const cp =
+      (prevData.powerStateControlProgress ?? 0) < 0
+        ? 0
+        : getCPToTierDrop(
+            prevData.powerStateReinforcement,
+            prevData.powerStateUndermining,
+            prevData.cycleStart.startProgress,
+            prevData.cycleStart.startTier,
+          );
     logSnipe(currData.name, "EOC Undermining", prevData.controllingPower, cp, prevData, currData);
     return true;
   } else if (currData.powerConflictProgress) {
@@ -431,7 +431,7 @@ export function checkForSnipe(
     // Log snipes for systems that should be dropped but have cache bug
     if (
       currData.powerState === "Exploited" &&
-      currData.powerStateControlProgress < 0 &&
+      currData.powerStateControlProgress < -0.5 && // Somewhat arbitrary buffer since cache bug systems should be in the lower half of the segment
       prevData.powerState === "Exploited" &&
       prevDataDate < lastPPTick
     ) {
