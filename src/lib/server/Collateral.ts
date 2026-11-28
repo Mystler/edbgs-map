@@ -26,8 +26,8 @@ export async function getCollateralDamageSystems(): Promise<CollateralSphereInfo
   const max = [100, 100, 100];
   for (const sys of systemsCache) {
     min[0] = sys.x! < min[0] ? sys.x! : min[0];
-    min[1] = sys.y! < min[1] ? sys.x! : min[1];
-    min[2] = sys.z! < min[2] ? sys.x! : min[2];
+    min[1] = sys.y! < min[1] ? sys.y! : min[1];
+    min[2] = sys.z! < min[2] ? sys.z! : min[2];
     max[0] = sys.x! > max[0] ? sys.x! : max[0];
     max[1] = sys.y! > max[1] ? sys.y! : max[1];
     max[2] = sys.z! > max[2] ? sys.z! : max[2];
